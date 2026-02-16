@@ -48,7 +48,7 @@ const Navbar = () => {
             <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
               <FiBarChart2 className="text-white" size={18} />
             </div>
-            <span className="hidden sm:block">LumiVizStack</span>
+            <span className="sm:block">LumiVizStack</span>
           </Link>
 
           {/* Desktop Navigation */}

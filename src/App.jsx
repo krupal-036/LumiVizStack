@@ -20,7 +20,7 @@ function App() {
         <Router>
           <div className="flex flex-col min-h-screen bg-white dark:bg-black text-gray-800 dark:text-gray-100 transition-colors duration-300">
             <Navbar />
-            <main className="flex-grow pt-20 w-full">
+            <main className="grow pt-20 w-full">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />

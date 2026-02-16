@@ -88,7 +88,7 @@ export default function Dashboard() {
               </p>
             ) : (
               <p className="text-green-600 font-semibold text-sm flex items-center gap-1">
-                Copied! <FiCheck />
+                Copied...!
               </p>
             )}
           </div>
