@@ -20,19 +20,28 @@ function App() {
         <Router>
           <div className="flex flex-col min-h-screen bg-white dark:bg-black text-gray-800 dark:text-gray-100 transition-colors duration-300">
             <Navbar />
-            {/* pt-20 ensures content clears the fixed navbar */}
             <main className="flex-grow pt-20 w-full">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<SignUp />} />
-                <Route path="/history" element={<History />} />
                 <Route path="/about" element={<About />} />
+                
+                {/* PROTECTED ROUTES */}
                 <Route
                   path="/visualize"
                   element={
                     <ProtectedRoute>
                       <Visualizer />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* Fix: History now protected */}
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute>
+                      <History />
                     </ProtectedRoute>
                   }
                 />

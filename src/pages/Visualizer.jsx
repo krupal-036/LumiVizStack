@@ -1,32 +1,17 @@
 // src/pages/Visualizer.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   FiUploadCloud, FiCode, FiLink, FiPlay, FiTable,
-  FiBarChart2, FiCreditCard, FiImage, FiX, FiRefreshCw
+  FiBarChart2, FiCreditCard, FiRefreshCw
 } from "react-icons/fi";
 
-// Helper to check if string is an image URL
-const isImageUrl = (url) => {
-  if (typeof url !== 'string') return false;
-  return url.match(/\.(jpeg|jpg|gif|png|svg|webp)$/) != null || url.includes('unsplash') || url.includes('picsum');
-};
+// Components
+import TableView from "../components/visualizations/TableView";
+import CardView from "../components/visualizations/CardView";
+import ChartView from "../components/visualizations/ChartView";
 
-// Helper to parse JSON safely
-const parseData = (dataString) => {
-  try {
-    const parsed = JSON.parse(dataString);
-    // Normalize to always be an array
-    if (Array.isArray(parsed)) return parsed;
-    if (typeof parsed === 'object' && parsed !== null) {
-      // If it's an object containing a key that is an array (common in APIs)
-      const arrayKey = Object.keys(parsed).find(key => Array.isArray(parsed[key]));
-      return arrayKey ? parsed[arrayKey] : [parsed];
-    }
-    return [];
-  } catch (e) {
-    throw new Error("Invalid JSON format");
-  }
-};
+// Utils
+import { parseData } from "../utils/dataParser";
 
 const Visualizer = () => {
   // Input States
@@ -55,12 +40,11 @@ const Visualizer = () => {
         rawData = jsonInput;
       } else if (inputType === "url") {
         if (!urlInput) throw new Error("Please enter a URL");
-        // In a real app, this should go through your backend proxy to avoid CORS
+        // Note: In production, use a backend proxy to avoid CORS issues
         const res = await fetch(urlInput);
         if (!res.ok) throw new Error("Failed to fetch data from URL");
         rawData = await res.text();
       } else if (inputType === "file") {
-        // File reading logic is handled in handleFileChange
         if (!jsonInput) throw new Error("Please upload a file");
         rawData = jsonInput;
       }
@@ -80,7 +64,7 @@ const Visualizer = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         setJsonInput(e.target.result);
-        setInputType("paste"); // Switch logic to use the loaded text
+        setInputType("paste"); 
       };
       reader.readAsText(file);
     }
@@ -91,106 +75,6 @@ const Visualizer = () => {
     setJsonInput("");
     setUrlInput("");
     setError("");
-  };
-
-  const renderTable = () => {
-    if (data.length === 0) return <p className="text-center py-10 text-gray-400">No data to display</p>;
-    const headers = Object.keys(data[0]);
-
-    return (
-      <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-sm">
-          <thead className="bg-gray-50 dark:bg-gray-800">
-            <tr>
-              {headers.map((key) => (
-                <th key={key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  {key}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {data.map((row, idx) => (
-              <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                {headers.map((key) => (
-                  <td key={key} className="px-4 py-3 whitespace-nowrap">
-                    {renderImages && isImageUrl(row[key]) ? (
-                      <img src={row[key]} alt="content" className="h-10 w-10 rounded object-cover" />
-                    ) : (
-                      <span className="text-gray-800 dark:text-gray-100">{String(row[key])}</span>
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    );
-  };
-
-  const renderCards = () => {
-    if (data.length === 0) return <p className="text-center py-10 text-gray-400">No data to display</p>;
-    
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {data.map((item, idx) => {
-          // Find first image key if exists
-          const imgKey = Object.keys(item).find(k => isImageUrl(item[k]));
-          const imgSrc = imgKey && renderImages ? item[imgKey] : null;
-
-          return (
-            <div key={idx} className="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all">
-              {imgSrc && <img src={imgSrc} alt="Card Visual" className="w-full h-40 object-cover" />}
-              <div className="p-4">
-                {Object.entries(item).map(([key, val]) => (
-                  <div key={key} className="mb-1 text-xs">
-                    <span className="font-semibold text-gray-500 dark:text-gray-400 uppercase mr-1">{key}:</span>
-                    <span className="text-gray-800 dark:text-gray-100 break-words">
-                      {renderImages && isImageUrl(val) ? <a href={val} target="_blank" rel="noreferrer" className="text-blue-500 underline">View Image</a> : String(val)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderChart = () => {
-    if (data.length === 0) return <p className="text-center py-10 text-gray-400">No data to display</p>;
-    
-    // Simple Auto-Detect Logic: Find first numeric field for value, first string for label
-    const firstItem = data[0];
-    const keys = Object.keys(firstItem);
-    const valueKey = keys.find(k => typeof firstItem[k] === 'number') || keys[1];
-    const labelKey = keys.find(k => typeof firstItem[k] === 'string') || keys[0];
-
-    return (
-      <div className="space-y-4">
-        <p className="text-xs text-gray-500 italic">Auto-generated bar chart using key: <strong>{valueKey}</strong></p>
-        <div className="space-y-2">
-          {data.map((item, idx) => (
-            <div key={idx} className="flex items-center gap-2">
-              <div className="w-24 truncate text-xs text-gray-500 dark:text-gray-400 text-right pr-2">
-                {item[labelKey]}
-              </div>
-              <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-4 overflow-hidden">
-                <div 
-                  className="bg-indigo-500 h-full rounded-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, (item[valueKey] / Math.max(...data.map(d => d[valueKey]))) * 100)}%` }}
-                />
-              </div>
-              <div className="w-12 text-right text-xs font-medium text-gray-700 dark:text-gray-200">
-                {item[valueKey]}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -230,7 +114,7 @@ const Visualizer = () => {
                 <textarea
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
-                  placeholder='[{"name": "John", "age": 30}]'
+                  placeholder='[{"name": "John", "age": 30, "nested": {"a":1}}]'
                   className="w-full h-64 p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 outline-none text-xs font-mono"
                 />
               )}
@@ -319,9 +203,9 @@ const Visualizer = () => {
 
           {/* Render Area */}
           <div className="min-h-[400px] w-full overflow-auto">
-            {viewMode === 'table' && renderTable()}
-            {viewMode === 'card' && renderCards()}
-            {viewMode === 'chart' && renderChart()}
+            {viewMode === 'table' && <TableView data={data} renderImages={renderImages} />}
+            {viewMode === 'card' && <CardView data={data} renderImages={renderImages} />}
+            {viewMode === 'chart' && <ChartView data={data} />}
           </div>
         </div>
 
