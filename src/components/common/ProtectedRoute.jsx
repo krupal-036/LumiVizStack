@@ -1,17 +1,34 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import Alert from "./Alert"; // Optional: Or redirect immediately
 
-export default function ProtectedRoute({ children }) {
-    const { user } = useContext(AuthContext);
-    const location = useLocation();
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useContext(AuthContext);
+  const location = useLocation();
 
-    if (!user) {
-        // Redirect to login page if not logged in
-        // We pass the current state so we can redirect back after login
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
-    return children;
-}
+  if (!user) {
+    // Redirect to login page with error message and current location
+    return (
+      <Navigate
+        to="/login"
+        state={{
+          from: location.pathname,
+          error: "You must be logged in to access this page.",
+        }}
+        replace
+      />
+    );
+  }
+
+  return children;
+};
+
+export default ProtectedRoute;
