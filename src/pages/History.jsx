@@ -9,10 +9,9 @@ export default function History() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load history specific to the logged-in user
     if (user && user.email) {
       const allHistory = JSON.parse(localStorage.getItem("vizHistory") || "[]");
-      // Filter history by current user's email
+      
       const userHistory = allHistory.filter((item) => item.owner === user.email);
       setHistory(userHistory);
     }

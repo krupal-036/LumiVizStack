@@ -40,7 +40,7 @@ export default function Dashboard() {
 
   return (
     <section className="flex flex-col items-center bg-[url('https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gradientBg.svg')] bg-cover dark:bg-none dark:bg-gradient-to-b dark:from-gray-900 dark:to-black text-gray-800 dark:text-gray-100 pb-20 text-sm pt-2 px-4">
-      
+
       {/* Feature Pills - Responsive Scroll */}
       <div className="flex items-center justify-center p-2 mt-6 rounded-full border border-indigo-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs overflow-x-auto max-w-full whitespace-nowrap">
         <div className="flex items-center gap-2 px-3 text-indigo-500">
@@ -50,8 +50,8 @@ export default function Dashboard() {
       </div>
 
       {/* Headline */}
-      <h1 className="text-3xl sm:text-4xl md:text-6xl text-center font-medium max-w-4xl mt-8 bg-gradient-to-r from-black to-[#748298] dark:from-white dark:to-gray-400 text-transparent bg-clip-text leading-tight">
-        Transform your data into insights.
+      <h1 className="text-3xl sm:text-4xl md:text-6xl text-center font-medium max-w-5xl mt-8 leading-tight">
+        Transform your data into insights. Simple, Secure & Powerful.
       </h1>
       <p className="text-slate-600 dark:text-gray-400 text-base max-md:px-2 text-center max-w-xl mt-4">
         A scalable full-stack platform that transforms JSON data into clear, interactive visualizations.
@@ -74,12 +74,13 @@ export default function Dashboard() {
       </div>
 
       {/* Copy JSON Box - Improved for mobile */}
-      <div className="w-full max-w-md mt-10">
-        <div className="flex items-center gap-3 bg-white dark:bg-gray-900 rounded-full px-4 py-3 border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="bg-gray-800 rounded-full p-2 flex-shrink-0">
+      <div className="w-full max-w-md mt-2 flex justify-center">
+        <div className="flex items-center max-w-fit gap-3 bg-white dark:bg-gray-900 rounded-full px-4 py-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+
+          <div className="bg-gray-800 rounded-full p-2 shrink-0">
             <FiCode color="white" size={16} />
           </div>
-          
+
           <div className="flex-1 overflow-hidden">
             {!isCopied ? (
               <p className="text-indigo-600 font-semibold text-sm truncate">
@@ -92,14 +93,16 @@ export default function Dashboard() {
             )}
           </div>
 
-          <button 
-            onClick={handleCopy} 
+          <button
+            onClick={handleCopy}
             className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 transition p-2"
           >
             {isCopied ? <FiCheck className="text-green-600" /> : <FiCopy />}
           </button>
+
         </div>
       </div>
+
     </section>
   );
 }

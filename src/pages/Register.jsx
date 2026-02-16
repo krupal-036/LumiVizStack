@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
+import { AuthContext } from "../context/AuthContext"; // Import AuthContext
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext); // Get login function
 
   const [formData, setFormData] = useState({
     username: "",
@@ -16,7 +18,6 @@ export default function SignUp() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    // Clear error when user starts typing again
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
     }
@@ -24,58 +25,52 @@ export default function SignUp() {
 
   const validate = () => {
     const newErrors = {};
-
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
     }
-
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email address is invalid";
     }
-
     if (!formData.password) {
       newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
-    // Get existing users from localStorage
     const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-    // Check if user already exists
     const userExists = existingUsers.find((u) => u.email === formData.email);
+    
     if (userExists) {
       setErrors({ email: "User with this email already exists" });
       return;
     }
 
-    // Create new user object
     const newUser = {
       id: Date.now(),
       name: formData.username,
       email: formData.email,
-      password: formData.password, // Note: In a real app, never store plain text passwords
+      password: formData.password,
     };
 
-    // Save to users list
+    // Save to users list (for persistence)
     existingUsers.push(newUser);
     localStorage.setItem("users", JSON.stringify(existingUsers));
 
-    // Auto-login: Set current user session
-    localStorage.setItem("user", JSON.stringify({ name: newUser.name, email: newUser.email }));
+    // --- FIX IS HERE ---
+    // Use login() to update Context state immediately
+    // This updates the Navbar instantly without needing a refresh
+    login({ name: newUser.name, email: newUser.email });
 
     navigate("/");
   };
