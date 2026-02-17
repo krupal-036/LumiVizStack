@@ -1,67 +1,76 @@
 // src/components/layout/Footer.jsx
 import { Link } from "react-router-dom";
-import { FiGithub, FiTwitter, FiLinkedin } from "react-icons/fi";
+import { FiGithub } from "react-icons/fi";
+
+// Keep footer links in sync with Navbar (single source of truth)
+const footerLinks = [
+  { path: "/", label: "Home" },
+  { path: "/visualize", label: "Visualize" },
+  { path: "/history", label: "History" },
+  { path: "/about", label: "About" },
+];
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          
-          {/* Brand Section */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-1">
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
-              LumiVizStack
-            </h2>
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-              Transforming complex data into clear, interactive visualizations.
-            </p>
-            <div className="flex space-x-4 mt-6">
-              <a href="#" className="text-gray-400 hover:text-gray-500 dark:hover:text-white transition-colors">
-                <FiTwitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500 dark:hover:text-white transition-colors">
-                <FiGithub className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-gray-500 dark:hover:text-white transition-colors">
-                <FiLinkedin className="h-5 w-5" />
-              </a>
-            </div>
-          </div>
+    <footer className="mt-auto border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-          {/* Links Section */}
-          <div className="grid grid-cols-2 gap-8 col-span-2 lg:col-span-3">
-             <div>
-              <h3 className="text-sm font-semibold text-gray-400 dark:text-gray-200 uppercase tracking-wider">
-                Product
-              </h3>
-              <ul className="mt-4 space-y-3">
-                <li><Link to="/" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">Features</Link></li>
-                <li><Link to="/visualize" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">Visualizer</Link></li>
-                <li><Link to="/history" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">History</Link></li>
-              </ul>
-            </div>
+        {/* Top Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
 
-            <div>
-              <h3 className="text-sm font-semibold text-gray-400 dark:text-gray-200 uppercase tracking-wider">
-                Company
-              </h3>
-              <ul className="mt-4 space-y-3">
-                <li><Link to="/about" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">About</Link></li>
-                <li><a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">Privacy</a></li>
-                <li><a href="#" className="text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400">Terms</a></li>
-              </ul>
-            </div>
-          </div>
+          {/* Brand */}
+          <Link
+            to="/"
+            className="text-lg font-bold bg-linear-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent"
+          >
+            LumiVizStack
+          </Link>
+
+          {/* Navigation Links */}
+          <nav className="flex flex-wrap justify-center gap-4 text-sm font-medium">
+            {footerLinks.map((link) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="text-gray-600 dark:text-gray-400 hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* GitHub Icon */}
+          <a
+            href="https://github.com/Krupal-036/lumivizstack"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            aria-label="GitHub Repository"
+          >
+            <FiGithub size={20} />
+          </a>
         </div>
 
-        <div className="mt-12 border-t border-gray-200 dark:border-gray-800 pt-8">
-          <p className="text-center text-xs text-gray-400">
-            © {currentYear} LumiVizStack. All rights reserved.
+        {/* Bottom Section */}
+        <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+          <p>© {currentYear} LumiVizStack. All rights reserved.</p>
+          
+          {/* Developer Credit */}
+          <p>
+            Developed by{" "}
+            <a 
+              href="https://krupal.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-indigo-500 hover:text-indigo-600 font-semibold transition-colors"
+            >
+              Krupal
+            </a>
           </p>
         </div>
+
       </div>
     </footer>
   );

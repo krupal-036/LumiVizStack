@@ -33,7 +33,7 @@ const Visualizer = () => {
       setRawInput(config.rawInput || "");
       setUrlInput(config.urlInput || "");
       setInputType(config.inputType || "paste");
-      
+
       // Clear location state to prevent re-loading on refresh
       window.history.replaceState({}, document.title);
     }
@@ -50,13 +50,13 @@ const Visualizer = () => {
         const res = await fetch(urlInput);
         rawData = await res.text();
       } else if (inputType === "file") {
-        rawData = rawInput; 
+        rawData = rawInput;
       }
 
       const parsed = parseData(rawData);
       if (parsed.length === 0) throw new Error("No valid data found");
       setData(parsed);
-      setIsPanelOpen(false); 
+      setIsPanelOpen(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -84,7 +84,7 @@ const Visualizer = () => {
       savedAt: new Date().toISOString(),
       dataLength: data.length,
       // Store necessary state to reconstruct
-      data: data, 
+      data: data,
       rawInput: rawInput,
       urlInput: urlInput,
       inputType: inputType
@@ -101,14 +101,13 @@ const Visualizer = () => {
 
   return (
     <div className="flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 relative min-h-[calc(100vh-80px)]">
-      
+
       {/* Sidebar / Floating Panel */}
-      <div 
-        className={`sticky top-20 h-[calc(100vh-80px)] z-40 transition-all duration-300 flex-shrink-0 ${
-          isPanelOpen ? 'w-96' : 'w-0 opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`sticky top-10 h-[calc(100vh-80px)] z-40 transition-all duration-300 shrink-0 ${isPanelOpen ? 'w-96' : 'w-0 opacity-0 pointer-events-none'
+          }`}
       >
-        <div className="h-full bg-white dark:bg-gray-900 shadow-2xl border-r dark:border-gray-800 overflow-hidden">
+        <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-300 dark:border-gray-800 overflow-hidden">
           <div className="p-6 h-full flex flex-col w-96">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold flex items-center gap-2">
@@ -127,8 +126,8 @@ const Visualizer = () => {
                 { id: 'file', icon: FiUploadCloud, label: 'File' },
                 { id: 'url', icon: FiLink, label: 'URL' },
               ].map(t => (
-                <button key={t.id} onClick={() => setInputType(t.id)} 
-                  className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 rounded-lg transition-colors ${inputType === t.id ? 'bg-indigo-100 dark:bg-indigo-900 text-indigo-600' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500'}`}>
+                <button key={t.id} onClick={() => setInputType(t.id)}
+                  className={`flex-1 py-2 text-sm font-semibold flex items-center justify-center gap-1 rounded-lg transition-colors border-2 ${inputType === t.id ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500 dark:border-indigo-600 border' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 border-gray-300 dark:border-gray-600 dark:text-gray-400'}`}>
                   <t.icon size={14} /> {t.label}
                 </button>
               ))}
@@ -141,7 +140,7 @@ const Visualizer = () => {
                   value={rawInput}
                   onChange={(e) => setRawInput(e.target.value)}
                   placeholder='[{"key": "value"}]'
-                  className="w-full h-full p-4 font-mono text-xs border-none focus:ring-0 rounded-xl bg-gray-50 dark:bg-gray-800 resize-none outline-none"
+                  className="w-full h-full p-4 font-mono text-xs border-2 border-gray-300 dark:border-gray-700 rounded-xl focus:ring-0 bg-gray-50 dark:bg-gray-800 resize-none outline-none"
                 />
               )}
               {inputType === 'url' && (
@@ -151,7 +150,7 @@ const Visualizer = () => {
                     value={urlInput}
                     onChange={(e) => setUrlInput(e.target.value)}
                     placeholder="https://api..."
-                    className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-none outline-none text-sm"
+                    className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700 outline-none text-sm"
                   />
                 </div>
               )}
@@ -181,10 +180,10 @@ const Visualizer = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0 p-8 pt-4">
-        
+
         {/* Floating Toggle Button */}
         {!isPanelOpen && (
-          <button 
+          <button
             onClick={() => setIsPanelOpen(true)}
             className="fixed bottom-8 left-8 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all"
           >
@@ -195,7 +194,7 @@ const Visualizer = () => {
         {/* View Mode Switcher & Save Button */}
         <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
           <h1 className="text-2xl font-bold">Canvas</h1>
-          
+
           <div className="flex items-center gap-3">
             {/* Save Button - Only shows if data exists */}
             {data.length > 0 && (
@@ -203,7 +202,7 @@ const Visualizer = () => {
                 onClick={handleSave}
                 className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
               >
-                {savedNotification ? <FiCheck /> : <FiSave />} 
+                {savedNotification ? <FiCheck /> : <FiSave />}
                 {savedNotification ? "Saved!" : "Save to History"}
               </button>
             )}
