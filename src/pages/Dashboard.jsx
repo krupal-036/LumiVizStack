@@ -23,10 +23,14 @@ export default function Dashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(copyjsondata);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 3000);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(copyjsondata);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 3000);
+    } catch {
+      setError("Copy failed. Please try again.");
+    }
   };
 
   const handleVisualizeClick = () => {
@@ -37,9 +41,9 @@ export default function Dashboard() {
       setTimeout(() => navigate("/login", { state: { error: "Please login to continue" } }), 1500);
     }
   };
-
+  // min-h-[calc(100vh-45px)]
   return (
-    <section className="flex flex-col items-center bg-[url('https://raw.githubusercontent.com/prebuiltui/prebuiltui/main/assets/hero/gradientBg.svg')] bg-cover dark:bg-none dark:bg-gradient-to-b dark:from-gray-900 dark:to-black text-gray-800 dark:text-gray-100 pb-20 text-sm pt-2 px-4">
+    <section aria-labelledby="dashboard-hero" className="min-h-[calc(90vh-45px)] flex flex-col items-center bg-[url('./gradientBg.svg')] bg-cover dark:bg-none dark:bg-linear-to-b dark:from-gray-900 dark:to-black text-gray-800 dark:text-gray-100 pb-20 text-sm pt-2 px-4">
 
       {/* Feature Pills - Responsive Scroll */}
       <div className="flex items-center justify-center p-2 mt-6 rounded-full border border-indigo-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs overflow-x-auto max-w-full whitespace-nowrap">
@@ -50,7 +54,7 @@ export default function Dashboard() {
       </div>
 
       {/* Headline */}
-      <h1 className="text-3xl sm:text-4xl md:text-6xl text-center font-medium max-w-5xl mt-8 leading-tight">
+      <h1 aria-labelledby="dashboard-hero" className="text-3xl sm:text-4xl md:text-6xl text-center font-medium max-w-5xl mt-8 leading-tight">
         Transform your data into insights. Simple, Secure & Powerful.
       </h1>
       <p className="text-slate-600 dark:text-gray-400 text-base max-md:px-2 text-center max-w-xl mt-4">

@@ -18,6 +18,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          {/* FIXED: Uncommented this wrapper to ensure proper flex layout */}
           <div className="flex flex-col min-h-screen bg-white dark:bg-black text-gray-800 dark:text-gray-100 transition-colors duration-300">
             <Navbar />
             <main className="grow pt-16 w-full">
@@ -36,7 +37,6 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                {/* Fix: History now protected */}
                 <Route
                   path="/history"
                   element={

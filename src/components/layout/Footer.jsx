@@ -56,13 +56,13 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-gray-400">
           <p>© {currentYear} LumiVizStack. All rights reserved.</p>
-          
+
           {/* Developer Credit */}
           <p>
             Developed by{" "}
-            <a 
-              href="https://krupal.vercel.app/" 
-              target="_blank" 
+            <a
+              href="https://krupal.vercel.app/"
+              target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-500 hover:text-indigo-600 font-semibold transition-colors"
             >
@@ -72,6 +72,8 @@ const Footer = () => {
         </div>
 
       </div>
+
+
     </footer>
   );
 };
