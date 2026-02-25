@@ -5,8 +5,8 @@ export const VizContext = createContext();
 export function VizProvider({ children }) {
   const [config, setConfig] = useState({});
   return (
-    <VizContext.Provider value={{ config, setConfig }}>
+    <VizContext value={{ config, setConfig }}>
       {children}
-    </VizContext.Provider>
+    </VizContext>
   );
 }

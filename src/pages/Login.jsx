@@ -1,15 +1,15 @@
 import { useState, useContext } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FiMail, FiLock } from "react-icons/fi";
-import { AuthContext } from "../context/AuthContext"; // Import AuthContext
+import { AuthContext } from "../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Access login function from context
   const { login } = useContext(AuthContext);
-  
+
   // Get redirect error from ProtectedRoute if it exists
   const redirectError = location.state?.error;
 

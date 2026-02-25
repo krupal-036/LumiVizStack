@@ -18,7 +18,6 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
-          {/* FIXED: Uncommented this wrapper to ensure proper flex layout */}
           <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors duration-200">
             <Navbar />
             <main className="grow pt-16 w-full">
@@ -28,7 +27,6 @@ function App() {
                 <Route path="/register" element={<SignUp />} />
                 <Route path="/about" element={<About />} />
 
-                {/* PROTECTED ROUTES */}
                 <Route
                   path="/visualize"
                   element={

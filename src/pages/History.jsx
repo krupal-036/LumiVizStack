@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import {
   FiTrash2, FiEye, FiCalendar, FiPlus, FiBarChart2,
   FiTable, FiLayout, FiSearch, FiClock, FiHash
 } from "react-icons/fi";
-import { AuthContext } from "../context/AuthContext";
 
 const History = () => {
   const [history, setHistory] = useState([]);
@@ -44,7 +44,12 @@ const History = () => {
   };
 
   const handleLoad = (item) => {
-    navigate("/visualize", { state: { config: item } });
+    navigate("/visualize", {
+      state: {
+        config: item,
+        forceLoad: true
+      }
+    });
   };
 
   // Helper to determine card styling based on view type

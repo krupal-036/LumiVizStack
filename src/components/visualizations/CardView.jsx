@@ -1,6 +1,5 @@
-import React, { useState } from "react";
 import { FiImage } from "react-icons/fi";
-import SmartCell from "../common/SmartCell"; // Re-using SmartCell for consistency
+import SmartCell from "../common/SmartCell";
 import { isUrl } from "../../utils/dataParser";
 
 // Enhanced Image Checker
@@ -39,21 +38,21 @@ const CardView = ({ data, renderImages = true }) => {
         const imgSrc = imgKey && renderImages ? item[imgKey] : null;
 
         return (
-          <div 
-            key={idx} 
+          <div
+            key={idx}
             className="group bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
           >
             {/* Image Container */}
             <div className="relative w-full h-48 bg-gray-100 dark:bg-gray-800 flex items-center justify-center overflow-hidden">
               {imgSrc ? (
-                <img 
-                  src={imgSrc} 
-                  alt="Card Visual" 
+                <img
+                  src={imgSrc}
+                  alt="Card Visual"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => { 
+                  onError={(e) => {
                     // If image fails to load, hide it to show the placeholder icon
-                    e.target.style.display = 'none'; 
-                  }} 
+                    e.target.style.display = 'none';
+                  }}
                 />
               ) : (
                 <div className="text-gray-300 dark:text-gray-600 flex flex-col items-center gap-2">
@@ -74,7 +73,7 @@ const CardView = ({ data, renderImages = true }) => {
                     <span className="block text-xs font-bold uppercase text-gray-400 dark:text-gray-500 mb-0.5 tracking-wide">
                       {key}
                     </span>
-                    <div className="text-gray-800 dark:text-gray-200 break-words">
+                    <div className="text-gray-800 dark:text-gray-200 wrap-break-word">
                       {/* Use SmartCell for nested objects/arrays support */}
                       <SmartCell value={val} renderImages={renderImages} />
                     </div>

@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import { FiCopy, FiCheck, FiLink, FiFileText, FiCode } from "react-icons/fi";
+import { FiCopy, FiCheck, FiLink, FiFileText, FiCode, FiClipboard } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
 
 import Alert from "../components/common/Alert";
@@ -49,70 +49,70 @@ export default function Dashboard() {
 
       {/* Feature Pills - Responsive Scroll */}
       {/* Feature Pills – Dark/Light + Mobile Optimized */}
-<div
-  className="
+      <div
+        className="
     mt-6 w-full max-w-fit
   rounded-2xl
-  bg-indigo-50 dark:bg-indigo-900/20
+  bg-indigo-100 dark:bg-indigo-800/50
   px-4 py-3
   shadow-lg shadow-indigo-500/40
   dark:shadow-indigo-400/40
   "
->
-  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+      >
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
 
-    {/* Icons */}
-    <div className="flex items-center gap-3">
-      <span
-        className="
+          {/* Icons */}
+          <div className="flex items-center gap-3">
+            <span
+              className="
           flex items-center justify-center
           w-9 h-9 rounded-full
           border border-indigo-400 dark:border-indigo-500
           bg-white dark:bg-gray-800
           text-indigo-700 dark:text-indigo-300
         "
-      >
-        <FiLink />
-      </span>
+            >
+              <FiLink />
+            </span>
 
-      <span
-        className="
+            <span
+              className="
           flex items-center justify-center
           w-9 h-9 rounded-full
           border border-indigo-400 dark:border-indigo-500
           bg-white dark:bg-gray-800
           text-indigo-700 dark:text-indigo-300
         "
-      >
-        <FiCode />
-      </span>
+            >
+              <FiCode />
+            </span>
 
-      <span
-        className="
+            <span
+              className="
           flex items-center justify-center
           w-9 h-9 rounded-full
           border border-indigo-400 dark:border-indigo-500
           bg-white dark:bg-gray-800
           text-indigo-700 dark:text-indigo-300
         "
-      >
-        <FiFileText />
-      </span>
-    </div>
+            >
+              <FiFileText />
+            </span>
+          </div>
 
-    {/* Text */}
-    <p
-      className="
+          {/* Text */}
+          <p
+            className="
         text-center sm:text-right
         text-xs sm:text-sm
         text-indigo-700 dark:text-indigo-300
         leading-snug
       "
-    >
-      File upload, raw JSON, API URLs
-    </p>
-  </div>
-</div>
+          >
+            File upload, raw JSON, API URLs
+          </p>
+        </div>
+      </div>
 
       {/* Headline */}
       <h1 aria-labelledby="dashboard-hero" className="text-3xl sm:text-4xl md:text-6xl text-center font-medium max-w-5xl mt-8 leading-tight">
@@ -124,10 +124,10 @@ export default function Dashboard() {
 
       {/* CTA Button */}
       <button
-  onClick={handleVisualizeClick}
-  type="button"
-  aria-label="Visualize your data"
-  className="
+        onClick={handleVisualizeClick}
+        type="button"
+        aria-label="Visualize your data"
+        className="
     group
     inline-flex items-center gap-3
     px-6 sm:px-8 py-3 mt-8
@@ -141,29 +141,29 @@ export default function Dashboard() {
     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
     focus:ring-offset-white dark:focus:ring-offset-gray-900
   "
->
-  {/* Left icon + text */}
-  <span className="flex items-center gap-2">
-    <HiSparkles className="w-5 h-5 text-indigo-400 dark:text-indigo-200" />
-    <span>Visualize your data now</span>
-  </span>
+      >
+        {/* Left icon + text */}
+        <span className="flex items-center gap-2 text-indigo-400 dark:text-indigo-200">
+          <HiSparkles className="w-5 h-5" />
+          <span >Visualize your data now</span>
+        </span>
 
-  {/* Arrow icon */}
-  <svg
-    className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
-    viewBox="0 0 20 20"
-    fill="none"
-    aria-hidden="true"
-  >
-    <path
-      d="M4.166 10h11.667m0 0L9.999 4.167M15.833 10l-5.834 5.834"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-</button>
+        {/* Arrow icon */}
+        <svg
+          className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1 text-indigo-400 dark:text-indigo-200"
+          viewBox="0 0 20 20"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M4.166 10h11.667m0 0L9.999 4.167M15.833 10l-5.834 5.834"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
 
       {/* Error Message */}
       <div className="mt-4 h-8">
@@ -180,7 +180,7 @@ export default function Dashboard() {
 
           <div className="flex-1 overflow-hidden">
             {!isCopied ? (
-              <p className="text-indigo-600 font-semibold text-sm truncate">
+              <p className="text-indigo-600 dark:text-indigo-400 font-semibold text-sm truncate">
                 Copy Demo JSON Data
               </p>
             ) : (
@@ -192,9 +192,9 @@ export default function Dashboard() {
 
           <button
             onClick={handleCopy}
-            className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 transition p-2"
+            className="text-gray-600 dark:text-gray-200 hover:text-indigo-600 transition p-2 border-2 border-gray-300 dark:border-gray-700 rounded-full"
           >
-            {isCopied ? <FiCheck className="text-green-600" /> : <FiCopy />}
+            {isCopied ? <FiCheck className="text-green-600" size={16} /> : <FiClipboard size={16} />}
           </button>
 
         </div>

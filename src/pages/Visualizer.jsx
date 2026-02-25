@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable, FiBarChart2, FiSave, FiCheck, FiMenu } from "react-icons/fi";
+import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable, FiBarChart2, FiSave, FiCheck, FiMenu, FiTrash2 } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
-
+const VISUALIZER_STORAGE_KEY = "visualizerState";
 const Visualizer = () => {
-  // Hooks
+
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
 
-  // State
+
   const [inputType, setInputType] = useState("paste");
   const [rawInput, setRawInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
@@ -24,19 +24,75 @@ const Visualizer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [savedNotification, setSavedNotification] = useState(false);
 
-  // Effect to Load History Item
-  useEffect(() => {
-    if (location.state?.config) {
-      const config = location.state.config;
-      setData(config.data || []);
-      setViewMode(config.type || "table");
-      setRawInput(config.rawInput || "");
-      setUrlInput(config.urlInput || "");
-      setInputType(config.inputType || "paste");
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
 
+
+  useEffect(() => {
+    const forceLoad = location.state?.forceLoad === true;
+
+    if (forceLoad && location.state?.config) {
+      const config = location.state.config;
+
+      console.log("Force-loading Visualizer from History");
+
+      setData(config.data ?? []);
+      setViewMode(config.type ?? "table");
+      setRawInput(config.rawInput ?? "");
+      setUrlInput(config.urlInput ?? "");
+      setInputType(config.inputType ?? "paste");
+
+      sessionStorage.setItem(
+        VISUALIZER_STORAGE_KEY,
+        JSON.stringify({
+          data: config.data ?? [],
+          viewMode: config.type ?? "table",
+          rawInput: config.rawInput ?? "",
+          urlInput: config.urlInput ?? "",
+          inputType: config.inputType ?? "paste"
+        })
+      );
+
+      return;
+    }
+
+    const saved = sessionStorage.getItem(VISUALIZER_STORAGE_KEY);
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      console.log("Restored Visualizer from session");
+
+      setData(parsed.data ?? []);
+      setViewMode(parsed.viewMode ?? "table");
+      setRawInput(parsed.rawInput ?? "");
+      setUrlInput(parsed.urlInput ?? "");
+      setInputType(parsed.inputType ?? "paste");
+    }
+  }, []);
+  useEffect(() => {
+    if (data.length === 0) return;
+
+    const snapshot = {
+      data,
+      viewMode,
+      rawInput,
+      urlInput,
+      inputType
+    };
+
+    sessionStorage.setItem(
+      VISUALIZER_STORAGE_KEY,
+      JSON.stringify(snapshot)
+    );
+  }, [data, viewMode, rawInput, urlInput, inputType]);
+  const handleClearVisualizer = () => {
+    setData([]);
+    setRawInput("");
+    setUrlInput("");
+    setInputType("paste");
+    setViewMode("table");
+    setError("");
+    sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
+  };
   const handleProcess = async () => {
     setLoading(true);
     setError("");
@@ -54,7 +110,7 @@ const Visualizer = () => {
       const parsed = parseData(rawData);
       if (parsed.length === 0) throw new Error("No valid data found");
       setData(parsed);
-      setIsPanelOpen(false); // Close panel on success (especially useful on mobile)
+      setIsPanelOpen(false);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -97,7 +153,6 @@ const Visualizer = () => {
   return (
     <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full">
 
-      {/* --- Mobile Overlay Backdrop --- */}
       {isPanelOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
@@ -105,7 +160,6 @@ const Visualizer = () => {
         />
       )}
 
-      {/* --- Sidebar / Floating Panel --- */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-80 max-w-full transform transition-transform duration-300 ease-in-out
                     md:sticky md:top-0 md:h-screen md:translate-x-0 md:transform-none
@@ -188,11 +242,7 @@ const Visualizer = () => {
           </div>
         </div>
       </div>
-
-      {/* --- Main Content Area --- */}
       <div className="flex-1 min-w-0 p-4 md:p-8 transition-all duration-300">
-
-        {/* Floating Toggle Button (Mobile & Desktop) */}
         {!isPanelOpen && (
           <button
             onClick={() => setIsPanelOpen(true)}
@@ -203,12 +253,12 @@ const Visualizer = () => {
           </button>
         )}
 
-        {/* View Mode Switcher & Save Button */}
+
         <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center mb-8 gap-4">
           <h1 className="text-2xl font-bold">Canvas</h1>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {/* Save Button */}
+
             {data.length > 0 && (
               <button
                 onClick={handleSave}
@@ -219,8 +269,16 @@ const Visualizer = () => {
                 <span className="sm:hidden">Save</span>
               </button>
             )}
+            {data.length > 0 && (
+              <button
+                onClick={handleClearVisualizer}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
+              >
+                <FiTrash2 />
+                <span className="hidden sm:inline">Clear</span>
+              </button>
+            )}
 
-            {/* View Toggles */}
             <div className="flex p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
               {[
                 { id: 'table', icon: FiTable, label: 'Table' },
@@ -240,15 +298,15 @@ const Visualizer = () => {
           </div>
         </div>
 
-        {/* Render Content */}
+
         <div className="pb-20">
           {data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-xl dark:border-gray-800 bg-white dark:bg-gray-900/50 p-4">
-              <div className="p-6 bg-gray-50 dark:bg-gray-800 rounded-full mb-4">
-                <FiBarChart2 className="text-4xl text-gray-300 dark:text-gray-600" />
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-xl border-gray-500 dark:border-gray-500 bg-white dark:bg-gray-800/50 p-4">
+              <div className="p-6 bg-gray-200/80 dark:bg-gray-800 rounded-full mb-4">
+                <FiBarChart2 className="text-4xl text-gray-500 dark:text-gray-400" />
               </div>
-              <h3 className="text-xl font-medium text-gray-400 dark:text-gray-500">No Data to Display</h3>
-              <p className="text-sm text-gray-400 dark:text-gray-600 mt-2">Open the side panel and load your data source</p>
+              <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">No Data to Display</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Open the side panel and load your data source</p>
             </div>
           ) : (
             <div className="overflow-x-auto">

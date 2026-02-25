@@ -1,13 +1,12 @@
 import { useState, useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
-import { ThemeContext } from "../../context/ThemeContext";
+import { useTheme } from "../../hooks/customHooks";
 import {
   FiSun, FiMoon, FiMenu, FiX, FiLogOut, FiUser,
   FiHome, FiBarChart2, FiClock, FiInfo
 } from "react-icons/fi";
 
-// Scalable Navigation Links Configuration
 const navLinks = [
   { path: "/", label: "Home", icon: FiHome },
   { path: "/visualize", label: "Visualize", icon: FiBarChart2, protected: true },
@@ -18,7 +17,7 @@ const navLinks = [
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout } = useContext(AuthContext);
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -32,7 +31,6 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  // Helper to check if link is active
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -40,7 +38,6 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center gap-2 text-xl font-bold text-gray-900 dark:text-white"
@@ -51,11 +48,8 @@ const Navbar = () => {
             <span className="sm:block">LumiVizStack</span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {navLinks.map((link) => {
-              // If link is protected and user isn't logged in, don't render it (optional, or render as disabled)
-              // For this UX, we render it but the ProtectedRoute handles the logic.
               if (link.protected && !user) return null;
 
               return (
@@ -63,9 +57,11 @@ const Navbar = () => {
                   key={link.path}
                   to={link.path}
                   onClick={handleLinkClick}
-                  className={`flex items-center gap-2 mx-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors ${isActive(link.path)
-                    ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500 dark:border-indigo-600 border-b-4"
-                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 border-b-4 dark:hover:text-white border-transparent  hover:border-gray-400 dark:hover:border-gray-600"
+                  className={`flex items-center gap-2 mx-2 px-4 py-2 rounded-full text-sm font-semibold transition-colors
+          active:border-none
+          ${isActive(link.path)
+                      ? "bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500 dark:border-indigo-600 border-b-4"
+                      : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 border-b-4 dark:hover:text-white active:border-none border-transparent hover:border-gray-400 dark:hover:border-gray-600"
                     }`}
                 >
                   <link.icon size={16} />
@@ -75,9 +71,7 @@ const Navbar = () => {
             })}
           </nav>
 
-          {/* Right Side Actions */}
           <div className="flex items-center gap-2">
-            {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 transition-colors"
@@ -86,7 +80,6 @@ const Navbar = () => {
               {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
             </button>
 
-            {/* Auth Buttons (Desktop) */}
             <div className="hidden md:flex items-center gap-2 ml-2 rounded-lg px-3 py-1.5">
               {user ? (
                 <div className="flex items-center gap-3">
@@ -132,8 +125,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
-      {/* This creates a smooth slide-down effect on mobile */}
       <div
         className={`md:hidden absolute top-16 inset-x-0 bg-white dark:bg-gray-900 border-b-2 border-gray-300 dark:border-gray-700 shadow-lg transition-all duration-300 ease-in-out overflow-hidden ${isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           }`}
@@ -158,10 +149,8 @@ const Navbar = () => {
             );
           })}
 
-          {/* Divider */}
           <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
 
-          {/* Auth Section Mobile */}
           {user ? (
             <div className="space-y-2">
               <div className="flex items-center justify-center gap-2 w-full px-4 py-3 text-gray-800 dark:text-white bg-gray-100 dark:bg-gray-800 rounded-lg">
