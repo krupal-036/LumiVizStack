@@ -36,7 +36,7 @@ const Navbar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b-2 border-gray-200 dark:border-gray-800 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex flex-row items-center justify-between gap-4 text-sm font-semibold h-16">
 
           <Link
             to="/"
@@ -74,17 +74,16 @@ const Navbar = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 transition-colors"
+              className="p-2 rounded-full text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
+              {theme === "dark" ? <FiSun size={20} /> : <FiMoon size={20} />}
             </button>
-
             <div className="hidden md:flex items-center gap-2 ml-2 rounded-lg px-3 py-1.5">
               {user ? (
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-full border-2 border-gray-300 dark:border-gray-600 font-semibold">
-                    <FiUser size={14} />
+                    <FiUser size={16} />
                     <span className="max-w-25 truncate">{user.name || "User"}</span>
                   </div>
                   <button
@@ -105,7 +104,7 @@ const Navbar = () => {
                   </Link>
                   <Link
                     to="/register"
-                    className="px-4 py-2 bg-indigo-800 hover:bg-indigo-300 shadow-sm text-indigo-200 hover:text-indigo-900 dark:text-indigo-300  hover:dark:bg-indigo-300 dark:hover:text-indigo-800 border-2 border-indigo-300 hover:border-indigo-800 dark:hover:border-indigo-800 dark:border-gray-600 rounded-lg text-sm transition-colors font-semibold"
+                    className="px-4 py-2 bg-indigo-300 dark:bg-indigo-700 hover:bg-indigo-800 shadow-sm text-indigo-900 hover:text-indigo-300 dark:text-indigo-300  hover:dark:bg-indigo-300 dark:hover:text-indigo-800 border-2 border-indigo-500 hover:border-indigo-800 dark:hover:border-indigo-800 dark:border-gray-600 rounded-lg text-sm transition-colors font-semibold"
                   >
                     Sign Up
                   </Link>
