@@ -156,10 +156,9 @@ export default function Dashboard() {
               onClick={handleCopy}
               className={`
                 flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                ${
-                  isCopied
-                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-600"
+                ${isCopied
+                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-600"
                 }
               `}
             >
