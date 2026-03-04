@@ -48,12 +48,10 @@ const Navbar = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 h-16">
-      {/* Glassmorphism Background */}
       <div className="absolute inset-0 bg-white/30 dark:bg-[#0B0F15]/70 backdrop-blur-xl border-b border-gray-300 dark:border-gray-700/50"></div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-6">
+      <div className="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link
             to="/"
             className="flex items-center gap-2.5 group"
@@ -67,7 +65,6 @@ const Navbar = () => {
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {navLinks.map((link) => {
               if (link.protected && !user) return null;
@@ -170,7 +167,6 @@ const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile Menu Toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="md:hidden p-2 rounded-full text-gray-600 dark:text-gray-300
@@ -184,7 +180,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
       <div
         className={`md:hidden absolute top-16 left-0 right-0 bg-white/95 dark:bg-[#0B0F19]/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 shadow-2xl transition-all duration-300 ease-in-out origin-top overflow-hidden ${isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
           }`}

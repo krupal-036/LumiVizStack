@@ -21,7 +21,7 @@ const Visualizer = () => {
   const [viewMode, setViewMode] = useState("table");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [savedNotification, setSavedNotification] = useState(false);
 
 

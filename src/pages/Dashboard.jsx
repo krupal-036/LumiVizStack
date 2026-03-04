@@ -139,7 +139,7 @@ export default function Dashboard() {
         </div>
 
         {/* Demo Data / Copy Card */}
-        <div className="w-full max-w-lg bg-white dark:bg-slate-900/80 backdrop-blur-md rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+        <div className="w-full max-w-lg bg-white dark:bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
           {/* Card Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2">
@@ -175,18 +175,18 @@ export default function Dashboard() {
           </div>
 
           {/* Card Body (Preview) */}
-          <div className="p-6 bg-slate-50 dark:bg-[#0B0F19]">
-            <div className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed select-all">
-              {`{
-  "employees": [
-    { "id": 1, "name": "Alice Johnson", ... },
-    { "id": 2, "name": "Bob Smith", ... },
-    ...
-  ],
-  "company": "LumiVizStack"
+          <div className="p-2 bg-slate-50 dark:bg-[#0B0F19]">
+  <div className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed select-none">
+{`{
+"employees": [
+  { "id": 1, "name": "Alice Johnson", ... },
+  { "id": 2, "name": "Bob Smith", ... },
+  ...
+],
+"company": "LumiVizStack"
 }`}
-            </div>
-          </div>
+  </div>
+</div>
         </div>
       </div>
     </section>
