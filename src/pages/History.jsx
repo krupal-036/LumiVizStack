@@ -12,18 +12,16 @@ const History = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // Load History from LocalStorage
   useEffect(() => {
     if (user?.email) {
       const all = JSON.parse(localStorage.getItem("vizHistory") || "[]");
-      // Sort by newest first
+      
       const userHistory = all.filter((item) => item.owner === user.email);
       userHistory.sort((a, b) => new Date(b.savedAt) - new Date(a.savedAt));
       setHistory(userHistory);
     }
   }, [user]);
 
-  // Filter History based on search
   const filteredHistory = useMemo(() => {
     return history.filter(item =>
       item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -34,12 +32,9 @@ const History = () => {
   const deleteItem = (id) => {
     if (!window.confirm("Are you sure you want to delete this visualization?")) return;
 
-    // Update LocalStorage
     const all = JSON.parse(localStorage.getItem("vizHistory") || "[]");
     const updatedAll = all.filter((item) => item.id !== id);
     localStorage.setItem("vizHistory", JSON.stringify(updatedAll));
-
-    // Update State
     setHistory(prev => prev.filter(item => item.id !== id));
   };
 
@@ -52,7 +47,6 @@ const History = () => {
     });
   };
 
-  // Helper to determine card styling based on view type
   const getVisualConfig = (type) => {
     switch (type) {
       case 'card':
@@ -79,43 +73,53 @@ const History = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-        { /* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 relative ">
-          <div>
-            <h1 className="text-4xl font-extrabold tracking-tight bg-linear-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent z-20">
-              History
-            </h1>
-            <p className="text-slate-500 dark:text-zinc-400 flex items-center gap-2 z-10">
-              <FiClock /> Your recent data visualizations
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row w-full md:w-auto gap-4 relative ">
-            {/* Search Bar */}
-            <div className="relative flex-1 md:w-64">
-              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search history..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-indigo-500 focus:border-none outline-none text-sm transition-all"
-              />
+        <div className="mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+                  <FiClock className="w-6 h-6" />
+                </div>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">
+                  Visualization History
+                </h1>
+              </div>
+              <p className="text-slate-500 dark:text-zinc-400 text-sm md:text-base max-w-md">
+                Browse, load, and manage your previously saved data visualizations.
+              </p>
             </div>
 
-            {/* Create Button */}
-            <button
-              onClick={() => navigate("/visualize")}
-              className="flex items-center justify-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-all font-semibold text-sm whitespace-nowrap"
-            >
-              <FiPlus className="text-lg" /> New Visualization
-            </button>
+            <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
+              <div className="relative flex-1 lg:w-72">
+                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search by title or type..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl 
+                             bg-white dark:bg-zinc-900 
+                             border border-slate-200 dark:border-zinc-800 
+                             focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 
+                             outline-none text-sm transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600"
+                />
+              </div>
+              <button
+                onClick={() => navigate("/visualize")}
+                className="flex items-center justify-center gap-2 px-5 py-2.5 
+                           bg-indigo-600 hover:bg-indigo-700 
+                           text-white rounded-xl 
+                           shadow-md shadow-indigo-500/20 
+                           transition-all font-medium text-sm whitespace-nowrap"
+              >
+                <FiPlus className="text-lg" /> New Visualization
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Grid Layout */}
         {filteredHistory.length === 0 ? (
           <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 mb-4">
@@ -135,7 +139,7 @@ const History = () => {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredHistory.map((item) => {
               const config = getVisualConfig(item.type);
               const Icon = config.icon;
@@ -145,22 +149,18 @@ const History = () => {
                   key={item.id}
                   className="group relative bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
                 >
-                  {/* Visual Header */}
                   <div className={`h-36 relative flex items-center justify-center overflow-hidden bg-linear-to-br ${config.gradient}`}>
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9zdmc+')] opacity-30"></div>
 
-                    {/* Animated Icon */}
                     <div className="relative z-10 p-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                       <Icon className="text-white text-4xl" />
                     </div>
 
-                    {/* Type Badge */}
                     <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-black/20 text-white backdrop-blur-sm">
                       {item.type || 'Data'}
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="p-5 relative">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-bold text-lg text-slate-800 dark:text-zinc-100 truncate pr-4">
@@ -168,7 +168,6 @@ const History = () => {
                       </h3>
                     </div>
 
-                    {/* Meta Tags */}
                     <div className="flex flex-wrap gap-2 mb-5">
                       <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
                         <FiCalendar className="text-indigo-400" /> {new Date(item.savedAt).toLocaleDateString()}
@@ -178,7 +177,6 @@ const History = () => {
                       </span>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="flex items-center gap-2 border-t border-slate-100 dark:border-zinc-800 pt-4">
                       <button
                         onClick={() => handleLoad(item)}
