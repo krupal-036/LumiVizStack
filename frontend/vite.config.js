@@ -5,10 +5,14 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   base: '/', 
   plugins: [react(), tailwindcss()],
+  build: {
+    outDir: 'public', 
+    emptyOutDir: true, 
+  },
   server: {
     proxy: {
       "/api": {
-        target: "https://lumivizstack.vercel.app",
+        target: "http://localhost:3000",
         changeOrigin: true,
         secure: false,
       },

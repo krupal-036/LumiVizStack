@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
+
 import authRoutes from "./routes/auth.js";
 import RateLimiter from "./middleware/RateLimiter.js";
 import "./db.js";
@@ -14,14 +15,15 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-const DIST_PATH = path.join(process.cwd(), "public/dist");
+// CORRECTION: Path now points to 'public' folder in the same directory
+const DIST_PATH = path.join(__dirname, "public/dist");
 
 app.use(express.json());
 app.use(express.static(DIST_PATH));
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://lumivizstack.vercel.app"],
+    origin: ["http://localhost:5173", "https://lumivizstack.vercel.app", "http://localhost:3000"],
     credentials: true,
   }),
 );
@@ -37,6 +39,7 @@ app.get("/api/health", RateLimiter, (req, res) => {
   });
 });
 
+// Local development listener
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () =>
@@ -44,24 +47,33 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-
+// Serve Frontend HTML for root
 app.get("/", (req, res) => {
   const htmlPath = path.join(DIST_PATH, "index.html");
   try {
-    let html = fs.readFileSync(htmlPath, "utf8");
-    res.send(html);
+    if (fs.existsSync(htmlPath)) {
+      res.sendFile(htmlPath);
+    } else {
+      res.status(404).send("Frontend not found in 'public' folder.");
+    }
   } catch (err) {
-    res.status(500).send("Error loading index.html. Ensure 'public/dist' exists.");
+    res.status(500).send("Error loading frontend.");
   }
 });
 
+// Handle 404 for API routes
 app.get("/api/*splat", (req, res) => {
-  console.log(`Invalid API hit: ${req.params.splat}. Redirecting...`);
   res.status(404).json({ error: "API route not found" });
 });
 
-app.get("/*splat", (req, res) => {
-  res.sendFile(path.join(DIST_PATH, "index.html"));
+// Catch-all for React Router (Serve index.html for any other route)
+app.get("*splat", (req, res) => {
+  const htmlPath = path.join(DIST_PATH, "index.html");
+  if (fs.existsSync(htmlPath)) {
+    res.sendFile(htmlPath);
+  } else {
+    res.status(404).send("Page not found.");
+  }
 });
 
 export default app;
