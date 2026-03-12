@@ -5,7 +5,7 @@ import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
-
+import PublicView from "./pages/PublicView";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import About from "./pages/About";
@@ -43,6 +43,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route path="/view/:historyId" element={<PublicView />} />
               </Routes>
             </main>
             <Footer />

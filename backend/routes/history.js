@@ -1,0 +1,127 @@
+import express from "express";
+import History from "../models/History.js";
+import verifyToken from "../middleware/verifyToken.js";
+
+const router = express.Router();
+
+// @route   POST api/history/save
+// @desc    Save visualization history (Max 5 per user)
+router.post("/save", verifyToken, async (req, res) => {
+  try {
+    const { title, type, data, rawInput, urlInput, inputType, isPublic } = req.body;
+    const userId = req.user.id;
+
+    // Check count
+    const count = await History.countDocuments({ userId });
+
+    if (count >= 5) {
+      // Find the oldest item and delete it
+      const oldest = await History.findOne({ userId }).sort({ createdAt: 1 });
+      if (oldest) {
+        await History.deleteOne({ _id: oldest._id });
+      }
+    }
+
+    const newHistory = new History({
+      userId,
+      title,
+      type,
+      data,
+      rawInput,
+      urlInput,
+      inputType,
+      isPublic: isPublic || false,
+    });
+
+    const savedItem = await newHistory.save();
+    res.status(201).json(savedItem);
+  } catch (err) {
+    console.error("Save error:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   PUT api/history/:id/toggle
+// @desc    Toggle isPublic flag
+router.put("/:id/toggle", verifyToken, async (req, res) => {
+  try {
+    const historyItem = await History.findById(req.params.id);
+
+    if (!historyItem) {
+      return res.status(404).json({ message: "History not found" });
+    }
+
+    // Check ownership
+    if (historyItem.userId.toString() !== req.user.id) {
+      return res.status(401).json({ message: "User not verified" });
+    }
+
+    historyItem.isPublic = !historyItem.isPublic;
+    await historyItem.save();
+
+    res.json(historyItem);
+  } catch (err) {
+    console.error("Toggle error:", err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   GET api/history/user
+// @desc    Get logged-in user's history
+router.get("/user", verifyToken, async (req, res) => {
+  try {
+    const histories = await History.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    res.json(histories);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+// @route   GET api/history/public/:id
+// @desc    Get public history by ID (accessible by anyone)
+router.get("/public/:id", async (req, res) => {
+  try {
+    const historyItem = await History.findById(req.params.id);
+
+    if (!historyItem) {
+      return res.status(404).json({ message: "History not found" });
+    }
+
+    if (!historyItem.isPublic) {
+      return res.status(403).json({ message: "This visualization is private" });
+    }
+
+    res.json(historyItem);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
+// @route   DELETE api/history/:id
+// @desc    Delete a history item
+router.delete("/:id", verifyToken, async (req, res) => {
+  try {
+    const historyItem = await History.findById(req.params.id);
+
+    if (!historyItem) {
+      return res.status(404).json({ message: "History not found" });
+    }
+
+    // Check ownership
+    if (historyItem.userId.toString() !== req.user.id) {
+      return res.status(401).json({ message: "User not authorized" });
+    }
+
+    await History.deleteOne({ _id: req.params.id });
+    res.json({ message: "History removed" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+
+export default router;

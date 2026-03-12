@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable,
   FiBarChart2, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
-  FiClock
+  FiClock, FiEye, FiEyeOff
 } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
@@ -32,9 +32,13 @@ const Visualizer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [savedNotification, setSavedNotification] = useState(false);
 
+  // New state for public flag
+  const [isPublic, setIsPublic] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
 
+  // Existing useEffects remain untouched (Session storage logic preserved)
   useEffect(() => {
     const forceLoad = location.state?.forceLoad === true;
     if (forceLoad && location.state?.config) {
@@ -73,6 +77,7 @@ const Visualizer = () => {
     setViewMode("table");
     setError("");
     setSearchTerm("");
+    // Note: Not clearing isPublic here intentionally to keep preference, or you can reset it.
     sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
   };
 
@@ -109,27 +114,52 @@ const Visualizer = () => {
     reader.readAsText(file);
   };
 
-  const handleSave = () => {
+  // Updated handleSave to use API
+  const handleSave = async () => {
     if (!user || data.length === 0) return;
+
+    const token = localStorage.getItem("token"); // Assuming token is stored in localStorage upon login
+
+    if (!token) {
+      setError("Authentication error. Please log in again.");
+      return;
+    }
+
     const newHistoryItem = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-      owner: user.email,
       title: `Visualization ${new Date().toLocaleDateString()}`,
       type: viewMode,
-      savedAt: new Date().toISOString(),
       dataLength: data.length,
       data: data,
       rawInput: rawInput,
       urlInput: urlInput,
-      inputType: inputType
+      inputType: inputType,
+      isPublic: isPublic // Include the public flag
     };
 
-    const allHistory = JSON.parse(localStorage.getItem("vizHistory") || "[]");
-    allHistory.push(newHistoryItem);
-    localStorage.setItem("vizHistory", JSON.stringify(allHistory));
+    try {
+      const response = await fetch("http://localhost:3000/api/history/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token // Or Authorization: Bearer token
+        },
+        body: JSON.stringify(newHistoryItem)
+      });
 
-    setSavedNotification(true);
-    setTimeout(() => setSavedNotification(false), 2000);
+      if (!response.ok) {
+        throw new Error("Failed to save history");
+      }
+
+      setSavedNotification(true);
+      setTimeout(() => setSavedNotification(false), 2000);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Handler to toggle public/private state
+  const togglePublic = () => {
+    setIsPublic(!isPublic);
   };
 
   const filteredData = useMemo(() => {
@@ -150,7 +180,7 @@ const Visualizer = () => {
   return (
     <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full">
 
-
+      {/* Side Panel Code... (omitted for brevity, unchanged) */}
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
       )}
@@ -159,7 +189,7 @@ const Visualizer = () => {
                     md:sticky md:top-0 md:h-screen md:translate-x-0 md:transform-none
                     ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}>
         <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none">
-
+          {/* Panel Content... (omitted for brevity, unchanged) */}
           <div className="p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></div>
@@ -171,7 +201,7 @@ const Visualizer = () => {
           </div>
 
           <div className="p-6 flex-1 overflow-y-auto flex flex-col">
-
+            {/* ... Data source inputs ... */}
             <div className="flex gap-2 mb-4">
               {[
                 { id: 'paste', icon: FiCode, label: 'Paste' },
@@ -187,7 +217,6 @@ const Visualizer = () => {
                 </button>
               ))}
             </div>
-
 
             <div className="flex-1 relative mb-4 min-h-[200px]">
               {inputType === 'paste' && (
@@ -238,7 +267,6 @@ const Visualizer = () => {
               <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
                 <FiBarChart2 className="w-6 h-6" />
               </div>
-
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">
                 Visualization Canvas
               </h1>
@@ -248,6 +276,19 @@ const Visualizer = () => {
 
               {data.length > 0 && (
                 <>
+                  {/* Toggle Public Button */}
+                  <button
+                    onClick={togglePublic}
+                    title={isPublic ? "Currently Public" : "Currently Private"}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg shadow-md transition-all text-sm font-medium border-2
+                      ${isPublic
+                        ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"}`}
+                  >
+                    {isPublic ? <FiEye /> : <FiEyeOff />}
+                    <span className="hidden sm:inline">{isPublic ? "Public" : "Private"}</span>
+                  </button>
+
                   <button
                     onClick={handleSave}
                     className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"

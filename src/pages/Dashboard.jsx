@@ -176,8 +176,8 @@ export default function Dashboard() {
 
           {/* Card Body (Preview) */}
           <div className="p-2 bg-slate-50 dark:bg-[#0B0F19]">
-  <div className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed select-none">
-{`{
+            <div className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed select-none">
+              {`{
 "employees": [
   { "id": 1, "name": "Alice Johnson", ... },
   { "id": 2, "name": "Bob Smith", ... },
@@ -185,8 +185,8 @@ export default function Dashboard() {
 ],
 "company": "LumiVizStack"
 }`}
-  </div>
-</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
