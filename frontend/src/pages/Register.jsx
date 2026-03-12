@@ -51,26 +51,30 @@ export default function SignUp() {
     setIsLoading(true);
     setErrors({}); 
 
-    try {
+     try {
       const response = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        }),
+        body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      // Check if response is actually JSON before parsing
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text(); // Get raw error if not JSON
+        throw new Error(text || "Server returned an invalid response");
+      }
 
       if (!response.ok) {
-        if (data.message && data.message.includes("email")) {
+        // Specific error handling
+        if (data.message?.toLowerCase().includes("email")) {
           setErrors({ email: data.message });
         } else {
           setErrors({ general: data.message || "Registration failed" });
         }
-        setIsLoading(false);
         return;
       }
 
@@ -78,8 +82,8 @@ export default function SignUp() {
       navigate("/");
 
     } catch (error) {
-      console.error("Error:", error);
-      setErrors({ general: "Unable to connect to server. Please try again later." });
+      console.error("Signup Error:", error);
+      setErrors({ general: "Connection failed. Check if the server is running." });
     } finally {
       setIsLoading(false);
     }

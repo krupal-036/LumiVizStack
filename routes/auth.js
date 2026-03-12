@@ -2,13 +2,14 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-
+import { usersConnection } from '../db.js'; 
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
+    await usersConnection.asPromise();
     let user = await User.findOne({ email });
     if (user) {
       return res.status(400).json({ message: 'User with this email already exists' });
@@ -39,6 +40,7 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    await usersConnection.asPromise();
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });

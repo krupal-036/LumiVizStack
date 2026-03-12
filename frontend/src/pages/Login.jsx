@@ -44,12 +44,13 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsLoading(true);
     setErrors({});
+    
     try {
       const response = await fetch('/api/auth/login', {
         method: "POST",
@@ -60,26 +61,37 @@ export default function Login() {
         }),
       });
 
-      const data = await response.json();
+      // 1. Check if the response is actually JSON
+      const contentType = response.headers.get("content-type");
+      let data;
+      
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        // If not JSON, the server likely sent an HTML error (like a 504 or 500)
+        throw new Error("Server is currently unavailable. Please try again.");
+      }
 
+      // 2. Handle Logic Errors (400, 401, etc.)
       if (!response.ok) {
         setErrors({ general: data.message || "Invalid email or password" });
-        setIsLoading(false);
         return;
       }
 
+      // 3. Success
       login(data.user, data.token);
-
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
 
     } catch (error) {
-      console.error("Error:", error);
-      setErrors({ general: "Unable to connect to server." });
+      console.error("Login Error:", error);
+      // Catch network errors or the custom Error thrown above
+      setErrors({ general: error.message || "Unable to connect to server." });
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black pt-2">
