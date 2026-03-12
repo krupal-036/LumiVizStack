@@ -19,8 +19,6 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -53,7 +51,7 @@ export default function Login() {
     setIsLoading(true);
     setErrors({});
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch('/api/auth/login', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

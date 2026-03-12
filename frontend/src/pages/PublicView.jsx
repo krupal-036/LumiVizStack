@@ -23,7 +23,7 @@ const PublicView = () => {
   useEffect(() => {
     const fetchPublicData = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/history/public/${historyId}`);
+        const res = await fetch(`/api/history/public/${historyId}`);
 
         if (!res.ok) {
           const data = await res.json();

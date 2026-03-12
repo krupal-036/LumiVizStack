@@ -15,9 +15,6 @@ export default function SignUp() {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -55,7 +52,7 @@ export default function SignUp() {
     setErrors({}); 
 
     try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
+      const response = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

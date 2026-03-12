@@ -137,7 +137,7 @@ const Visualizer = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3000/api/history/save", {
+      const response = await fetch("/api/history/save", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -55,7 +55,7 @@ const History = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/history/${id}`, {
+      const res = await fetch(`/api/history/${id}`, {
         method: "DELETE",
         headers: { "x-auth-token": token }
       });
