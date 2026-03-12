@@ -15,7 +15,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// CORRECTION: Path now points to 'public' folder in the same directory
 const DIST_PATH = path.join(__dirname, "public/dist");
 
 app.use(express.json());
@@ -39,7 +38,6 @@ app.get("/api/health", RateLimiter, (req, res) => {
   });
 });
 
-// Local development listener
 if (process.env.NODE_ENV !== "production") {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () =>
@@ -47,7 +45,6 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-// Serve Frontend HTML for root
 app.get("/", (req, res) => {
   const htmlPath = path.join(DIST_PATH, "index.html");
   try {
@@ -61,12 +58,10 @@ app.get("/", (req, res) => {
   }
 });
 
-// Handle 404 for API routes
 app.get("/api/*splat", (req, res) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-// Catch-all for React Router (Serve index.html for any other route)
 app.get("*splat", (req, res) => {
   const htmlPath = path.join(DIST_PATH, "index.html");
   if (fs.existsSync(htmlPath)) {
