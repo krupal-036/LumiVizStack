@@ -1,139 +1,80 @@
-import React, { useState, useMemo } from "react";
-import { FiBarChart2, FiActivity, FiPieChart } from "react-icons/fi";
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend } from 'recharts';
+import { FiSettings } from 'react-icons/fi';
+
+const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const ChartView = ({ data }) => {
-  const [chartType, setChartType] = useState("bar"); // bar | line | pie
+  const [chartType, setChartType] = useState('bar');
+  const [selectedNumKey, setSelectedNumKey] = useState('');
 
-  const { values, labels, maxVal } = useMemo(() => {
-    if (!data || data.length === 0) return { values: [], labels: [], maxVal: 0 };
+  const allKeys = useMemo(() => (data.length > 0 ? Object.keys(data[0]) : []), [data]);
+  const numericKeys = useMemo(() => allKeys.filter(k => typeof data[0][k] === 'number'), [data, allKeys]);
+  const labelKey = useMemo(() => allKeys.find(k => typeof data[0][k] === 'string') || allKeys[0], [data, allKeys]);
 
-    const firstItem = data[0];
-    const keys = Object.keys(firstItem);
+  React.useEffect(() => {
+    if (numericKeys.length > 0 && !selectedNumKey) setSelectedNumKey(numericKeys[0]);
+  }, [numericKeys, selectedNumKey]);
 
-    // Find numeric and string keys automatically
-    const valueKey = keys.find(k => typeof firstItem[k] === 'number') || keys[0];
-    const labelKey = keys.find(k => typeof firstItem[k] === 'string') || keys[1] || keys[0];
-
-    const vals = data.map(d => Number(d[valueKey]) || 0);
-    const labs = data.map(d => String(d[labelKey]).substring(0, 15));
-
-    return { values: vals, labels: labs, maxVal: Math.max(...vals) };
-  }, [data]);
-
-  if (data.length === 0) return <div className="text-center py-20 text-gray-400">No data for chart</div>;
-
-  // Simple SVG Chart Logic
-  const SVG_WIDTH = 600;
-  const SVG_HEIGHT = 300;
-  const BAR_WIDTH = SVG_WIDTH / data.length - 10;
-
-  const renderBarChart = () => (
-    <svg viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`} className="w-full h-64 overflow-visible">
-      {values.map((val, i) => {
-        const height = (val / maxVal) * (SVG_HEIGHT - 40);
-        const x = i * (BAR_WIDTH + 10) + 10;
-        const y = SVG_HEIGHT - height - 20;
-
-        return (
-          <g key={i} className="transition-all duration-500">
-            <rect
-              x={x} y={y}
-              width={BAR_WIDTH}
-              height={height}
-              fill="#6366f1"
-              rx="4"
-              className="hover:fill-indigo-400 cursor-pointer"
-            />
-            <text x={x + BAR_WIDTH / 2} y={SVG_HEIGHT - 5} textAnchor="middle" className="fill-gray-400 text-[10px]">
-              {labels[i]}
-            </text>
-            <text x={x + BAR_WIDTH / 2} y={y - 5} textAnchor="middle" className="fill-gray-600 dark:fill-gray-300 text-[10px] font-bold">
-              {val}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-
-  const renderLineChart = () => {
-    const points = values.map((val, i) => {
-      const x = i * (SVG_WIDTH / values.length) + 20;
-      const y = SVG_HEIGHT - (val / maxVal) * (SVG_HEIGHT - 40) - 20;
-      return `${x},${y}`;
-    }).join(" ");
-
-    return (
-      <svg viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`} className="w-full h-64 overflow-visible">
-        <polyline
-          fill="none"
-          stroke="#6366f1"
-          strokeWidth="3"
-          points={points}
-          className="drop-shadow-md"
-        />
-        {values.map((val, i) => {
-          const x = i * (SVG_WIDTH / values.length) + 20;
-          const y = SVG_HEIGHT - (val / maxVal) * (SVG_HEIGHT - 40) - 20;
-          return (
-            <circle key={i} cx={x} cy={y} r="4" fill="#fff" stroke="#6366f1" strokeWidth="2" className="hover:r-6 cursor-pointer" />
-          )
-        })}
-      </svg>
-    );
-  };
-
-  const renderPieChart = () => {
-    let currentAngle = 0;
-    const total = values.reduce((a, b) => a + b, 0);
-    const cx = 150, cy = 150, r = 100;
-
-    return (
-      <svg viewBox="0 0 300 300" className="w-64 h-64 mx-auto">
-        {values.map((val, i) => {
-          const angle = (val / total) * 360;
-          const largeArc = angle > 180 ? 1 : 0;
-
-          // Calculate start/end points
-          const startRad = (currentAngle - 90) * Math.PI / 180;
-          const endRad = (currentAngle + angle - 90) * Math.PI / 180;
-
-          const x1 = cx + r * Math.cos(startRad);
-          const y1 = cy + r * Math.sin(startRad);
-          const x2 = cx + r * Math.cos(endRad);
-          const y2 = cy + r * Math.sin(endRad);
-
-          const pathD = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-          currentAngle += angle;
-
-          const colors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
-
-          return (
-            <path key={i} d={pathD} fill={colors[i % colors.length]} stroke="#fff" strokeWidth="2" className="hover:opacity-80 transition-opacity cursor-pointer">
-              <title>{`${labels[i]}: ${val}`}</title>
-            </path>
-          );
-        })}
-      </svg>
-    );
-  };
+  if (data.length === 0) return null;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border dark:border-gray-800">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex gap-2 p-1 bg-gray-50 dark:bg-gray-800 rounded-lg w-fit shadow-sm border border-gray-200 dark:border-gray-700">
-          <button onClick={() => setChartType("bar")} className={`p-2 rounded ${chartType === "bar" ? "bg-indigo-600 text-white shadow-md" : "text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}><FiBarChart2 /></button>
-          <button onClick={() => setChartType("line")} className={`p-2 rounded ${chartType === "line" ? "bg-indigo-600 text-white shadow-md" : "text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}><FiActivity /></button>
-          <button onClick={() => setChartType("pie")} className={`p-2 rounded ${chartType === "pie" ? "bg-indigo-600 text-white shadow-md" : "text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400"}`}><FiPieChart /></button>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-xl border border-gray-200 dark:border-gray-700 h-[500px] shadow-sm flex flex-col">
+     
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div className="flex bg-gray-100 dark:bg-gray-900 p-1 rounded-lg">
+          {['bar', 'line', 'area', 'pie'].map(t => (
+            <button key={t} onClick={() => setChartType(t)} 
+              className={`px-4 py-2 rounded-md text-xs font-bold transition-all capitalize
+                ${chartType === t ? 'bg-white dark:bg-gray-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'}`}>
+              {t}
+            </button>
+          ))}
         </div>
-        <span className="text-xs text-gray-400 uppercase font-bold">Auto-Mapped Data</span>
+
+        {numericKeys.length > 0 && (
+          <div className="flex items-center gap-2 bg-indigo-50 dark:bg-indigo-900/30 px-4 py-2 rounded-lg border border-indigo-100 dark:border-indigo-800">
+            <FiSettings size={16} className="text-indigo-600" />
+            <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">Data Key:</span>
+            <select
+              value={selectedNumKey}
+              onChange={(e) => setSelectedNumKey(e.target.value)}
+              className="bg-transparent text-xs font-bold text-indigo-900 dark:text-indigo-100 outline-none cursor-pointer"
+            >
+              {numericKeys.map(k => <option key={k} value={k}>{k}</option>)}
+            </select>
+          </div>
+        )}
       </div>
 
-      <div className="flex justify-center items-center py-4">
-        {chartType === "bar" && renderBarChart()}
-        {chartType === "line" && renderLineChart()}
-        {chartType === "pie" && renderPieChart()}
+      <div className="flex-1 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          {chartType === 'pie' ? (
+            <PieChart>
+              <Pie data={data} dataKey={selectedNumKey} nameKey={labelKey} cx="50%" cy="50%" outerRadius={100} label>
+                {data.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          ) : (
+            (() => {
+              const ChartComp = chartType === 'bar' ? BarChart : chartType === 'line' ? LineChart : AreaChart;
+              return (
+                <ChartComp data={data}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#374151" opacity={0.1} />
+                  <XAxis dataKey={labelKey} tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#9ca3af', fontSize: 11 }} />
+                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', backgroundColor: 'var(--tooltip-bg, #fff)', color: '#111' }} />
+                  <Legend />
+                  {chartType === 'bar' && <Bar dataKey={selectedNumKey} fill="#6366f1" radius={[4, 4, 0, 0]} barSize={30} />}
+                  {chartType === 'line' && <Line type="monotone" dataKey={selectedNumKey} stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1', strokeWidth: 2, stroke: '#fff' }} />}
+                  {chartType === 'area' && <Area type="monotone" dataKey={selectedNumKey} fill="#6366f1" stroke="#6366f1" fillOpacity={0.2} strokeWidth={2} />}
+                </ChartComp>
+              );
+            })()
+          )}
+        </ResponsiveContainer>
       </div>
     </div>
   );

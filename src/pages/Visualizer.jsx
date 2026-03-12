@@ -1,18 +1,26 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable, FiBarChart2, FiSave, FiCheck, FiMenu, FiTrash2 } from "react-icons/fi";
+import {
+  FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable,
+  FiBarChart2, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
+  FiClock
+} from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
-const VISUALIZER_STORAGE_KEY = "visualizerState";
-const Visualizer = () => {
+import TreeView from "../components/visualizations/TreeView";
+import GraphView from "../components/visualizations/GraphView";
+import { Features, renderValue } from "../components/Features.jsx";
 
+const VISUALIZER_STORAGE_KEY = "visualizerState";
+
+const Visualizer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-
+  const reportRef = useRef(null);
 
   const [inputType, setInputType] = useState("paste");
   const [rawInput, setRawInput] = useState("");
@@ -24,43 +32,25 @@ const Visualizer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [savedNotification, setSavedNotification] = useState(false);
 
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [forceImages, setForceImages] = useState({});
 
   useEffect(() => {
     const forceLoad = location.state?.forceLoad === true;
-
     if (forceLoad && location.state?.config) {
       const config = location.state.config;
-
-      console.log("Force-loading Visualizer from History");
-
       setData(config.data ?? []);
       setViewMode(config.type ?? "table");
       setRawInput(config.rawInput ?? "");
       setUrlInput(config.urlInput ?? "");
       setInputType(config.inputType ?? "paste");
-
-      sessionStorage.setItem(
-        VISUALIZER_STORAGE_KEY,
-        JSON.stringify({
-          data: config.data ?? [],
-          viewMode: config.type ?? "table",
-          rawInput: config.rawInput ?? "",
-          urlInput: config.urlInput ?? "",
-          inputType: config.inputType ?? "paste"
-        })
-      );
-
+      sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(config));
       return;
     }
 
     const saved = sessionStorage.getItem(VISUALIZER_STORAGE_KEY);
-
     if (saved) {
       const parsed = JSON.parse(saved);
-
-      console.log("Restored Visualizer from session");
-
       setData(parsed.data ?? []);
       setViewMode(parsed.viewMode ?? "table");
       setRawInput(parsed.rawInput ?? "");
@@ -68,22 +58,13 @@ const Visualizer = () => {
       setInputType(parsed.inputType ?? "paste");
     }
   }, []);
+
   useEffect(() => {
     if (data.length === 0) return;
-
-    const snapshot = {
-      data,
-      viewMode,
-      rawInput,
-      urlInput,
-      inputType
-    };
-
-    sessionStorage.setItem(
-      VISUALIZER_STORAGE_KEY,
-      JSON.stringify(snapshot)
-    );
+    const snapshot = { data, viewMode, rawInput, urlInput, inputType };
+    sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(snapshot));
   }, [data, viewMode, rawInput, urlInput, inputType]);
+
   const handleClearVisualizer = () => {
     setData([]);
     setRawInput("");
@@ -91,8 +72,10 @@ const Visualizer = () => {
     setInputType("paste");
     setViewMode("table");
     setError("");
+    setSearchTerm("");
     sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
   };
+
   const handleProcess = async () => {
     setLoading(true);
     setError("");
@@ -128,7 +111,6 @@ const Visualizer = () => {
 
   const handleSave = () => {
     if (!user || data.length === 0) return;
-
     const newHistoryItem = {
       id: Date.now().toString(36) + Math.random().toString(36).substr(2),
       owner: user.email,
@@ -150,24 +132,34 @@ const Visualizer = () => {
     setTimeout(() => setSavedNotification(false), 2000);
   };
 
+  const filteredData = useMemo(() => {
+    if (!searchTerm) return data;
+    return data.filter(item =>
+      Object.values(item).some(val => String(val).toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  }, [data, searchTerm]);
+
+  const viewModes = [
+    { id: 'table', icon: FiTable, label: 'Table' },
+    { id: 'card', icon: FiGrid, label: 'Grid' },
+    { id: 'chart', icon: FiBarChart2, label: 'Charts' },
+    { id: 'tree', icon: FiCode, label: 'JSON' },
+    { id: 'graph', icon: FiShare2, label: 'Graph' },
+  ];
+
   return (
     <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full">
 
+
       {isPanelOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setIsPanelOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
       )}
 
-      <div
-        className={`fixed inset-y-0 left-0 z-40 w-80 max-w-full transform transition-transform duration-300 ease-in-out
+      <div className={`fixed inset-y-0 left-0 z-40 w-80 max-w-full transform transition-transform duration-300 ease-in-out
                     md:sticky md:top-0 md:h-screen md:translate-x-0 md:transform-none
-                    ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}
-      >
+                    ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}>
         <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none">
 
-          {/* Sidebar Header */}
           <div className="p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></div>
@@ -178,10 +170,8 @@ const Visualizer = () => {
             </button>
           </div>
 
-          {/* Sidebar Content */}
           <div className="p-6 flex-1 overflow-y-auto flex flex-col">
 
-            {/* Input Tabs */}
             <div className="flex gap-2 mb-4">
               {[
                 { id: 'paste', icon: FiCode, label: 'Paste' },
@@ -189,17 +179,17 @@ const Visualizer = () => {
                 { id: 'url', icon: FiLink, label: 'URL' },
               ].map(t => (
                 <button key={t.id} onClick={() => setInputType(t.id)}
-                  className={`flex-1 py-2 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 rounded-lg transition-colors border-2 
+                  className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 rounded-lg transition-colors border-2 
                     ${inputType === t.id
-                      ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500 dark:border-indigo-600'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700 dark:text-gray-400'}`}>
+                      ? 'bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700'}`}>
                   <t.icon size={14} /> {t.label}
                 </button>
               ))}
             </div>
 
-            {/* Input Area */}
-            <div className="flex-1 relative mb-4 min-h-50">
+
+            <div className="flex-1 relative mb-4 min-h-[200px]">
               {inputType === 'paste' && (
                 <textarea
                   value={rawInput}
@@ -210,13 +200,7 @@ const Visualizer = () => {
               )}
               {inputType === 'url' && (
                 <div className="mt-4">
-                  <input
-                    type="text"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="https://api..."
-                    className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 outline-none text-sm"
-                  />
+                  <input type="text" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="https://api..." className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 outline-none text-sm" />
                 </div>
               )}
               {inputType === 'file' && (
@@ -224,7 +208,7 @@ const Visualizer = () => {
                   <input type="file" id="fileUp" onChange={handleFileUpload} className="hidden" />
                   <label htmlFor="fileUp" className="cursor-pointer text-center p-10">
                     <FiUploadCloud className="mx-auto text-4xl text-gray-300 dark:text-gray-500 mb-4" />
-                    <span className="text-gray-500 dark:text-gray-400">Click to upload JSON</span>
+                    <span className="text-gray-500">Click to upload JSON</span>
                   </label>
                 </div>
               )}
@@ -232,74 +216,90 @@ const Visualizer = () => {
 
             {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-lg text-xs">{error}</div>}
 
-            <button
-              onClick={handleProcess}
-              disabled={loading}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-            >
+            <button onClick={handleProcess} disabled={loading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50">
               {loading ? "Processing..." : "Visualize Data"} <FiPlay />
             </button>
           </div>
         </div>
       </div>
-      <div className="flex-1 min-w-0 p-4 md:p-8 transition-all duration-300">
+
+      <div className="flex-1 min-w-0 p-4 md:p-8 transition-all duration-300 lg:max-w-screen-2xl mx-auto px-4 lg:px-8">
+
         {!isPanelOpen && (
-          <button
-            onClick={() => setIsPanelOpen(true)}
-            className="fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all"
-            aria-label="Open data source panel"
-          >
+          <button onClick={() => setIsPanelOpen(true)} className="fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all">
             <FiCode size={20} />
           </button>
         )}
 
+        <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-        <div className="flex flex-col sm:flex-row flex-wrap justify-between items-start sm:items-center mb-8 gap-4">
-          <h1 className="text-2xl font-bold">Canvas</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
+                <FiBarChart2 className="w-6 h-6" />
+              </div>
 
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">
+                Visualization Canvas
+              </h1>
+            </div>
 
-            {data.length > 0 && (
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
-              >
-                {savedNotification ? <FiCheck /> : <FiSave />}
-                <span className="hidden sm:inline">{savedNotification ? "Saved!" : "Save to History"}</span>
-                <span className="sm:hidden">Save</span>
-              </button>
-            )}
-            {data.length > 0 && (
-              <button
-                onClick={handleClearVisualizer}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
-              >
-                <FiTrash2 />
-                <span className="hidden sm:inline">Clear</span>
-              </button>
-            )}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
 
-            <div className="flex p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
-              {[
-                { id: 'table', icon: FiTable, label: 'Table' },
-                { id: 'card', icon: FiGrid, label: 'Grid' },
-                { id: 'chart', icon: FiBarChart2, label: 'Charts' },
-              ].map(v => (
-                <button key={v.id} onClick={() => setViewMode(v.id)}
-                  className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all 
-                    ${viewMode === v.id
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'}`}>
-                  <v.icon size={16} />
-                  <span className="hidden sm:inline">{v.label}</span>
-                </button>
-              ))}
+              {data.length > 0 && (
+                <>
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
+                  >
+                    {savedNotification ? <FiCheck /> : <FiSave />}
+                    <span className="hidden sm:inline">
+                      {savedNotification ? "Saved!" : "Save"}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={handleClearVisualizer}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
+                  >
+                    <FiTrash2 />
+                    <span className="hidden sm:inline">Clear</span>
+                  </button>
+                </>
+              )}
+              <div className="flex p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto max-w-full">
+                {viewModes.map(v => (
+                  <button
+                    key={v.id}
+                    onClick={() => setViewMode(v.id)}
+                    className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap
+            ${viewMode === v.id
+                        ? "bg-indigo-600 text-white shadow-md"
+                        : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      }`}
+                  >
+                    <v.icon size={16} />
+                    <span className="hidden sm:inline">{v.label}</span>
+                  </button>
+                ))}
+              </div>
+
             </div>
           </div>
+
+          {data.length > 0 && viewMode !== "graph" && (
+            <div className="w-full">
+              <Features
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                targetRef={reportRef}
+              />
+            </div>
+          )}
+
         </div>
 
-
-        <div className="pb-20">
+        <div ref={reportRef} className="pb-20">
           {data.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-xl border-gray-500 dark:border-gray-500 bg-white dark:bg-gray-800/50 p-4">
               <div className="p-6 bg-gray-200/80 dark:bg-gray-800 rounded-full mb-4">
@@ -310,9 +310,11 @@ const Visualizer = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              {viewMode === 'table' && <TableView data={data} />}
-              {viewMode === 'card' && <CardView data={data} renderImages={true} />}
-              {viewMode === 'chart' && <ChartView data={data} />}
+              {viewMode === 'table' && <TableView data={filteredData} renderValue={renderValue} forceImages={forceImages} setForceImages={setForceImages} />}
+              {viewMode === 'card' && <CardView data={filteredData} renderValue={renderValue} forceImages={forceImages} setForceImages={setForceImages} />}
+              {viewMode === 'chart' && <ChartView data={filteredData} />}
+              {viewMode === 'tree' && <TreeView data={data} />}
+              {viewMode === 'graph' && <GraphView data={data} />}
             </div>
           )}
         </div>
