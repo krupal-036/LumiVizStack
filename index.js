@@ -44,24 +44,24 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
+
+app.get("/", (req, res) => {
+  const htmlPath = path.join(DIST_PATH, "index.html");
+  try {
+    let html = fs.readFileSync(htmlPath, "utf8");
+    res.send(html);
+  } catch (err) {
+    res.status(500).send("Error loading index.html. Ensure 'public/dist' exists.");
+  }
+});
+
+app.get("/api/*splat", (req, res) => {
+  console.log(`Invalid API hit: ${req.params.splat}. Redirecting...`);
+  res.status(404).json({ error: "API route not found" });
+});
+
+app.get("/*splat", (req, res) => {
+  res.sendFile(path.join(DIST_PATH, "index.html"));
+});
+
 export default app;
-
-// app.get("/", (req, res) => {
-// const htmlPath = path.join(DIST_PATH, "index.html");
-// try {
-//   let html = fs.readFileSync(htmlPath, "utf8");
-//   res.send(html);
-// } catch (err) {
-//   res.status(500).send("Error loading index.html. Ensure 'public/dist' exists.");
-// }
-// res.status(200).send("Success")
-// });
-
-// app.get("/api/*splat", (req, res) => {
-//   console.log(`Invalid API hit: ${req.params.splat}. Redirecting...`);
-//   res.status(404).json({ error: "API route not found" });
-// });
-
-// app.get("/*splat", (req, res) => {
-//   res.sendFile(path.join(DIST_PATH, "index.html"));
-// });
