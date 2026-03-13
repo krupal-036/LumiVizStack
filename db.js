@@ -1,30 +1,46 @@
 import mongoose from "mongoose";
 import "dotenv/config";
 
-const connectionCache = {};
+const MONGO_URI = process.env.MONGO_URI;
+const DB_NAME = "lumivizstack_db";
 
-const createDbConnection = (dbName) => {
-  if (!dbName) throw new Error("Database name is missing in environment variables");
+if (!MONGO_URI) {
+  throw new Error("Please define the MONGO_URI environment variable");
+}
 
-  if (connectionCache[dbName]) {
-    return connectionCache[dbName];
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+const connectDB = async () => {
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  const uri = `${process.env.MONGO_URI}/${dbName}`;
   
-  const connection = mongoose.createConnection(uri, {
-    serverSelectionTimeoutMS: 5000, 
-    bufferCommands: false, 
-  });
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+      maxPoolSize: 10,
+    };
 
-  connection.on("connected", () => console.log(`Connected to: ${dbName}`));
-  connection.on("error", (err) => console.error(`${dbName} DB Error:`, err.message));
+    cached.promise = mongoose.connect(`${MONGO_URI}/${DB_NAME}`, opts).then((mongoose) => {
+      console.log(`Connected to MongoDB: ${DB_NAME}`);
+      return mongoose;
+    });
+  }
 
-  connectionCache[dbName] = connection;
-  return connection;
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    // 4. If connection fails, clear the promise so the next request can try again
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
 };
 
-export const usersConnection = createDbConnection(process.env.DB_USERS);
-export const adminConnection = createDbConnection(process.env.DB_ADMIN);
-export const vizContextConnection = createDbConnection(process.env.DB_VIZ_CONTEXT);
-export const vizHistoryConnection = createDbConnection(process.env.DB_VIZ_HISTORY);
+export default connectDB;

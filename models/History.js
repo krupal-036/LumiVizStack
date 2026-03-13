@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { vizHistoryConnection } from "../db.js";
 
 const { Schema } = mongoose;
 
@@ -8,6 +7,7 @@ const HistorySchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true,
     index: true,
+    ref: 'User'
   },
   isPublic: {
     type: Boolean,
@@ -34,4 +34,6 @@ const HistorySchema = new Schema({
   },
 });
 
-export default vizHistoryConnection.model("History", HistorySchema);
+const History = mongoose.models.History || mongoose.model("History", HistorySchema);
+
+export default History;

@@ -7,7 +7,8 @@ import "dotenv/config";
 
 import authRoutes from "./routes/auth.js";
 import RateLimiter from "./middleware/RateLimiter.js";
-import "./db.js";
+// import "./db.js";
+import connectDB from "./db.js";
 import historyRoutes from "./routes/history.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -18,7 +19,6 @@ const app = express();
 const DIST_PATH = path.join(__dirname, "public/dist");
 
 app.use(express.json());
-app.use(express.static(DIST_PATH));
 
 app.use(
   cors({
@@ -30,6 +30,17 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: "Database connection failed" });
+  }
+});
+
+app.use(express.static(DIST_PATH));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/history", historyRoutes);

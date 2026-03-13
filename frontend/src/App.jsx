@@ -12,6 +12,7 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import SignUp from "./pages/Register";
 import Visualizer from "./pages/Visualizer";
+import NotFound from "./pages/NotFound"; 
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
                   }
                 />
                 <Route path="/view/:historyId" element={<PublicView />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </main>
             <Footer />

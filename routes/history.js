@@ -41,6 +41,65 @@ router.post("/save", verifyToken, async (req, res) => {
   }
 });
 
+
+
+
+
+
+
+
+router.post("/save", verifyToken, async (req, res) => {
+  try {
+    const { title, type, data, rawInput, urlInput, inputType, isPublic } = req.body;
+    const userId = req.user.id;
+
+    // 1. Create and save the new item first
+    const newHistory = new History({
+      userId,
+      title,
+      type,
+      data,
+      rawInput,
+      urlInput,
+      inputType,
+      isPublic: isPublic || false,
+    });
+    const savedItem = await newHistory.save();
+
+    // 2. Cleanup: Find all items, sort by date, and keep only the latest 5
+    const userHistories = await History.find({ userId }).sort({ createdAt: -1 });
+
+    if (userHistories.length > 5) {
+      const idsToDelete = userHistories.slice(5).map(item => item._id);
+      await History.deleteMany({ _id: { $in: idsToDelete } });
+    }
+
+    res.status(201).json(savedItem);
+  } catch (err) {
+    console.error("Save error:", err.message);
+    res.status(500).json("Server error");
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // @route   PUT api/history/:id/toggle
 // @desc    Toggle isPublic flag
 router.put("/:id/toggle", verifyToken, async (req, res) => {
