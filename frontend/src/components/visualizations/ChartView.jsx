@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, Legend } from 'recharts';
 import { FiSettings } from 'react-icons/fi';
 
@@ -7,14 +7,47 @@ const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 const ChartView = ({ data }) => {
   const [chartType, setChartType] = useState('bar');
   const [selectedNumKey, setSelectedNumKey] = useState('');
+  
+  // State to track container dimensions for responsiveness
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
+  const chartContainerRef = useRef(null);
 
   const allKeys = useMemo(() => (data.length > 0 ? Object.keys(data[0]) : []), [data]);
   const numericKeys = useMemo(() => allKeys.filter(k => typeof data[0][k] === 'number'), [data, allKeys]);
   const labelKey = useMemo(() => allKeys.find(k => typeof data[0][k] === 'string') || allKeys[0], [data, allKeys]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (numericKeys.length > 0 && !selectedNumKey) setSelectedNumKey(numericKeys[0]);
   }, [numericKeys, selectedNumKey]);
+
+  // Effect to track container resize
+  useEffect(() => {
+    const container = chartContainerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      if (entries[0]) {
+        const { width, height } = entries[0].contentRect;
+        setContainerSize({ width, height });
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  // Calculate dynamic radius for Pie Chart
+  const pieRadius = useMemo(() => {
+    const { width, height } = containerSize;
+    if (width === 0 || height === 0) return 100; // Fallback
+    
+    // Calculate radius based on the smaller dimension (width or height)
+    // We subtract some padding (e.g., 80px) to account for labels and legend
+    const calculatedRadius = Math.min(width, height) / 2 - 80;
+    
+    // Clamp the radius between a min (mobile) and max (desktop) value
+    return Math.max(40, Math.min(calculatedRadius, 200));
+  }, [containerSize]);
 
   if (data.length === 0) return null;
 
@@ -47,11 +80,21 @@ const ChartView = ({ data }) => {
         )}
       </div>
 
-      <div className="flex-1 w-full">
+      {/* Attach ref to this container to measure size */}
+      <div ref={chartContainerRef} className="flex-1 w-full">
         <ResponsiveContainer width="100%" height="100%">
           {chartType === 'pie' ? (
             <PieChart>
-              <Pie data={data} dataKey={selectedNumKey} nameKey={labelKey} cx="50%" cy="50%" outerRadius={100} label>
+              {/* Pass the dynamic pieRadius here */}
+              <Pie 
+                data={data} 
+                dataKey={selectedNumKey} 
+                nameKey={labelKey} 
+                cx="50%" 
+                cy="50%" 
+                outerRadius={pieRadius} 
+                label
+              >
                 {data.map((_, index) => <Cell key={index} fill={COLORS[index % COLORS.length]} />)}
               </Pie>
               <Tooltip />

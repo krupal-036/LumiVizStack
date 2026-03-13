@@ -141,7 +141,7 @@ const Visualizer = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-auth-token": token // Or Authorization: Bearer token
+          "x-auth-token": token
         },
         body: JSON.stringify(newHistoryItem)
       });
@@ -157,7 +157,6 @@ const Visualizer = () => {
     }
   };
 
-  // Handler to toggle public/private state
   const togglePublic = () => {
     setIsPublic(!isPublic);
   };
@@ -180,7 +179,6 @@ const Visualizer = () => {
   return (
     <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full">
 
-      {/* Side Panel Code... (omitted for brevity, unchanged) */}
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
       )}
@@ -189,7 +187,7 @@ const Visualizer = () => {
                     md:sticky md:top-0 md:h-screen md:translate-x-0 md:transform-none
                     ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}>
         <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none">
-          {/* Panel Content... (omitted for brevity, unchanged) */}
+
           <div className="p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <h2 className="text-xl font-bold flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></div>
@@ -216,6 +214,9 @@ const Visualizer = () => {
                   <t.icon size={14} /> {t.label}
                 </button>
               ))}
+              <button onClick={() => setIsPanelOpen(false)} className="sm:hidden p-2.5 font-semibold text-lg flex items-center justify-center gap-1 rounded-full transition-colors border-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 border-gray-600 dark:border-gray-700">
+                <FiX />
+              </button>
             </div>
 
             <div className="flex-1 relative mb-4 min-h-[200px]">
@@ -263,16 +264,20 @@ const Visualizer = () => {
         <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
-                <FiBarChart2 className="w-6 h-6" />
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
+                <FiBarChart2 className="w-6 h-6 stroke-[2.5px]" />
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">
-                Visualization Canvas
+
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                  Visualization Canvas
+                </span>
               </h1>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+
+            <div className="flex flex-wrap items-center justify-around gap-2 sm:gap-3">
 
               {data.length > 0 && (
                 <>

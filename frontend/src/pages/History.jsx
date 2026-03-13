@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import {
   FiTrash2, FiEye, FiCalendar, FiPlus, FiBarChart2,
-  FiTable, FiLayout, FiSearch, FiClock, FiHash, FiGlobe, FiLock, FiCopy, FiCheck
+  FiTable, FiLayout, FiSearch, FiClock, FiHash, FiGlobe, FiLock, FiCopy, FiCheck,
+  FiExternalLink,
+  FiEyeOff,
+  FiPlay,
+  FiUnlock
 } from "react-icons/fi";
 
 const History = () => {
@@ -30,6 +34,7 @@ const History = () => {
       if (!token) return;
 
       const res = await fetch("/api/history/user", {
+        method: "GET",
         headers: { "x-auth-token": token }
       });
 
@@ -70,6 +75,31 @@ const History = () => {
     }
   };
 
+  const togglePublic = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`/api/history/${id}/toggle`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "x-auth-token": token
+        }
+      });
+
+      if (res.ok) {
+        const updatedItem = await res.json();
+        setHistory(prev => prev.map(item =>
+          item._id === id ? { ...item, isPublic: updatedItem.isPublic } : item
+        ));
+      } else {
+        alert("Failed to update visibility");
+      }
+    } catch (err) {
+      console.error("Toggle visibility error:", err);
+    }
+  };
+
+
   const handleLoad = (item) => {
     navigate("/visualize", {
       state: {
@@ -107,23 +137,23 @@ const History = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 transition-colors duration-300">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <div className="mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg text-indigo-600 dark:text-indigo-400">
-                  <FiClock className="w-6 h-6" />
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-zinc-50">
-                  Visualization History
-                </h1>
+        <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+
+            <div className="flex items-center gap-3 pb-2">
+              <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
+                <FiClock className="w-6 h-6 stroke-[2.5px]" />
               </div>
-              <p className="text-slate-500 dark:text-zinc-400 text-sm md:text-base max-w-md">
-                Browse, load, and manage your previously saved data visualizations.
-              </p>
+
+              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                  Visualization History
+                </span>
+              </h1>
             </div>
+
 
             <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
               <div className="relative flex-1 lg:w-72">
@@ -224,23 +254,51 @@ const History = () => {
                       </span>
                     </div>
 
-                    <div className="mt-auto flex items-center gap-2 border-t border-slate-100 dark:border-zinc-800 pt-4">
+                    <div className="mt-auto flex items-center justify-center sm:justify-around gap-2 border-t border-slate-100 dark:border-zinc-800 pt-4">
                       <button
                         onClick={() => handleLoad(item)}
-                        className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-sm"
-                      >
-                        <FiEye /> Load
+                        className="flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg font-medium border-2  dark:text-indigo-600 border-indigo-600 dark:border-indigo-600 bg-indigo-300 dark:bg-600 hover:bg-indigo-400 text-indigo-600 font-medium text-sm transition-colors shadow-sm"
+                      ><FiEye />
+                        <span className="hidden sm:inline">Load</span>
                       </button>
 
                       {item.isPublic && (
-                        <button
-                          onClick={() => handleCopyLink(itemId)}
-                          className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title="Copy Public Link"
-                        >
-                          {copiedId === itemId ? <FiCheck className="text-green-500" /> : <FiCopy />}
-                        </button>
+                        <div className="flex gap-2">
+                          <>
+                            {/* Copy Link Button */}
+                            <button
+                              onClick={() => handleCopyLink(itemId)}
+                              className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                              title="Copy Public Link"
+                            >
+                              {copiedId === itemId ? <FiCheck className="text-green-500" /> : <FiCopy />}
+                            </button>
+
+                            <a
+                              href={`/view/${itemId}`} // Replace with your actual public route
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                              title="View Public Link"
+                            >
+                              <FiExternalLink />
+                            </a>
+                          </>
+                        </div>
                       )}
+                      <button
+                        key={itemId}
+                        onClick={() => togglePublic(itemId)}
+                        title={item.isPublic ? "Currently Public" : "Currently Private"}
+                        className={`flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg shadow-md transition-all text-sm font-medium border-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500
+                          ${item.isPublic
+                            ? "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
+                            : "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"}`}
+                      >
+                        {item.isPublic ? <FiUnlock /> : <FiLock />}
+                        <span className="hidden sm:inline">{item.isPublic ? "Public" : "Private"}</span>
+                      </button>
+
 
                       <button
                         onClick={() => deleteItem(itemId)}

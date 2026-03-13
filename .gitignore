@@ -1,3 +1,5 @@
+# dont include proxy in vite build , remove proxy from vite.config.js
+
 client
 server
 
