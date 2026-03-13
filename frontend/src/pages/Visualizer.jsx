@@ -319,7 +319,7 @@ const Visualizer = () => {
                     key={v.id}
                     onClick={() => setViewMode(v.id)}
                     className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap
-            ${viewMode === v.id
+                    ${viewMode === v.id
                         ? "bg-indigo-600 text-white shadow-md"
                         : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
                       }`}
@@ -333,7 +333,7 @@ const Visualizer = () => {
             </div>
           </div>
 
-          {data.length > 0 && viewMode !== "graph" && (
+          {data.length > 0 && viewMode !== "graph" && viewMode !== "tree" && (
             <div className="w-full">
               <Features
                 searchTerm={searchTerm}

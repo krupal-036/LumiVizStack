@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import AdminRoute from "./components/common/AdminRoute";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import PublicView from "./pages/PublicView";
@@ -12,7 +13,8 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import SignUp from "./pages/Register";
 import Visualizer from "./pages/Visualizer";
-import NotFound from "./pages/NotFound"; 
+import AdminPanel from "./pages/AdminPanel.jsx";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -44,8 +46,20 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+
                 <Route path="/view/:historyId" element={<PublicView />} />
+
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminPanel />
+                    </AdminRoute>
+                  }
+                />
+
                 <Route path="*" element={<NotFound />} />
+
               </Routes>
             </main>
             <Footer />

@@ -5,11 +5,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import "dotenv/config";
 
-import authRoutes from "./routes/auth.js";
-import RateLimiter from "./middleware/RateLimiter.js";
-// import "./db.js";
 import connectDB from "./db.js";
+import authRoutes from "./routes/auth.js";
+import adminRoutes from "./routes/admin.js";
 import historyRoutes from "./routes/history.js";
+import RateLimiter from "./middleware/RateLimiter.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +44,7 @@ app.use(express.static(DIST_PATH));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/history", historyRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", RateLimiter, (req, res) => {
   res.status(200).json({

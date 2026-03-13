@@ -44,13 +44,13 @@ export default function Login() {
     return Object.keys(newErrors).length === 0;
   };
 
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsLoading(true);
     setErrors({});
-    
+
     try {
       const response = await fetch('/api/auth/login', {
         method: "POST",
@@ -64,7 +64,7 @@ export default function Login() {
       // 1. Check if the response is actually JSON
       const contentType = response.headers.get("content-type");
       let data;
-      
+
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
@@ -78,8 +78,14 @@ export default function Login() {
         return;
       }
 
+      const userWithRole = {
+        ...data.user,
+        role: data.user.role // or data.user.role depending on your backend structure
+      };
+
+      login(userWithRole, data.token);
       // 3. Success
-      login(data.user, data.token);
+      // login(data.user, data.token);
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
 
