@@ -29,7 +29,7 @@ const History = () => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await fetch("http://localhost:3000/api/history/user", {
+      const res = await fetch("/api/history/user", {
         headers: { "x-auth-token": token }
       });
 

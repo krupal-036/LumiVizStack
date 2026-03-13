@@ -37,7 +37,7 @@ router.post("/save", verifyToken, async (req, res) => {
     res.status(201).json(savedItem);
   } catch (err) {
     console.error("Save error:", err.message);
-    res.status(500).send("Server error");
+    res.status(500).json("Server error");
   }
 });
 
@@ -62,7 +62,7 @@ router.put("/:id/toggle", verifyToken, async (req, res) => {
     res.json(historyItem);
   } catch (err) {
     console.error("Toggle error:", err.message);
-    res.status(500).send("Server error");
+    res.status(500).json("Server error");
   }
 });
 
@@ -74,7 +74,7 @@ router.get("/user", verifyToken, async (req, res) => {
     res.json(histories);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).json("Server error");
   }
 });
 
@@ -95,7 +95,7 @@ router.get("/public/:id", async (req, res) => {
     res.json(historyItem);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).json("Server error");
   }
 });
 
@@ -119,7 +119,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
     res.json({ message: "History removed" });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send("Server error");
+    res.status(500).json("Server error");
   }
 });
 

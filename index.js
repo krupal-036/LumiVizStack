@@ -22,7 +22,11 @@ app.use(express.static(DIST_PATH));
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://lumivizstack.vercel.app", "http://localhost:3000"],
+    origin: [
+      "https://lumivizstack.vercel.app",
+      "http://localhost:5173",
+      "http://localhost:3000",
+    ],
     credentials: true,
   }),
 );
@@ -51,10 +55,10 @@ app.get("/", (req, res) => {
     if (fs.existsSync(htmlPath)) {
       res.sendFile(htmlPath);
     } else {
-      res.status(404).send("Frontend not found in 'public' folder.");
+      res.status(404).json("Frontend not found in 'public' folder.");
     }
   } catch (err) {
-    res.status(500).send("Error loading frontend.");
+    res.status(500).json("Error loading frontend.");
   }
 });
 
@@ -67,7 +71,7 @@ app.get("*splat", (req, res) => {
   if (fs.existsSync(htmlPath)) {
     res.sendFile(htmlPath);
   } else {
-    res.status(404).send("Page not found.");
+    res.status(404).json("Page not found.");
   }
 });
 
