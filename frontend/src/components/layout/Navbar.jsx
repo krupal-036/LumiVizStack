@@ -76,9 +76,10 @@ const Navbar = () => {
                   onClick={handleLinkClick}
                   className={`
                     flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
-                    ${isActive(link.path)
-                      ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-sm"
-                      : "text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+                    ${
+                      isActive(link.path)
+                        ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-sm"
+                        : "text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
                     }
                   `}
                 >
@@ -94,10 +95,36 @@ const Navbar = () => {
                 </Link>
               );
             })}
+            {user?.role === "admin" ? (
+              <Link
+                key={"alladmin"}
+                to={"/admin"}
+                onClick={handleLinkClick}
+                className={`
+                    flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200
+                    ${
+                      isActive("/admin")
+                        ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 shadow-sm"
+                        : "text-gray-700 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
+                    }
+                  `}
+              >
+                <FiUser
+                  size={16}
+                  className={
+                    isActive("admin")
+                      ? "text-indigo-600 dark:text-indigo-400"
+                      : ""
+                  }
+                />
+                {"Admin"}
+              </Link>
+            ) : (
+              ""
+            )}
           </nav>
 
           <div className="flex items-center gap-2 border border-gray-300 dark:border-gray-700 rounded-full px-3 py-1">
-
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full text-gray-500 dark:text-gray-400 
@@ -177,8 +204,9 @@ const Navbar = () => {
       </div>
 
       <div
-        className={`md:hidden absolute top-16 left-0 right-0 bg-white/95 dark:bg-[#0B0F19]/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 shadow-2xl transition-all duration-300 ease-in-out origin-top overflow-hidden ${isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-          }`}
+        className={`md:hidden absolute top-16 left-0 right-0 bg-white/95 dark:bg-[#0B0F19]/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 shadow-2xl transition-all duration-300 ease-in-out origin-top overflow-hidden ${
+          isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+        }`}
       >
         <nav className="flex flex-col p-4 space-y-1">
           {navLinks.map((link) => {
@@ -191,9 +219,10 @@ const Navbar = () => {
                 onClick={handleLinkClick}
                 className={`
                   flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
-                  ${isActive(link.path)
-                    ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  ${
+                    isActive(link.path)
+                      ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                   }
                 `}
               >
@@ -202,6 +231,26 @@ const Navbar = () => {
               </Link>
             );
           })}
+          {user?.role === "admin" ? (
+            <Link
+              key={"alladmin"}
+              to={"/admin"}
+              onClick={handleLinkClick}
+              className={`
+                  flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all duration-200
+                  ${
+                    isActive("/admin")
+                      ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                  }
+                `}
+            >
+              <FiUser size={20} />
+              {"Admin"}
+            </Link>
+          ) : (
+            ""
+          )}
 
           <div className="my-2 border-t border-gray-200 dark:border-gray-800"></div>
 

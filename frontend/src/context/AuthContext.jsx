@@ -4,15 +4,19 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
-    
+
+
     if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-    }
+    const parsedUser = JSON.parse(storedUser);
+    setUser(parsedUser);
+    setRole(parsedUser.role);
+  }
     setLoading(false);
   }, []);
 
@@ -22,6 +26,9 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
     }
     setUser(userData);
+    console.log("Initial role : ", role);
+    console.log("Role from token : ", userData.role);
+    setRole(userData.role);
   };
 
   const logout = () => {
@@ -31,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, role }}>
       {!loading && children}
     </AuthContext.Provider>
   );

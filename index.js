@@ -10,13 +10,20 @@ import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import historyRoutes from "./routes/history.js";
 import RateLimiter from "./middleware/RateLimiter.js";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { serveFrontend } from "./middleware/serveFrontend.js";
 
 const app = express();
 
-const DIST_PATH = path.join(__dirname, "public/dist");
+const DIST_PATH = path.join(process.cwd(), "public");
+
+const serveApp = serveFrontend(DIST_PATH);
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// const app = express();
+
+// const DIST_PATH = path.join(__dirname, "public/dist");
 
 app.use(express.json());
 
@@ -61,30 +68,41 @@ if (process.env.NODE_ENV !== "production") {
   );
 }
 
-app.get("/", (req, res) => {
-  const htmlPath = path.join(DIST_PATH, "index.html");
-  try {
-    if (fs.existsSync(htmlPath)) {
-      res.sendFile(htmlPath);
-    } else {
-      res.status(404).json("Frontend not found in 'public' folder.");
-    }
-  } catch (err) {
-    res.status(500).json("Error loading frontend.");
-  }
-});
+// app.get("/", (req, res) => {
+//   const htmlPath = path.join(DIST_PATH, "index.html");
+//   try {
+//     if (fs.existsSync(htmlPath)) {
+//       res.sendFile(htmlPath);
+//     } else {
+//       res.status(404).json("Frontend not found in 'public' folder.");
+//     }
+//   } catch (err) {
+//     res.status(500).json("Error loading frontend.");
+//   }
+// });
 
-app.get("/api/*splat", (req, res) => {
-  res.status(404).json({ error: "API route not found" });
-});
+// app.get("/api/*splat", (req, res) => {
+//   const htmlPath = path.join(DIST_PATH, "index.html");
+//   if (fs.existsSync(htmlPath)) {
+//     res.sendFile(htmlPath);
+//   } else {
+//     res.status(404).json({ error: "API route not found" });
+//   }
+// });
 
-app.get("*splat", (req, res) => {
-  const htmlPath = path.join(DIST_PATH, "index.html");
-  if (fs.existsSync(htmlPath)) {
-    res.sendFile(htmlPath);
-  } else {
-    res.status(404).json("Page not found.");
-  }
-});
+// app.get("*splat", (req, res) => {
+//   const htmlPath = path.join(DIST_PATH, "index.html");
+//   if (fs.existsSync(htmlPath)) {
+//     res.sendFile(htmlPath);
+//   } else {
+//     res.status(404).json("Page not found.");
+//   }
+// });
+
+
+app.get("/", serveApp);
+app.get("/api/*splat", serveApp);
+app.get("*splat", serveApp);
+
 
 export default app;

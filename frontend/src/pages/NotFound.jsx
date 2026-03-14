@@ -1,43 +1,50 @@
-
-import { Link } from "react-router-dom";
-import { Home, ArrowLeft } from "lucide-react";
-
+import { Link, useNavigate } from "react-router-dom";
+import { FiHome, FiArrowLeft, FiAlertCircle } from "react-icons/fi";
 
 const NotFound = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-10rem)] w-full text-center px-4">
-      
-      <h1 className="text-9xl font-extrabold text-gray-200 dark:text-gray-800 tracking-widest">
-        404
-      </h1>
-      
-      <div className="absolute">
-        <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">
+    <section className="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 px-4 py-10">
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-red-500/10 dark:bg-red-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none" />
+
+      <div className="relative z-10 text-center max-w-lg mx-auto">
+        <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-sm">
+          <FiAlertCircle className="w-10 h-10" />
+        </div>
+
+        <h1 className="text-8xl md:text-9xl font-extrabold tracking-tighter text-transparent bg-clip-text bg-linear-to-br from-slate-600 to-slate-200 dark:from-slate-200 dark:to-slate-900 select-none">
+          404
+        </h1>
+
+        <h2 className="mt-4 text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">
           Page Not Found
         </h2>
-        <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
+        <p className="mt-4 text-slate-500 dark:text-slate-400 leading-relaxed">
+          Sorry, we couldn't find the page you're looking for. Perhaps you've
+          mistyped the URL or the page has been moved.
         </p>
-        
-        <div className="flex items-center justify-center gap-4">
+
+        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             to="/"
-            className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md"
+            className="group relative inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold text-white transition-all duration-200 bg-indigo-600 rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:-translate-y-0.5"
           >
-            <Home size={18} />
-            Go Home
+            <FiHome className="w-4 h-4" />
+            Back to Dashboard
           </Link>
-          
+
           <button
-            onClick={() => window.history.back()}
-            className="flex items-center gap-2 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200"
           >
-            <ArrowLeft size={18} />
+            <FiArrowLeft className="w-4 h-4" />
             Go Back
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

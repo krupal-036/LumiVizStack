@@ -7,6 +7,9 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
   const email = req.body.email.toLowerCase();
+  if (!email || !password || !username) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
   try {
     let user = await User.findOne({ email });
     if (user) {
