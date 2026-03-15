@@ -61,18 +61,15 @@ export default function Login() {
         }),
       });
 
-      // 1. Check if the response is actually JSON
       const contentType = response.headers.get("content-type");
       let data;
 
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
-        // If not JSON, the server likely sent an HTML error (like a 504 or 500)
         throw new Error("Server is currently unavailable. Please try again.");
       }
 
-      // 2. Handle Logic Errors (400, 401, etc.)
       if (!response.ok) {
         setErrors({ general: data.message || "Invalid email or password" });
         return;
@@ -80,17 +77,14 @@ export default function Login() {
 
       const userWithRole = {
         ...data.user,
-        role: data.user.role, // or data.user.role depending on your backend structure
+        role: data.user.role,
       };
 
       login(userWithRole, data.token);
-      // 3. Success
-      // login(data.user, data.token);
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
     } catch (error) {
       console.error("Login Error:", error);
-      // Catch network errors or the custom Error thrown above
       setErrors({ general: error.message || "Unable to connect to server." });
     } finally {
       setIsLoading(false);
@@ -102,7 +96,7 @@ export default function Login() {
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-300
-                   max-w-[340px] w-full mx-4 md:p-6 p-4 py-8 text-left text-sm
+                   max-w-[450px] w-full mx-4 md:p-6 p-4 py-8 text-left text-sm
                    rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <h2 className="text-2xl font-bold mb-9 text-center text-gray-800 dark:text-white">
@@ -159,7 +153,7 @@ export default function Login() {
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-6">
+        {/* <div className="flex items-center justify-between mb-6">
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -176,7 +170,7 @@ export default function Login() {
           >
             Forgot Password?
           </Link>
-        </div>
+        </div> */}
 
         <button
           type="submit"
@@ -187,7 +181,7 @@ export default function Login() {
         </button>
 
         <p className="text-center mt-4 text-sm">
-          Don&apos;t have an account?{" "}
+          Don't have an account?{" "}
           <Link to="/register" className="text-blue-500 hover:underline">
             Signup
           </Link>

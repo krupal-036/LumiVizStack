@@ -5,12 +5,10 @@ const SmartCell = ({ value, renderImages = true }) => {
   const [showModal, setShowModal] = useState(false);
   const [isForcedImage, setIsForcedImage] = useState(false);
 
-  // 1. Handle Null / Undefined
   if (value === null || value === undefined) {
     return <span className="text-gray-400 italic">null</span>;
   }
 
-  // 2. Handle Objects / Arrays (Recursive)
   if (typeof value === "object") {
     return (
       <>
@@ -46,11 +44,9 @@ const SmartCell = ({ value, renderImages = true }) => {
     );
   }
 
-  // 3. Handle Strings (URLs, Images, Text)
   if (typeof value === "string") {
     const isUrl = value.startsWith("http");
     
-    // Check for image (Auto or Forced)
     const isImageExt = value.match(/\.(jpeg|jpg|gif|png|svg|webp)$/) != null || value.includes('unsplash');
     const shouldRenderImage = renderImages && (isImageExt || isForcedImage);
 
@@ -93,7 +89,6 @@ const SmartCell = ({ value, renderImages = true }) => {
     return <span className="text-gray-800 dark:text-gray-100 text-sm">{value}</span>;
   }
 
-  // 4. Default (Numbers, Booleans)
   return <span className="text-teal-600 dark:text-teal-300 font-medium">{String(value)}</span>;
 };
 

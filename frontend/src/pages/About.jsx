@@ -49,14 +49,14 @@ export default function About() {
     <div className="min-h-screen bg-gray-50 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
       <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 sm:pt-4 xs:pt-4 pb-10">
 
-        <div className="text-center max-w-3xl mx-auto mb-20 pt-4">
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-4">
           <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
             <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
             Platform Overview
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
             &nbsp;Transforming Data into <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-500 to-violet-600">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
               &nbsp;LumiVizStack&nbsp;
             </span>
           </h1>
@@ -67,7 +67,7 @@ export default function About() {
           </p>
         </div>
 
-        <div className="mb-24">
+        <div className="mb-10">
           <div className="bg-white dark:bg-gray-900/60 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-3xl shadow-xl shadow-gray-200 dark:shadow-none overflow-hidden">
             <div className="grid lg:grid-cols-12">
               <div className="lg:col-span-8 p-8 sm:p-12">

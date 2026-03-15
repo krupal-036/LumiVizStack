@@ -49,9 +49,9 @@ export default function SignUp() {
     if (!validate()) return;
 
     setIsLoading(true);
-    setErrors({}); 
+    setErrors({});
 
-     try {
+    try {
       const response = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -94,7 +94,7 @@ export default function SignUp() {
       <form
         onSubmit={handleSubmit}
         className="bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-300
-                   max-w-[340px] w-full mx-4 md:p-6 p-4 py-8 text-left text-sm
+                   max-w-[450px] w-full mx-4 md:p-6 p-4 py-8 text-left text-sm
                    rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
       >
         <h2 className="text-2xl font-bold mb-9 text-center text-gray-800 dark:text-white">

@@ -15,7 +15,6 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    // Redirect to login page with error message and current location
     return (
       <Navigate
         to="/login"

@@ -81,25 +81,40 @@ const EndpointCard = ({
 export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
-      <div className="max-w-4xl mx-auto px-4 pt-24 sm:px-6 lg:px-8 pb-20">
-        {/* Header */}
-        <div className="mb-12 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
-            <FiServer className="w-4 h-4" />
-            API Reference
-          </div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">
-            LumiVizStack API Docs
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed max-w-2xl">
-            This document provides detailed information about the REST API
-            endpoints available in LumiVizStack. The API allows you to manage
-            authentication, history, and data visualization configurations
-            programmatically.
-          </p>
-        </div>
+      <div className="max-w-4xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
 
-        {/* Disclaimer */}
+        <div className="flex flex-col items-center justify-center mb-10 sm:mb-12 lg:mb-16 text-center px-4">
+
+  {/* Badge */}
+  <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-5 sm:mb-6">
+    <FiServer className="w-4 h-4" />
+    API Reference
+  </div>
+
+  {/* Heading */}
+  <h1 className="flex flex-wrap items-center justify-center text-center text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 sm:mb-6">
+    
+    <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
+      LumiVizStack&nbsp;
+    </span>
+
+    <span className="text-gray-900 dark:text-white">
+      API Docs
+    </span>
+
+  </h1>
+
+  {/* Description */}
+  <p className="max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+    This document provides detailed information about the REST API
+    endpoints available in LumiVizStack. The API allows you to manage
+    authentication, history, and data visualization configurations
+    programmatically.
+  </p>
+
+</div>
+
+
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-10 text-sm text-blue-700 dark:text-blue-300 flex gap-3 items-start">
           <FiAlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
           <div>
@@ -113,7 +128,6 @@ export default function ApiDocs() {
           </div>
         </div>
 
-        {/* Authentication Section */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center gap-2">
             <FiLock className="text-indigo-500" />
@@ -161,7 +175,6 @@ export default function ApiDocs() {
           />
         </section>
 
-        {/* History Section */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center gap-2">
             <FiCode className="text-indigo-500" />
@@ -226,7 +239,6 @@ export default function ApiDocs() {
           />
         </section>
 
-        {/* Admin Section */}
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 border-b border-gray-200 dark:border-gray-700 pb-3 flex items-center gap-2">
             <FiServer className="text-indigo-500" />

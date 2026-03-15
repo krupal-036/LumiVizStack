@@ -6,6 +6,7 @@ import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
 import TreeView from "../components/visualizations/TreeView";
 import GraphView from "../components/visualizations/GraphView";
+import Loader from "../components/common/Loader.jsx"
 import { renderValue } from "../components/Features.jsx";
 import { FiAlertCircle, FiArrowLeft, FiBarChart2, FiCalendar, FiClock, FiCode, FiEye, FiGrid, FiHome, FiSearch, FiShare, FiShare2, FiTable, FiWatch } from "react-icons/fi";
 
@@ -50,12 +51,7 @@ const PublicView = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500">Loading Visualization...</p>
-        </div>
-      </div>
+      <Loader data={"Loading Visualization..."}/>
     );
   }
 

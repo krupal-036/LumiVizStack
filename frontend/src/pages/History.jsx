@@ -9,6 +9,7 @@ import {
   FiPlay,
   FiUnlock
 } from "react-icons/fi";
+import Loader from "../components/common/Loader";
 
 const History = () => {
   const [history, setHistory] = useState([]);
@@ -148,7 +149,7 @@ const History = () => {
               </div>
 
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
                   Visualization History
                 </span>
               </h1>
@@ -185,10 +186,8 @@ const History = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-20">
-            <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p>Loading history...</p>
-          </div>
+          <Loader data={"Loading history..."}/>
+
         ) : filteredHistory.length === 0 ? (
           <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 mb-4">
@@ -238,7 +237,7 @@ const History = () => {
                     </div>
                   </div>
 
-                  <div className="p-5 flex-1 flex flex-col">
+                  <div className="p-2 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-3">
                       <h3 className="font-bold text-lg text-slate-800 dark:text-zinc-100 truncate pr-4">
                         {item.title || "Untitled Visualization"}
@@ -257,15 +256,15 @@ const History = () => {
                     <div className="mt-auto flex items-center justify-center sm:justify-around gap-2 border-t border-slate-100 dark:border-zinc-800 pt-4">
                       <button
                         onClick={() => handleLoad(item)}
+                        title="Extract Transfrom Load"
                         className="flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg font-medium border-2  dark:text-indigo-600 border-indigo-600 dark:border-indigo-600 bg-indigo-300 dark:bg-600 hover:bg-indigo-400 text-indigo-600 font-medium text-sm transition-colors shadow-sm"
                       ><FiEye />
-                        <span className="hidden sm:inline">Load</span>
+                        <span className="hidden sm:inline">ETL</span>
                       </button>
 
                       {item.isPublic && (
                         <div className="flex gap-2">
                           <>
-                            {/* Copy Link Button */}
                             <button
                               onClick={() => handleCopyLink(itemId)}
                               className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
@@ -275,7 +274,7 @@ const History = () => {
                             </button>
 
                             <a
-                              href={`/view/${itemId}`} // Replace with your actual public route
+                              href={`/view/${itemId}`} 
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
@@ -296,7 +295,7 @@ const History = () => {
                             : "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"}`}
                       >
                         {item.isPublic ? <FiUnlock /> : <FiLock />}
-                        <span className="hidden sm:inline">{item.isPublic ? "Public" : "Private"}</span>
+                        {/* <span className="hidden sm:inline">{item.isPublic ? <FiUnlock /> : <FiLock />}</span> */}
                       </button>
 
 

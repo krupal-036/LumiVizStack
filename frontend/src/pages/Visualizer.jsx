@@ -32,13 +32,11 @@ const Visualizer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [savedNotification, setSavedNotification] = useState(false);
 
-  // New state for public flag
   const [isPublic, setIsPublic] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
 
-  // Existing useEffects remain untouched (Session storage logic preserved)
   useEffect(() => {
     const forceLoad = location.state?.forceLoad === true;
     if (forceLoad && location.state?.config) {
@@ -77,7 +75,6 @@ const Visualizer = () => {
     setViewMode("table");
     setError("");
     setSearchTerm("");
-    // Note: Not clearing isPublic here intentionally to keep preference, or you can reset it.
     sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
   };
 
@@ -114,11 +111,10 @@ const Visualizer = () => {
     reader.readAsText(file);
   };
 
-  // Updated handleSave to use API
   const handleSave = async () => {
     if (!user || data.length === 0) return;
 
-    const token = localStorage.getItem("token"); // Assuming token is stored in localStorage upon login
+    const token = localStorage.getItem("token");
 
     if (!token) {
       setError("Authentication error. Please log in again.");
@@ -133,7 +129,7 @@ const Visualizer = () => {
       rawInput: rawInput,
       urlInput: urlInput,
       inputType: inputType,
-      isPublic: isPublic // Include the public flag
+      isPublic: isPublic
     };
 
     try {
@@ -199,7 +195,6 @@ const Visualizer = () => {
           </div>
 
           <div className="p-6 flex-1 overflow-y-auto flex flex-col">
-            {/* ... Data source inputs ... */}
             <div className="flex gap-2 mb-4">
               {[
                 { id: 'paste', icon: FiCode, label: 'Paste' },
@@ -270,7 +265,7 @@ const Visualizer = () => {
               </div>
 
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
                   Visualization Canvas
                 </span>
               </h1>
@@ -281,7 +276,6 @@ const Visualizer = () => {
 
               {data.length > 0 && (
                 <>
-                  {/* Toggle Public Button */}
                   <button
                     onClick={togglePublic}
                     title={isPublic ? "Currently Public" : "Currently Private"}

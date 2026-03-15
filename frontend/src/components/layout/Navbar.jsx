@@ -54,13 +54,12 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-[#0B0F19]/70 border-b border-gray-200 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
         <Link
           to="/"
           onClick={closeMenu}
           className="flex items-center gap-3 group"
         >
-          <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
+          <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
             <FiBarChart2 size={18} />
           </div>
 
@@ -68,8 +67,6 @@ export default function Navbar() {
             LumiVizStack
           </span>
         </Link>
-
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
           {navLinks.map((link) => {
             if (link.protected && !user) return null;
@@ -108,9 +105,7 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Right Controls */}
         <div className="flex items-center gap-2">
-          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
@@ -118,7 +113,6 @@ export default function Navbar() {
             {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
           </button>
 
-          {/* Desktop Auth */}
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
@@ -156,7 +150,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -166,7 +159,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0B0F19]">
           <div className="px-4 py-4 flex flex-col gap-2">

@@ -5,8 +5,6 @@ const Alert = ({ message, type = "error" }) => {
     const [isVisible, setIsVisible] = useState(true);
 
     if (!isVisible) return null;
-
-    // Color configurations for Light/Dark mode
     const styles = {
         error: {
             container: "bg-red-600/10 dark:bg-red-900/30 border-red-600 dark:border-red-500",

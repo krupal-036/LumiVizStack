@@ -35,7 +35,6 @@ const connectDB = async () => {
   try {
     cached.conn = await cached.promise;
   } catch (e) {
-    // 4. If connection fails, clear the promise so the next request can try again
     cached.promise = null;
     throw e;
   }

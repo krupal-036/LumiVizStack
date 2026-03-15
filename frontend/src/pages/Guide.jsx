@@ -15,7 +15,7 @@ import {
   FiBookOpen,
   FiCheckCircle,
 } from "react-icons/fi";
-
+import VisualizeButton from "../components/common/Button";
 const guideSteps = [
   {
     step: "01",
@@ -102,16 +102,16 @@ const guideSteps = [
 export default function Guide() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
-      <div className="max-w-5xl mx-auto px-4 pt-24 sm:px-6 lg:px-8 pb-20">
-        {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="max-w-5xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-20">
+
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
             <FiBookOpen className="w-4 h-4" />
             User Guide
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
             How to use <br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-500 to-violet-600">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
               LumiVizStack
             </span>
           </h1>
@@ -121,7 +121,6 @@ export default function Guide() {
           </p>
         </div>
 
-        {/* Steps Section */}
         <div className="space-y-8">
           {guideSteps.map((step, idx) => (
             <div
@@ -174,7 +173,6 @@ export default function Guide() {
           ))}
         </div>
 
-        {/* Tips Section */}
         <div className="mt-12 p-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-2xl">
           <div className="flex items-center gap-3 mb-3">
             <FiCheckCircle className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -189,16 +187,7 @@ export default function Guide() {
           </p>
         </div>
 
-        {/* Footer CTA */}
-        <div className="mt-16 text-center">
-          <Link
-            to="/visualize"
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-bold text-white transition-all duration-200 bg-indigo-600 rounded-full hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:-translate-y-0.5"
-          >
-            <FiPlay className="w-5 h-5" />
-            Start Visualizing Now
-          </Link>
-        </div>
+        <VisualizeButton text="Start Visualizing" />
       </div>
     </div>
   );

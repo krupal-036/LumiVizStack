@@ -1,4 +1,3 @@
-// src/pages/AdminPanel.jsx
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "../context/AuthContext";
@@ -11,6 +10,7 @@ import {
   FiAlertTriangle,
 } from "react-icons/fi";
 import { HiOutlineUserGroup } from "react-icons/hi";
+import Loader from "../components/common/Loader";
 
 const StatCard = ({ icon, label, value, color }) => (
   <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
@@ -41,15 +41,10 @@ const AdminPanel = () => {
     if (!token) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-
-      // Using the endpoints from your provided files
-      // Admin stats from admin.js
-      // Users from admin.js
-      // History from history.js (GET /api/history/admin)
       const [statsRes, usersRes, historyRes] = await Promise.all([
         axios.get("/api/admin/stats", config),
         axios.get("/api/admin/users", config),
-        axios.get("/api/history/admin", config), // Updated endpoint
+        axios.get("/api/history/admin", config), 
       ]);
 
       setStats(statsRes.data);
@@ -83,7 +78,6 @@ const AdminPanel = () => {
   const handleDeleteHistoryItem = async (id) => {
     if (!window.confirm("Delete this visualization record?")) return;
     try {
-      // Using the DELETE /:id route from history.js
       await axios.delete(`/api/history/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -104,7 +98,6 @@ const AdminPanel = () => {
       return;
 
     try {
-      // Using the new DELETE /all route
       await axios.delete("/api/history/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -119,22 +112,18 @@ const AdminPanel = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0B0F19]">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-indigo-500"></div>
-      </div>
+      <Loader data={"Loading Admin Panel..."}/>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] py-10 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
-      {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[120px] rounded-full" />
       </div>
 
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
             Admin Control Panel
@@ -144,7 +133,6 @@ const AdminPanel = () => {
           </p>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
           <StatCard
             icon={<FiUsers className="w-6 h-6" />}
@@ -161,9 +149,7 @@ const AdminPanel = () => {
           />
         </div>
 
-        {/* Main Content Card */}
         <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-xl overflow-hidden backdrop-blur-md">
-          {/* Tabs */}
           <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 px-6 pt-4">
             <div className="flex">
               <button
@@ -196,7 +182,6 @@ const AdminPanel = () => {
               </button>
             </div>
 
-            {/* Delete All Button (Visible only on History Tab) */}
             {activeTab === "history" && history.length > 0 && (
               <button
                 onClick={handleDeleteAllHistory}
@@ -208,7 +193,6 @@ const AdminPanel = () => {
             )}
           </div>
 
-          {/* Content Area */}
           <div className="p-6">
             {activeTab === "users" && (
               <div className="overflow-x-auto">

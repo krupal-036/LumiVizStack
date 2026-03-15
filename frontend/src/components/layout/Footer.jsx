@@ -1,4 +1,3 @@
-// src/components/layout/Footer.jsx
 import React from "react";
 import { Link } from "react-router-dom";
 import {
@@ -17,9 +16,9 @@ const Footer = () => {
   return (
     <footer className="bg-white dark:bg-[#0B0F19] border-t border-gray-200 dark:border-gray-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Top Section: Brand & Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Column 1: Brand */}
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+
           <div className="col-span-1">
             <Link to="/" className="flex items-center gap-2.5 group mb-4">
               <div className="w-9 h-9 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:shadow-indigo-500/50 transition-all duration-300">
@@ -33,7 +32,6 @@ const Footer = () => {
               Transforming complex JSON data into interactive, actionable visual
               insights.
             </p>
-            {/* Social Icons */}
             <div className="flex items-center gap-2">
               <a
                 href="#"
@@ -59,7 +57,6 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Column 2: Quick Links */}
           <div className="col-span-1">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
               Product
@@ -83,7 +80,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Column 3: Resources & Contact */}
           <div className="col-span-1">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
               Resources
@@ -104,23 +100,40 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
+          </div>
+          <div className="col-span-1">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+              Contact
+            </h3>
 
-            {/* Contact  */}
-            <div className="mt-6 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 inline-block">
-              <Link
-                to="https://krupal.vercel.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition"
-              >
-                <FiExternalLink className="text-indigo-500" />
-                <span>krupal.vercel.app</span>
-              </Link>
-            </div>
+            <ul className="space-y-3">
+
+              <li>
+                <Link
+                  to="mailto:krupalfataniya007@gmail.com"
+                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <FiMail className="text-indigo-500" />
+                  krupalfataniya007@gmail.com
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="https://krupal.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                >
+                  <FiExternalLink className="text-indigo-500" />
+                  krupal.vercel.app
+                </Link>
+              </li>
+
+            </ul>
           </div>
         </div>
 
-        {/* Bottom Section: Copyright */}
         <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
