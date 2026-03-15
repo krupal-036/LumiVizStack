@@ -1,4 +1,3 @@
-// src/App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -15,6 +14,8 @@ import SignUp from "./pages/Register";
 import Visualizer from "./pages/Visualizer";
 import AdminPanel from "./pages/AdminPanel.jsx";
 import NotFound from "./pages/NotFound";
+import Guide from "./pages/Guide";
+import ApiDocs from "./pages/ApiDocs.jsx";
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<SignUp />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/guide" element={<Guide />} />
+                <Route path="/docs/api" element={<ApiDocs />} />
 
                 <Route
                   path="/visualize"
@@ -59,7 +62,6 @@ function App() {
                 />
 
                 <Route path="*" element={<NotFound />} />
-
               </Routes>
             </main>
             <Footer />

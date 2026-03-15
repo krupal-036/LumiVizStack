@@ -52,7 +52,7 @@ export default function Login() {
     setErrors({});
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +80,7 @@ export default function Login() {
 
       const userWithRole = {
         ...data.user,
-        role: data.user.role // or data.user.role depending on your backend structure
+        role: data.user.role, // or data.user.role depending on your backend structure
       };
 
       login(userWithRole, data.token);
@@ -88,7 +88,6 @@ export default function Login() {
       // login(data.user, data.token);
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
-
     } catch (error) {
       console.error("Login Error:", error);
       // Catch network errors or the custom Error thrown above
@@ -97,7 +96,6 @@ export default function Login() {
       setIsLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black pt-2">
@@ -124,7 +122,9 @@ export default function Login() {
         )}
 
         <div className="mb-4">
-          <div className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}>
+          <div
+            className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.email ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+          >
             <FiMail className="text-gray-400" />
             <input
               type="email"
@@ -135,11 +135,15 @@ export default function Login() {
               className="w-full outline-none bg-transparent py-2.5 text-gray-800 dark:text-gray-100"
             />
           </div>
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+          )}
         </div>
 
         <div className="mb-4">
-          <div className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}>
+          <div
+            className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.password ? "border-red-500" : "border-gray-300 dark:border-gray-600"}`}
+          >
             <FiLock className="text-gray-400" />
             <input
               type="password"
@@ -150,7 +154,9 @@ export default function Login() {
               className="w-full outline-none bg-transparent py-2.5 text-gray-800 dark:text-gray-100"
             />
           </div>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+          )}
         </div>
 
         <div className="flex items-center justify-between mb-6">
@@ -164,7 +170,10 @@ export default function Login() {
             />
             Remember me
           </label>
-          <Link to="/forgot-password" className="text-blue-500 hover:underline text-xs">
+          <Link
+            to="/forgot-password"
+            className="text-blue-500 hover:underline text-xs"
+          >
             Forgot Password?
           </Link>
         </div>
