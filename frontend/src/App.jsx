@@ -16,6 +16,7 @@ import AdminPanel from "./pages/AdminPanel.jsx";
 import NotFound from "./pages/NotFound";
 import Guide from "./pages/Guide";
 import ApiDocs from "./pages/ApiDocs.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 
 function App() {
   return (
@@ -60,7 +61,10 @@ function App() {
                     </AdminRoute>
                   }
                 />
-
+                <Route path="/profile" element={
+                  <ProtectedRoute>
+                    <UserProfile />
+                  </ProtectedRoute>} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

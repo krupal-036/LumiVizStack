@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import Loader from "../components/common/Loader";
 import {
   FiTrash2, FiEye, FiCalendar, FiPlus, FiBarChart2,
   FiTable, FiLayout, FiSearch, FiClock, FiHash, FiGlobe, FiLock, FiCopy, FiCheck,
@@ -9,8 +10,6 @@ import {
   FiPlay,
   FiUnlock
 } from "react-icons/fi";
-import Loader from "../components/common/Loader";
-
 const History = () => {
   const [history, setHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,7 +26,6 @@ const History = () => {
       setLoading(false);
     }
   }, [user]);
-
   const fetchHistory = async () => {
     setLoading(true);
     try {
@@ -48,14 +46,12 @@ const History = () => {
       setLoading(false);
     }
   };
-
   const filteredHistory = useMemo(() => {
     return history.filter(item =>
       item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.type?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [history, searchTerm]);
-
   const deleteItem = async (id) => {
     if (!window.confirm("Are you sure you want to delete this visualization?")) return;
 
@@ -75,7 +71,6 @@ const History = () => {
       console.error(err);
     }
   };
-
   const togglePublic = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -99,8 +94,6 @@ const History = () => {
       console.error("Toggle visibility error:", err);
     }
   };
-
-
   const handleLoad = (item) => {
     navigate("/visualize", {
       state: {
@@ -115,14 +108,12 @@ const History = () => {
       }
     });
   };
-
   const handleCopyLink = (id) => {
     const url = `${window.location.origin}/view/${id}`;
     navigator.clipboard.writeText(url);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
-
   const getVisualConfig = (type) => {
     switch (type) {
       case 'card':
@@ -135,27 +126,21 @@ const History = () => {
         return { icon: FiTable, gradient: 'from-cyan-500 to-blue-400' };
     }
   };
-
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 transition-colors duration-300">
       <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
         <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-
             <div className="flex items-center gap-3 pb-2">
               <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
                 <FiClock className="w-6 h-6 stroke-[2.5px]" />
               </div>
-
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
                 <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
                   Visualization History
                 </span>
               </h1>
             </div>
-
-
             <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
               <div className="relative flex-1 lg:w-72">
                 <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 h-4 w-4" />
@@ -164,21 +149,11 @@ const History = () => {
                   placeholder="Search by title or type..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl 
-                             bg-white dark:bg-zinc-900 
-                             border border-slate-200 dark:border-zinc-800 
-                             focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 
-                             outline-none text-sm transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600"
-                />
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none text-sm transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600" />
               </div>
               <button
                 onClick={() => navigate("/visualize")}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 
-                           bg-indigo-600 hover:bg-indigo-700 
-                           text-white rounded-xl 
-                           shadow-md shadow-indigo-500/20 
-                           transition-all font-medium text-sm whitespace-nowrap"
-              >
+                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-500/20 transition-all font-medium text-sm whitespace-nowrap">
                 <FiPlus className="text-lg" /> New Visualization
               </button>
             </div>
@@ -186,8 +161,7 @@ const History = () => {
         </div>
 
         {loading ? (
-          <Loader data={"Loading history..."}/>
-
+          <Loader data={"Loading history..."} />
         ) : filteredHistory.length === 0 ? (
           <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 mb-4">
@@ -200,8 +174,7 @@ const History = () => {
             {!searchTerm && (
               <button
                 onClick={() => navigate("/visualize")}
-                className="px-6 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
-              >
+                className="px-6 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 transition-colors">
                 Get Started
               </button>
             )}
@@ -216,8 +189,7 @@ const History = () => {
               return (
                 <div
                   key={itemId}
-                  className="group relative bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col"
-                >
+                  className="group relative bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col">
                   <div className={`h-36 relative flex items-center justify-center overflow-hidden bg-linear-to-br ${config.gradient}`}>
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9zdmc+')] opacity-30"></div>
 
@@ -257,9 +229,7 @@ const History = () => {
                       <button
                         onClick={() => handleLoad(item)}
                         title="Extract Transfrom Load"
-                        className="flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg font-medium border-2  dark:text-indigo-600 border-indigo-600 dark:border-indigo-600 bg-indigo-300 dark:bg-600 hover:bg-indigo-400 text-indigo-600 font-medium text-sm transition-colors shadow-sm"
-                      ><FiEye />
-                        <span className="hidden sm:inline">ETL</span>
+                        className="flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg font-medium border-2  dark:text-indigo-600 border-indigo-600 dark:border-indigo-600 bg-indigo-300 dark:bg-600 hover:bg-indigo-400 text-indigo-600 font-medium text-sm transition-colors shadow-sm"> <FiEye /><span className="hidden sm:inline">ETL</span>
                       </button>
 
                       {item.isPublic && (
@@ -268,18 +238,16 @@ const History = () => {
                             <button
                               onClick={() => handleCopyLink(itemId)}
                               className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                              title="Copy Public Link"
-                            >
+                              title="Copy Public Link">
                               {copiedId === itemId ? <FiCheck className="text-green-500" /> : <FiCopy />}
                             </button>
 
                             <a
-                              href={`/view/${itemId}`} 
+                              href={`/view/${itemId}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                              title="View Public Link"
-                            >
+                              title="View Public Link">
                               <FiExternalLink />
                             </a>
                           </>
@@ -292,8 +260,7 @@ const History = () => {
                         className={`flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg shadow-md transition-all text-sm font-medium border-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500
                           ${item.isPublic
                             ? "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
-                            : "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"}`}
-                      >
+                            : "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"}`}>
                         {item.isPublic ? <FiUnlock /> : <FiLock />}
                         {/* <span className="hidden sm:inline">{item.isPublic ? <FiUnlock /> : <FiLock />}</span> */}
                       </button>
@@ -302,8 +269,7 @@ const History = () => {
                       <button
                         onClick={() => deleteItem(itemId)}
                         className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 hover:text-red-500 dark:hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 dark:hover:border-red-500 rounded-lg transition-colors"
-                        aria-label="Delete"
-                      >
+                        aria-label="Delete">
                         <FiTrash2 />
                       </button>
                     </div>

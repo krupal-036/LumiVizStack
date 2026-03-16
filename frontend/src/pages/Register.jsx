@@ -25,24 +25,40 @@ export default function SignUp() {
 
   const validate = () => {
     const newErrors = {};
+
     if (!formData.username.trim()) {
       newErrors.username = "Username is required";
     } else if (formData.username.length < 3) {
       newErrors.username = "Username must be at least 3 characters";
+    } else if (formData.username.length > 30) {
+      newErrors.username = "Username cannot be greater than 30 characters";
     }
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email address is invalid";
     }
-    if (!formData.password) {
+
+    const password = formData.password;
+    if (!password) {
       newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (password.length < 8) {
+      newErrors.password = "Must be at least 8 characters";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Include at least one uppercase letter";
+    } else if (!/[a-z]/.test(password)) {
+      newErrors.password = "Include at least one lowercase letter";
+    } else if (!/[0-9]/.test(password)) {
+      newErrors.password = "Include at least one number";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      newErrors.password = "Include at least one special symbol";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,23 +74,35 @@ export default function SignUp() {
         body: JSON.stringify(formData),
       });
 
-      // Check if response is actually JSON before parsing
+
       const contentType = response.headers.get("content-type");
       let data;
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
-        const text = await response.text(); // Get raw error if not JSON
+        const text = await response.text();
         throw new Error(text || "Server returned an invalid response");
       }
 
       if (!response.ok) {
-        // Specific error handling
-        if (data.message?.toLowerCase().includes("email")) {
-          setErrors({ email: data.message });
-        } else {
-          setErrors({ general: data.message || "Registration failed" });
+        const backendErrors = {};
+
+        if (Array.isArray(data.message)) {
+          data.message?.forEach((msg) => {
+            const lowerMsg = msg?.toLowerCase();
+            if (lowerMsg.includes("username")) backendErrors.username = msg;
+            if (lowerMsg.includes("email")) backendErrors.email = msg;
+            if (lowerMsg.includes("password")) backendErrors.password = msg;
+          });
+        } else if (data.message) {
+          if (data.message.toLowerCase().includes("email")) {
+            backendErrors.email = data.message;
+          } else {
+            backendErrors.general = data.message;
+          }
         }
+
+        setErrors(backendErrors);
         return;
       }
 

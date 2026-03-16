@@ -10,8 +10,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
-
-
     if (storedUser && storedToken) {
     const parsedUser = JSON.parse(storedUser);
     setUser(parsedUser);
@@ -26,8 +24,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
     }
     setUser(userData);
-    console.log("Initial role : ", role);
-    console.log("Role from token : ", userData.role);
     setRole(userData.role);
   };
 
@@ -38,7 +34,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading, role }}>
+    <AuthContext.Provider value={{ user, login, setUser, logout, loading, role }}>
       {!loading && children}
     </AuthContext.Provider>
   );

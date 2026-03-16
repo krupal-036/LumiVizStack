@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiGrid, FiTable,
-  FiBarChart2, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
-  FiClock, FiEye, FiEyeOff
+  FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
+  FiClock, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch
 } from "react-icons/fi";
+import { MdShowChart } from "react-icons/md";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
 import TableView from "../components/visualizations/TableView";
@@ -13,6 +13,7 @@ import ChartView from "../components/visualizations/ChartView";
 import TreeView from "../components/visualizations/TreeView";
 import GraphView from "../components/visualizations/GraphView";
 import { Features, renderValue } from "../components/Features.jsx";
+import { TbGhost } from "react-icons/tb";
 
 const VISUALIZER_STORAGE_KEY = "visualizerState";
 
@@ -164,13 +165,16 @@ const Visualizer = () => {
     );
   }, [data, searchTerm]);
 
+
+
   const viewModes = [
     { id: 'table', icon: FiTable, label: 'Table' },
     { id: 'card', icon: FiGrid, label: 'Grid' },
     { id: 'chart', icon: FiBarChart2, label: 'Charts' },
-    { id: 'tree', icon: FiCode, label: 'JSON' },
-    { id: 'graph', icon: FiShare2, label: 'Graph' },
+    { id: 'tree', icon: FiDatabase, label: 'JSON' }, // or FiFileText
+    { id: 'graph', icon: FiGitBranch, label: 'Graph' }, // Represents nodes/paths
   ];
+
 
   return (
     <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full">
@@ -343,7 +347,7 @@ const Visualizer = () => {
           {data.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-xl border-gray-500 dark:border-gray-500 bg-white dark:bg-gray-800/50 p-4">
               <div className="p-6 bg-gray-200/80 dark:bg-gray-800 rounded-full mb-4">
-                <FiBarChart2 className="text-4xl text-gray-500 dark:text-gray-400" />
+                <TbGhost className="text-4xl text-gray-500 dark:text-gray-400" />
               </div>
               <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">No Data to Display</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Open the side panel and load your data source</p>

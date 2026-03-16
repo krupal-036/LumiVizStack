@@ -19,7 +19,6 @@ const connectDB = async () => {
     return cached.conn;
   }
 
-  
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,

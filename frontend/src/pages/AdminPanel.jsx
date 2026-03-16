@@ -284,7 +284,6 @@ const AdminPanel = () => {
                           <td className="py-4 px-4 text-slate-600 dark:text-slate-300 text-sm flex items-center gap-2">
                             <FiUser className="w-4 h-4 opacity-50" />
                             {h.userId?.email || "Unknown"}
-                            {console.log(h)}
                           </td>
                           <td className="py-4 px-4 text-slate-600 dark:text-slate-300 text-sm">
                             <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono">

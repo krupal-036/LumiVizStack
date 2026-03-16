@@ -6,7 +6,7 @@ import { isAdmin } from "../middleware/adminAuth.js";
 
 const router = express.Router();
 
-// Dashboard stats
+// @route   GET api/admin/stats
 router.get("/stats", verifyToken, isAdmin, async (req, res) => {
   try {
     const userCount = await User.countDocuments();
@@ -17,7 +17,7 @@ router.get("/stats", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// Get all users
+// @route   GET api/admin/users
 router.get("/users", verifyToken, isAdmin, async (req, res) => {
   try {
     const users = await User.find().select("-password");
@@ -27,7 +27,7 @@ router.get("/users", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// Delete user
+// @route   DELETE api/admin/user/:userid
 router.delete("/user/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
@@ -43,7 +43,7 @@ router.delete("/user/:id", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// All history
+// @route   GET api/admin/all-history
 router.get("/all-history", verifyToken, isAdmin, async (req, res) => {
   try {
     const allHistory = await History.find().populate(

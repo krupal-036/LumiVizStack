@@ -32,14 +32,28 @@ export default function Login() {
 
   const validate = () => {
     const newErrors = {};
+
     if (!formData.email.trim()) {
       newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Email address is invalid";
     }
-    if (!formData.password) {
+
+    const password = formData.password;
+    if (!password) {
       newErrors.password = "Password is required";
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (!/[A-Z]/.test(password)) {
+      newErrors.password = "Must include at least one uppercase letter";
+    } else if (!/[a-z]/.test(password)) {
+      newErrors.password = "Must include at least one lowercase letter";
+    } else if (!/[0-9]/.test(password)) {
+      newErrors.password = "Must include at least one number";
+    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      newErrors.password = "Must include at least one special symbol";
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -63,15 +77,21 @@ export default function Login() {
 
       const contentType = response.headers.get("content-type");
       let data;
-
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
-        throw new Error("Server is currently unavailable. Please try again.");
+        const text = await response.text();
+        throw new Error(text || "Server error. Please try again later.");
       }
 
       if (!response.ok) {
-        setErrors({ general: data.message || "Invalid email or password" });
+        if (data.message?.toLowerCase().includes("email")) {
+          setErrors({ email: data.message });
+        } else if (data.message?.toLowerCase().includes("password")) {
+          setErrors({ password: data.message });
+        } else {
+          setErrors({ general: data.message || "Invalid credentials" });
+        }
         return;
       }
 
@@ -83,6 +103,7 @@ export default function Login() {
       login(userWithRole, data.token);
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
+
     } catch (error) {
       console.error("Login Error:", error);
       setErrors({ general: error.message || "Unable to connect to server." });
