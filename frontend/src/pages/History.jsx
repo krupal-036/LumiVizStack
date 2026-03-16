@@ -1,287 +1,291 @@
-import React, { useState, useEffect, useContext, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import Loader from "../components/common/Loader";
 import {
-  FiTrash2, FiEye, FiCalendar, FiPlus, FiBarChart2,
-  FiTable, FiLayout, FiSearch, FiClock, FiHash, FiGlobe, FiLock, FiCopy, FiCheck,
-  FiExternalLink,
-  FiEyeOff,
-  FiPlay,
-  FiUnlock
+    FiTrash2, FiEye, FiEyeOff, FiClock, FiActivity,
+    FiLoader, FiAlertCircle, FiBarChart2, FiLink, FiExternalLink, FiCheck
 } from "react-icons/fi";
-const History = () => {
-  const [history, setHistory] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState(null);
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    if (user) {
-      fetchHistory();
-    } else {
-      setHistory([]);
-      setLoading(false);
-    }
-  }, [user]);
-  const fetchHistory = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) return;
+export default function History() {
+    const { user } = useContext(AuthContext);
+    const [history, setHistory] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [actionId, setActionId] = useState(null);
+    const [copiedId, setCopiedId] = useState(null);
+    const [toast, setToast] = useState("");
 
-      const res = await fetch("/api/history/user", {
-        method: "GET",
-        headers: { "x-auth-token": token }
-      });
+    useEffect(() => {
+        fetchHistory();
+    }, []);
 
-      const data = await res.json();
-      const sorted = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      setHistory(sorted);
-    } catch (err) {
-      console.error("Failed to fetch history", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const filteredHistory = useMemo(() => {
-    return history.filter(item =>
-      item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.type?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [history, searchTerm]);
-  const deleteItem = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this visualization?")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/history/${id}`, {
-        method: "DELETE",
-        headers: { "x-auth-token": token }
-      });
-
-      if (res.ok) {
-        setHistory(prev => prev.filter(item => item._id !== id));
-      } else {
-        alert("Failed to delete item");
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  const togglePublic = async (id) => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`/api/history/${id}/toggle`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
+    useEffect(() => {
+        if (toast) {
+            const timer = setTimeout(() => setToast(""), 2000);
+            return () => clearTimeout(timer);
         }
-      });
+    }, [toast]);
 
-      if (res.ok) {
-        const updatedItem = await res.json();
-        setHistory(prev => prev.map(item =>
-          item._id === id ? { ...item, isPublic: updatedItem.isPublic } : item
-        ));
-      } else {
-        alert("Failed to update visibility");
-      }
-    } catch (err) {
-      console.error("Toggle visibility error:", err);
-    }
-  };
-  const handleLoad = (item) => {
-    navigate("/visualize", {
-      state: {
-        config: {
-          data: item.data,
-          type: item.type,
-          rawInput: item.rawInput,
-          urlInput: item.urlInput,
-          inputType: item.inputType
-        },
-        forceLoad: true
-      }
-    });
-  };
-  const handleCopyLink = (id) => {
-    const url = `${window.location.origin}/view/${id}`;
-    navigator.clipboard.writeText(url);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-  const getVisualConfig = (type) => {
-    switch (type) {
-      case 'card':
-        return { icon: FiLayout, gradient: 'from-rose-500 to-orange-400' };
-      case 'chart':
-        return { icon: FiBarChart2, gradient: 'from-violet-500 to-purple-400' };
-      case 'tree':
-        return { icon: FiTable, gradient: 'from-green-500 to-teal-400' };
-      default:
-        return { icon: FiTable, gradient: 'from-cyan-500 to-blue-400' };
-    }
-  };
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-zinc-950 text-slate-800 dark:text-zinc-100 transition-colors duration-300">
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3 pb-2">
-              <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
-                <FiClock className="w-6 h-6 stroke-[2.5px]" />
-              </div>
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
-                  Visualization History
-                </span>
-              </h1>
-            </div>
-            <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-3">
-              <div className="relative flex-1 lg:w-72">
-                <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500 h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Search by title or type..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none text-sm transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600" />
-              </div>
-              <button
-                onClick={() => navigate("/visualize")}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-500/20 transition-all font-medium text-sm whitespace-nowrap">
-                <FiPlus className="text-lg" /> New Visualization
-              </button>
-            </div>
-          </div>
-        </div>
+    const fetchHistory = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch("/api/history/user", {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setHistory(data);
+            } else {
+                throw new Error(data.message || "Failed to fetch history");
+            }
+        } catch (err) {
+            console.error(err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        {loading ? (
-          <Loader data={"Loading history..."} />
-        ) : filteredHistory.length === 0 ? (
-          <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 mb-4">
-              <FiBarChart2 size={32} />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-700 dark:text-zinc-200">No Visualizations Found</h3>
-            <p className="text-slate-400 mt-2 mb-6">
-              {searchTerm ? "Nothing matches your search." : "Start by creating your first visualization."}
-            </p>
-            {!searchTerm && (
-              <button
-                onClick={() => navigate("/visualize")}
-                className="px-6 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg font-medium hover:bg-indigo-100 transition-colors">
-                Get Started
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredHistory.map((item) => {
-              const config = getVisualConfig(item.type);
-              const Icon = config.icon;
-              const itemId = item._id;
+    const handleToggleStatus = async (id) => {
+        setActionId(id);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`/api/history/${id}/toggle`, {
+                method: "PUT",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+            const updatedItem = await res.json();
 
-              return (
-                <div
-                  key={itemId}
-                  className="group relative bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-700 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 flex flex-col">
-                  <div className={`h-36 relative flex items-center justify-center overflow-hidden bg-linear-to-br ${config.gradient}`}>
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIi8+PC9zdmc+')] opacity-30"></div>
+            if (res.ok) {
+                setHistory(prev =>
+                    prev.map(item => item._id === id ? updatedItem : item)
+                );
+            } else {
+                alert("Failed to update status");
+            }
+        } catch (err) {
+            console.error("Toggle error:", err);
+        } finally {
+            setActionId(null);
+        }
+    };
 
-                    <div className="relative z-10 p-6 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                      <Icon className="text-white text-4xl" />
-                    </div>
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this visualization?")) {
+            return;
+        }
 
-                    <div className="absolute top-3 left-3 flex items-center gap-2">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase flex items-center gap-1 backdrop-blur-sm ${item.isPublic ? 'bg-green-100/80 text-green-800' : 'bg-gray-100/80 text-gray-600'}`}>
-                        {item.isPublic ? <FiGlobe size={10} /> : <FiLock size={10} />}
-                        {item.isPublic ? "Public" : "Private"}
-                      </span>
-                    </div>
+        setActionId(id);
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`/api/history/${id}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
 
-                    <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-black/20 text-white backdrop-blur-sm">
-                      {item.type || 'Data'}
-                    </div>
-                  </div>
+            if (res.ok) {
+                setHistory(prev => prev.filter(item => item._id !== id));
+            } else {
+                const data = await res.json();
+                alert(data.message || "Delete failed");
+            }
+        } catch (err) {
+            console.error("Delete error:", err);
+        } finally {
+            setActionId(null);
+        }
+    };
 
-                  <div className="p-2 flex-1 flex flex-col">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-bold text-lg text-slate-800 dark:text-zinc-100 truncate pr-4">
-                        {item.title || "Untitled Visualization"}
-                      </h3>
-                    </div>
+    const handleCopyLink = (id) => {
+        const publicUrl = `${window.location.origin}/view/${id}`;
 
-                    <div className="flex flex-wrap gap-2 mb-5">
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
-                        <FiCalendar className="text-indigo-400" /> {new Date(item.createdAt).toLocaleDateString()}
-                      </span>
-                      <span className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300">
-                        <FiHash className="text-indigo-400" /> {item.data?.length || 0} Records
-                      </span>
-                    </div>
+        navigator.clipboard.writeText(publicUrl).then(() => {
+            setCopiedId(id);
+            setToast("Link copied to clipboard!");
+            setTimeout(() => setCopiedId(null), 2000);
+        }).catch(err => {
+            console.error("Failed to copy:", err);
+            alert("Failed to copy link");
+        });
+    };
 
-                    <div className="mt-auto flex items-center justify-center sm:justify-around gap-2 border-t border-slate-100 dark:border-zinc-800 pt-4">
-                      <button
-                        onClick={() => handleLoad(item)}
-                        title="Extract Transfrom Load"
-                        className="flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg font-medium border-2  dark:text-indigo-600 border-indigo-600 dark:border-indigo-600 bg-indigo-300 dark:bg-600 hover:bg-indigo-400 text-indigo-600 font-medium text-sm transition-colors shadow-sm"> <FiEye /><span className="hidden sm:inline">ETL</span>
-                      </button>
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
-                      {item.isPublic && (
-                        <div className="flex gap-2">
-                          <>
-                            <button
-                              onClick={() => handleCopyLink(itemId)}
-                              className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500 hover:text-blue-500 dark:hover:text-blue-500 hover:bg-blue-100 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                              title="Copy Public Link">
-                              {copiedId === itemId ? <FiCheck className="text-green-500" /> : <FiCopy />}
-                            </button>
+    return (
+        <div className="min-h-screen pt-10 pb-12 px-4 bg-gray-50 dark:bg-[#0B0F19] transition-colors duration-300">
 
-                            <a
-                              href={`/view/${itemId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                              title="View Public Link">
-                              <FiExternalLink />
-                            </a>
-                          </>
-                        </div>
-                      )}
-                      <button
-                        key={itemId}
-                        onClick={() => togglePublic(itemId)}
-                        title={item.isPublic ? "Currently Public" : "Currently Private"}
-                        className={`flex items-center p-2.75 sm:p-2.5 gap-2 rounded-lg shadow-md transition-all text-sm font-medium border-2 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500
-                          ${item.isPublic
-                            ? "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"
-                            : "hover:border-emerald-500 hover:text-emerald-500 dark:hover:text-emerald-500 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 transition-colors"}`}>
-                        {item.isPublic ? <FiUnlock /> : <FiLock />}
-                        {/* <span className="hidden sm:inline">{item.isPublic ? <FiUnlock /> : <FiLock />}</span> */}
-                      </button>
-
-
-                      <button
-                        onClick={() => deleteItem(itemId)}
-                        className="p-2.5 text-slate-400 border-2 border-gray-300 dark:border-gray-600 hover:border-red-500 hover:text-red-500 dark:hover:text-red-500 hover:bg-red-100 dark:hover:bg-red-900/20 dark:hover:border-red-500 rounded-lg transition-colors"
-                        aria-label="Delete">
-                        <FiTrash2 />
-                      </button>
-                    </div>
-                  </div>
+            {toast && (
+                <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-xl flex items-center gap-2 animate-bounce font-medium">
+                    <FiCheck /> {toast}
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
+            )}
 
-export default History;
+            <div className="max-w-5xl mx-auto">
+
+                <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
+                            <FiClock className="text-indigo-500" />
+                            Visualization History
+                        </h1>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
+                            Your recent activity and saved charts
+                        </p>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white dark:bg-[#111827] border border-gray-200 dark:border-gray-800 rounded-xl px-4 py-2 flex items-center gap-2 shadow-sm">
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Saved</span>
+                            <span className={`text-lg font-bold ${history.length === 5 ? "text-red-600" : "text-indigo-600"} dark:text-indigo-400`}>{history.length}</span>
+                            <span className="text-gray-300 dark:text-gray-700">/</span>
+                            <span className="text-sm font-medium text-gray-400 dark:text-gray-600">5</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mb-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 flex items-start gap-3">
+                    <FiLink className="text-indigo-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                        <strong>Public Links:</strong> Toggle your chart to "Public" to enable sharing and open links.
+                    </p>
+                </div>
+
+                {error && (
+                    <div className="mb-6 p-4 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 flex items-center gap-3">
+                        <FiAlertCircle /> {error}
+                    </div>
+                )}
+
+                {loading ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="bg-white dark:bg-[#111827] rounded-2xl p-6 border border-gray-100 dark:border-gray-800 animate-pulse">
+                                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+                                <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-1/2 mb-6"></div>
+                                <div className="flex justify-between">
+                                    <div className="h-8 bg-gray-100 dark:bg-gray-800 rounded-lg w-20"></div>
+                                    <div className="h-8 bg-gray-100 dark:bg-gray-800 rounded-lg w-24"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : history.length === 0 ? (
+                    <div className="text-center py-20 bg-white dark:bg-[#111827] rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm">
+                        <div className="w-16 h-16 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
+                            <FiBarChart2 size={32} />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-1">No History Yet</h3>
+                        <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-sm mx-auto">
+                            Your saved visualizations will appear here once you create them.
+                        </p>
+                        <a
+                            href="/dashboard"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-indigo-500/20"
+                        >
+                            Create Visualization
+                        </a>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {history.map((item) => (
+                            <div
+                                key={item._id}
+                                className="group bg-white dark:bg-[#111827] rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-900 transition-all duration-300 shadow-sm hover:shadow-xl overflow-hidden flex flex-col"
+                            >
+                                <div className="p-5 border-b border-gray-50 dark:border-gray-800/50 flex-grow">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg text-indigo-500">
+                                                <FiActivity size={20} />
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <h3 className="font-bold text-gray-900 dark:text-white truncate" title={item.title}>
+                                                    {item.title || "Untitled Visualization"}
+                                                </h3>
+                                                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                                    {item.type || "Chart"}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="px-5 py-3.5 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
+                                    <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
+                                        <FiClock />
+                                        <span>{formatDate(item.createdAt)}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+
+                                        {item.isPublic && (
+                                            <>
+                                                <button
+                                                    onClick={() => handleCopyLink(item._id)}
+                                                    className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all relative group"
+                                                    title="Copy Public Link"
+                                                >
+                                                    {copiedId === item._id ? (
+                                                        <FiCheck className="text-green-500" />
+                                                    ) : (
+                                                        <FiLink size={16} />
+                                                    )}
+                                                </button>
+
+                                                <a
+                                                    href={`/view/${item._id}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
+                                                    title="Open Public Page"
+                                                >
+                                                    <FiExternalLink size={16} />
+                                                </a>
+                                            </>
+                                        )}
+
+                                        <button
+                                            onClick={() => handleToggleStatus(item._id)}
+                                            disabled={actionId === item._id}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${item.isPublic
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/60"
+                                                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                }`}
+                                        >
+                                            {actionId === item._id ? (
+                                                <FiLoader className="animate-spin" />
+                                            ) : (
+                                                <>
+                                                    {item.isPublic ? <FiEye size={14} /> : <FiEyeOff size={14} />}
+                                                    {item.isPublic ? "Public" : "Private"}
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDelete(item._id)}
+                                            disabled={actionId === item._id}
+                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
+                                            title="Delete"
+                                        >
+                                            <FiTrash2 size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

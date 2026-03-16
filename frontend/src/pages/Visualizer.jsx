@@ -2,7 +2,8 @@ import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
-  FiClock, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch
+  FiClock, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch,
+  FiLoader
 } from "react-icons/fi";
 import { MdShowChart } from "react-icons/md";
 import { parseData } from "../utils/dataParser";
@@ -30,11 +31,9 @@ const Visualizer = () => {
   const [viewMode, setViewMode] = useState("table");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [savedNotification, setSavedNotification] = useState(false);
-
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [saveState, setSaveState] = useState("idle"); 
   const [isPublic, setIsPublic] = useState(false);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
 
@@ -113,46 +112,53 @@ const Visualizer = () => {
   };
 
   const handleSave = async () => {
-    if (!user || data.length === 0) return;
+  if (!user || data.length === 0) return;
 
-    const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-    if (!token) {
-      setError("Authentication error. Please log in again.");
-      return;
-    }
+  if (!token) {
+    setError("Authentication error. Please log in again.");
+    return;
+  }
 
-    const newHistoryItem = {
-      title: `Visualization ${new Date().toLocaleDateString()}`,
-      type: viewMode,
-      dataLength: data.length,
-      data: data,
-      rawInput: rawInput,
-      urlInput: urlInput,
-      inputType: inputType,
-      isPublic: isPublic
-    };
+  setSaveState("saving");
 
-    try {
-      const response = await fetch("/api/history/save", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token
-        },
-        body: JSON.stringify(newHistoryItem)
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save history");
-      }
-
-      setSavedNotification(true);
-      setTimeout(() => setSavedNotification(false), 2000);
-    } catch (err) {
-      setError(err.message);
-    }
+  const newHistoryItem = {
+    title: `Visualization ${new Date().toLocaleDateString()}`,
+    type: viewMode,
+    dataLength: data.length,
+    data: data,
+    rawInput: rawInput,
+    urlInput: urlInput,
+    inputType: inputType,
+    isPublic: isPublic
   };
+
+  try {
+    const response = await fetch("/api/history/save", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-auth-token": token
+      },
+      body: JSON.stringify(newHistoryItem)
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save history");
+    }
+
+    setSaveState("saved");
+
+    setTimeout(() => {
+      setSaveState("idle");
+    }, 2000);
+
+  } catch (err) {
+    setError(err.message);
+    setSaveState("idle");
+  }
+};
 
   const togglePublic = () => {
     setIsPublic(!isPublic);
@@ -294,12 +300,22 @@ const Visualizer = () => {
 
                   <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-md transition-all text-sm font-medium"
+                    disabled={saveState === "saving"}
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg shadow-md transition-all text-sm font-medium"
                   >
-                    {savedNotification ? <FiCheck /> : <FiSave />}
+
+                    {saveState === "saving" && <FiLoader className="animate-spin" />}
+
+                    {saveState === "saved" && <FiCheck />}
+
+                    {saveState === "idle" && <FiSave />}
+
                     <span className="hidden sm:inline">
-                      {savedNotification ? "Saved!" : "Save"}
+                      {saveState === "saving" && "Saving..."}
+                      {saveState === "saved" && "Saved"}
+                      {saveState === "idle" && "Save"}
                     </span>
+
                   </button>
 
                   <button

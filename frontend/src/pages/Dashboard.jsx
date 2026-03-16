@@ -109,8 +109,8 @@ export default function Dashboard() {
           The fastest way to visualize complex JSON structures. <br />
           No configuration needed - just paste, connect, or upload your data.
         </p>
-        
-<VisualizeButton text="Visualize JSON Now" />
+
+        <VisualizeButton text="Visualize JSON Now" />
 
         <div className="my-12 flex items-center w-full max-w-sm">
           <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>

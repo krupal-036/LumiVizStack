@@ -82,15 +82,9 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-2">
             {user ? (
               <>
-                {/* <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-sm">
-                  <FiUser size={16} />
-                  <span className="max-w-[90px] truncate">
-                    {user.name || "User"}
-                  </span>
-                </div> */}
                 <Link
                   to="/profile"
-                  className={`flex items-center gap-2 px-3 py-1 rounded-full transition ${isActive("/profile") ? "bg-indigo-600 text-white shadow" : "bg-gray-100 dark:bg-gray-800 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"}`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-full transition ${isActive("/profile") ? "bg-indigo-600 text-white shadow" : "bg-gray-100 dark:bg-gray-800 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"}`}
                 >
                   <FiUser size={16} />
                   <span className="max-w-[90px] truncate">{user.name || "User"}</span>
@@ -144,10 +138,6 @@ export default function Navbar() {
 
             {user ? (
               <>
-                {/* <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                  <FiUser size={18} />
-                  {user.name || "User"}
-                </div> */}
                 <Link
                   to="/profile"
                   onClick={closeMenu}
