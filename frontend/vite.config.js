@@ -15,5 +15,3 @@ export default defineConfig({
     },
   },
 });
-
-// Dont include proxy in vite build

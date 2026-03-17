@@ -216,26 +216,28 @@ export default function History() {
                         );
                     })()}
 
-
-
                 </div>
 
-                <div className="mb-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 flex items-start gap-3">
-                    <FiLink className="text-indigo-500 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                        <span className="">
+                <div className="mb-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/50 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                        <FiLink className="text-indigo-500 mt-0.5 flex-shrink-0" />
+                        <p className="text-sm text-indigo-700 dark:text-indigo-300">
                             <strong>Public Links:</strong> Toggle your chart to "Public" to enable sharing and open links.
-                        </span>
-                        <span className=""> <button onClick={() => handleDeleteAll()}>Delete All</button>  </span>
-                    </p>
-                </div>
+                        </p>
+                    </div>
 
+                    <button
+                        onClick={() => handleDeleteAll()}
+                        className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-200 rounded-lg hover:bg-red-50 hover:text-red-700 transition-colors dark:bg-red-900/10 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-900/20"
+                    >
+                        Delete All
+                    </button>
+                </div>
                 {error && (
                     <div className="mb-6 p-4 rounded-xl bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 flex items-center gap-3">
                         <FiAlertCircle /> {error}
                     </div>
                 )}
-
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {[...Array(4)].map((_, i) => (
@@ -303,7 +305,6 @@ export default function History() {
                                         </div>
                                     </div>
                                 </div>
-
 
                                 <div className="px-5 py-3.5 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
