@@ -15,6 +15,11 @@ export default function Login() {
     password: "",
     remember: false,
   });
+  const clearError = (sec) => {
+        setTimeout(() => {
+            setErrors("");
+        }, sec * 1000);
+    }
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +32,7 @@ export default function Login() {
     });
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
+      clearError(3);
     }
   };
 
@@ -55,6 +61,7 @@ export default function Login() {
     }
 
     setErrors(newErrors);
+    clearError(3);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -87,10 +94,13 @@ export default function Login() {
       if (!response.ok) {
         if (data.message?.toLowerCase().includes("email")) {
           setErrors({ email: data.message });
+          clearError(3);
         } else if (data.message?.toLowerCase().includes("password")) {
           setErrors({ password: data.message });
+          clearError(3);
         } else {
-          setErrors({ general: data.message || "Invalid credentials" });
+          setErrors({ general: data.error || "Invalid credentials" });
+          clearError(3);
         }
         return;
       }
@@ -105,8 +115,8 @@ export default function Login() {
       navigate(from, { replace: true });
 
     } catch (error) {
-      console.error("Login Error:", error);
       setErrors({ general: error.message || "Unable to connect to server." });
+      clearError(3);
     } finally {
       setIsLoading(false);
     }

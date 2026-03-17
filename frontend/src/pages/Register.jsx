@@ -22,7 +22,11 @@ export default function SignUp() {
       setErrors({ ...errors, [name]: "" });
     }
   };
-
+  const clearError = (sec) => {
+        setTimeout(() => {
+            setErrors("");
+        }, sec * 1000);
+    }
   const validate = () => {
     const newErrors = {};
 
@@ -56,6 +60,7 @@ export default function SignUp() {
     }
 
     setErrors(newErrors);
+    clearError(3);
     return Object.keys(newErrors).length === 0;
   };
 
@@ -86,7 +91,6 @@ export default function SignUp() {
 
       if (!response.ok) {
         const backendErrors = {};
-
         if (Array.isArray(data.message)) {
           data.message?.forEach((msg) => {
             const lowerMsg = msg?.toLowerCase();
@@ -94,15 +98,16 @@ export default function SignUp() {
             if (lowerMsg.includes("email")) backendErrors.email = msg;
             if (lowerMsg.includes("password")) backendErrors.password = msg;
           });
-        } else if (data.message) {
-          if (data.message.toLowerCase().includes("email")) {
+        } else if (data?.message || data.error) {
+          if (data.message?.toLowerCase().includes("email")) {
             backendErrors.email = data.message;
           } else {
-            backendErrors.general = data.message;
+            backendErrors.general = data.error;
           }
         }
 
         setErrors(backendErrors);
+        clearError(3);
         return;
       }
 
@@ -110,8 +115,8 @@ export default function SignUp() {
       navigate("/");
 
     } catch (error) {
-      console.error("Signup Error:", error);
       setErrors({ general: "Connection failed. Check if the server is running." });
+      clearError(3);
     } finally {
       setIsLoading(false);
     }

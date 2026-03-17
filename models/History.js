@@ -28,6 +28,11 @@ const HistorySchema = new Schema({
   rawInput: String,
   urlInput: String,
   inputType: String,
+  isDeleted: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
   createdAt: {
     type: Date,
     default: Date.now,

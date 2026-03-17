@@ -20,24 +20,17 @@ router.get("/admin", verifyToken, isAdmin, async (req, res) => {
 // @desc    Save visualization history (Max 5 per user)
 router.post("/save", verifyToken, async (req, res) => {
   try {
-    const { title, type, data, rawInput, urlInput, inputType, isPublic } = req.body;
+    const { title, type, data, rawInput, urlInput, inputType, isPublic, isDeleted } = req.body;
     const userId = req.user.id;
     const newHistory = new History({
-      userId,
-      title,
-      type,
-      data,
-      rawInput,
-      urlInput,
-      inputType,
-      isPublic: isPublic || false,
+      userId, title, type, data, rawInput, urlInput, inputType, isPublic: isPublic || false, isDeleted: isDeleted || false,
     });
 
     const savedItem = await newHistory.save();
     const userHistories = await History.find({ userId }).sort({ createdAt: -1 });
 
-    if (userHistories.length > 5) {
-      const idsToDelete = userHistories.slice(5).map(item => item._id);
+    if (userHistories.length > 10) {
+      const idsToDelete = userHistories.slice(10).map(item => item._id);
       await History.deleteMany({ _id: { $in: idsToDelete } });
     }
 
@@ -85,18 +78,21 @@ router.get("/user", verifyToken, async (req, res) => {
 
 // @route   GET api/history/public/:id
 // @desc    Get public history by ID (accessible by anyone)
+
 router.get("/public/:id", async (req, res) => {
   try {
     const historyItem = await History.findById(req.params.id);
 
     if (!historyItem) {
-      return res.status(404).json({ message: "History not found" });
+      return res.status(404).json({ message: "History not found..." });
     }
 
     if (!historyItem.isPublic) {
-      return res.status(403).json({ message: "This visualization is private" });
+      return res.status(403).json({ message: "This visualization is private..." });
     }
-
+    if (historyItem.isDeleted) {
+      return res.status(403).json({ message: "This visualization is Deleted by user..." });
+    }
     res.json(historyItem);
   } catch (err) {
     console.error(err.message);
@@ -104,8 +100,46 @@ router.get("/public/:id", async (req, res) => {
   }
 });
 
+
+// @route   PUT api/history/delete-all
+// @desc    Mark all history as deleted (Soft Delete)
+
+router.put("/delete-all", verifyToken, async (req, res) => {
+  try {
+    const result = await History.updateMany(
+      { userId: req.user.id, isDeleted: { $ne: true } },
+      { $set: { isDeleted: true } }
+    );
+
+    res.json({
+      message: "History cleared successfully",
+      modifiedCount: result.modifiedCount
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to clear history" });
+  }
+});
+
+
+
+// @route   DELETE api/history/delete-all
+// @desc    Delete all history items
+
+router.delete("/delete-all", verifyToken, async (req, res) => {
+  try {
+    const result = await History.deleteMany({ userId: req.user.id });
+    res.json({
+      message: "History permanently deleted",
+      deletedCount: result.deletedCount
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete history" });
+  }
+});
+
 // @route   DELETE api/history/:id
 // @desc    Delete a history item
+
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const historyItem = await History.findById(req.params.id);
@@ -127,5 +161,33 @@ router.delete("/:id", verifyToken, async (req, res) => {
     res.status(500).json("Server error");
   }
 });
+
+// @route   PUT api/history/:id/
+// @desc    Toggle isDelete flag
+
+router.put("/:id", verifyToken, async (req, res) => {
+  try {
+    const historyItem = await History.findById(req.params.id);
+
+    if (!historyItem) {
+      return res.status(404).json({ message: "History not found" });
+    }
+    if (historyItem.userId.toString() !== req.user.id) {
+      return res.status(401).json({ message: "User not verified" });
+    }
+
+    historyItem.isDeleted = !historyItem.isDeleted;
+    await historyItem.save();
+
+    res.json(historyItem);
+  } catch (err) {
+    console.error("Toggle error:", err.message);
+    res.status(500).json("Server error");
+  }
+});
+
+
+
+
 
 export default router;

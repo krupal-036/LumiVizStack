@@ -51,7 +51,7 @@ router.put("/update", verifyToken, async (req, res) => {
                     .json({ message: "Password must be at least 6 characters long" });
             }
 
-            const salt = await bcrypt.getSalt(10);
+            const salt = await bcrypt.genSalt(10);
             updateData.password = await bcrypt.hash(password, salt);
         }
 

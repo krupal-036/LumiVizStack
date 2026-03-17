@@ -7,7 +7,7 @@ const router = express.Router();
 
 // @route   POST api/auth/register
 router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password, credits } = req.body;
   const email = req.body.email?.toLowerCase();
   if (!email || !password || !username) {
     return res.status(400).json({ message: "All fields are required" });
@@ -53,6 +53,7 @@ router.post("/register", async (req, res) => {
     const payload = {
       userId: user.id,
       role: user.role,
+      credits: user.credits, 
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "9h",
@@ -109,6 +110,7 @@ router.post("/login", async (req, res) => {
     const payload = {
       userId: user.id,
       role: user.role,
+      credits: user.credits,
     };
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "9h",
