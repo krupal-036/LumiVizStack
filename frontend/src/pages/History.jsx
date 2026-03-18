@@ -6,9 +6,11 @@ import {
     FiLoader, FiAlertCircle, FiBarChart2, FiLink, FiExternalLink, FiCheck,
     FiRefreshCw
 } from "react-icons/fi";
+import { useError } from "../hooks/customHooks";
 
 export default function History() {
     const { user } = useContext(AuthContext);
+    const { showError } = useError();
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setErrors] = useState("");

@@ -7,3 +7,14 @@
         font-family: 'Inter', sans-serif;
     }
 }
+
+@layer utilities {
+  @keyframes shrink {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
+  }
+
+  .animate-toast-progress {
+    animation: shrink 2000ms linear forwards;
+  }
+}

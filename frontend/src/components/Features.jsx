@@ -79,7 +79,7 @@ export const Features = ({ searchTerm, setSearchTerm, targetRef }) => {
   };
 
   return (
-    <div className="flex flex-row md:flex-row gap-4 items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+    <div className="flex flex-row md:flex-row gap-4 items-center justify-between transition-colors">
       <div className="relative w-full sm:flex-1 md:w-160">
         <Search
           className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"

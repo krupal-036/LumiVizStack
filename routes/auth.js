@@ -6,6 +6,7 @@ import User from "../models/User.js";
 const router = express.Router();
 
 // @route   POST api/auth/register
+
 router.post("/register", async (req, res) => {
   const { username, password, credits } = req.body;
   const email = req.body.email?.toLowerCase();
@@ -83,6 +84,7 @@ router.post("/register", async (req, res) => {
 });
 
 // @route   POST api/auth/login
+
 router.post("/login", async (req, res) => {
   const { password } = req.body;
   const email = req.body.email?.toLowerCase();

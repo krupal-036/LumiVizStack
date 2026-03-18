@@ -1,27 +1,29 @@
 import express from "express";
 import History from "../models/History.js";
 import verifyToken from "../middleware/verifyToken.js";
+
 const router = express.Router();
-import { isAdmin } from "../middleware/adminAuth.js";
-
-router.get("/admin", verifyToken, isAdmin, async (req, res) => {
-  try {
-    const histories = await History.find()
-      .sort({ createdAt: -1 })
-      .populate("userId", "name email");
-
-    res.json(histories);
-  } catch (err) {
-    res.status(500).json("Server error");
-  }
-});
 
 // @route   POST api/history/save
-// @desc    Save visualization history (Max 5 per user)
+// @desc    Save visualization history (Max 10 per user)
+
 router.post("/save", verifyToken, async (req, res) => {
   try {
     const { title, type, data, rawInput, urlInput, inputType, isPublic, isDeleted } = req.body;
     const userId = req.user.id;
+
+    const trimmedInput = rawInput?.trim();
+
+    if (trimmedInput) {
+      const duplicate = await History.findOne({ userId, rawInput: trimmedInput });
+      if (duplicate) {
+        // Explicitly send a 400 with a clear message
+        return res.status(400).json({
+          message: "A visualization with this exact data already exists in your history."
+        });
+      }
+    }
+
     const newHistory = new History({
       userId, title, type, data, rawInput, urlInput, inputType, isPublic: isPublic || false, isDeleted: isDeleted || false,
     });
@@ -43,6 +45,7 @@ router.post("/save", verifyToken, async (req, res) => {
 
 // @route   PUT api/history/:id/toggle
 // @desc    Toggle isPublic flag
+
 router.put("/:id/toggle", verifyToken, async (req, res) => {
   try {
     const historyItem = await History.findById(req.params.id);
@@ -50,8 +53,12 @@ router.put("/:id/toggle", verifyToken, async (req, res) => {
     if (!historyItem) {
       return res.status(404).json({ message: "History not found" });
     }
-    if (historyItem.userId.toString() !== req.user.id) {
-      return res.status(401).json({ message: "User not verified" });
+
+    const isOwner = historyItem.userId.toString() === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(401).json({ message: "User not authorized" });
     }
 
     historyItem.isPublic = !historyItem.isPublic;
@@ -72,7 +79,7 @@ router.get("/user", verifyToken, async (req, res) => {
     res.json(histories);
   } catch (err) {
     console.error(err.message);
-    res.status(500).json("Server error");
+    res.status(500).json("Server error really");
   }
 });
 
@@ -172,8 +179,12 @@ router.put("/:id", verifyToken, async (req, res) => {
     if (!historyItem) {
       return res.status(404).json({ message: "History not found" });
     }
-    if (historyItem.userId.toString() !== req.user.id) {
-      return res.status(401).json({ message: "User not verified" });
+
+    const isOwner = historyItem.userId.toString() === req.user.id;
+    const isAdmin = req.user.role === 'admin';
+
+    if (!isOwner && !isAdmin) {
+      return res.status(401).json({ message: "User not authorized" });
     }
 
     historyItem.isDeleted = !historyItem.isDeleted;

@@ -1,13 +1,9 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import {
-  FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiList, FiShare2,
-  FiClock, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch,
-  FiLoader, FiSettings, FiSearch
-} from "react-icons/fi";
-import { MdShowChart } from "react-icons/md";
+import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch, FiLoader, FiSettings, FiSearch } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
+import { useError } from '../hooks/customHooks.jsx';
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
@@ -22,8 +18,9 @@ const Visualizer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
+  const { showError } = useError();
   const reportRef = useRef(null);
-
+  const panelref = useRef(null);
   const [inputType, setInputType] = useState("paste");
   const [rawInput, setRawInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
@@ -125,7 +122,7 @@ const Visualizer = () => {
     setSaveState("saving");
 
     const newHistoryItem = {
-      title: `Visualization ${new Date().toLocaleDateString()}`,
+      title: `Visual ${new Date().toLocaleDateString()}`,
       type: viewMode,
       dataLength: data.length,
       data: data,
@@ -145,8 +142,12 @@ const Visualizer = () => {
         body: JSON.stringify(newHistoryItem)
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to save history");
+        showError(result.message || result || "Failed to save history");
+        setSaveState("idle");
+        return;
       }
 
       setSaveState("saved");
@@ -182,7 +183,7 @@ const Visualizer = () => {
 
 
   return (
-    <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 h-[calc(100vh-64px)] w-full">
+    <div className={`relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-auto w-full`}>
 
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
@@ -191,13 +192,13 @@ const Visualizer = () => {
       <div className={`fixed inset-y-0 left-0 z-40 w-80 max-w-full transform transition-transform duration-300 ease-in-out
                     md:sticky md:top-0 md:translate-x-0 md:transform-none 
                     ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}>
-        <div className="h-full bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none">
+        <div className="min-h-screen sm:min-h-auto sm:h-[calc(100vh-64px)] bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none" >
 
           <div className="p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <h2 className="font-bold text-gray-800 dark:text-white flex items-center gap-2">
               <FiSettings className="text-indigo-500" /> Input Source
             </h2>
-            <button onClick={() => setIsPanelOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+            <button onClick={() => setIsPanelOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full" ref={panelref}>
               <FiX />
             </button>
           </div>
@@ -224,12 +225,7 @@ const Visualizer = () => {
 
             <div className="flex-1 relative mb-4 min-h-[200px]">
               {inputType === 'paste' && (
-                <textarea
-                  value={rawInput}
-                  onChange={(e) => setRawInput(e.target.value)}
-                  placeholder='[{"key": "value"}]'
-                  className="w-full h-full p-4 font-mono text-xs border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-0 bg-gray-50 dark:bg-gray-800 resize-none outline-none"
-                />
+                <textarea value={rawInput} onChange={(e) => setRawInput(e.target.value)} placeholder='[{"key": "value"}]' className="w-full h-full p-4 font-mono text-xs border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-0 bg-gray-50 dark:bg-gray-800 resize-none outline-none" />
               )}
               {inputType === 'url' && (
                 <div className="mt-4">
@@ -257,20 +253,21 @@ const Visualizer = () => {
       </div>
       <div className="flex-1 min-w-0 transition-all duration-300 lg:max-w-screen-2xl mx-auto px-4 lg:px-8">
         {!isPanelOpen && (
-          <button onClick={() => setIsPanelOpen(true)} className="fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all">
+          <button onClick={() => {
+            panelref.current.focus();
+            setIsPanelOpen(true);
+          }} className="fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all" >
             <FiCode size={20} />
           </button>
         )}
-        <div className="flex flex-col gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm transition-colors">
+        <div className="flex flex-col gap-4 py-4 rounded-xl transition-colors py-10">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 justify-center">
               <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
                 <FiBarChart2 className="w-6 h-6 stroke-[2.5px]" />
               </div>
-
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
+                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
                   Visualization Canvas
                 </span>
               </h1>
@@ -278,72 +275,62 @@ const Visualizer = () => {
 
             <div className="flex flex-col sm:flex-row p-1.5 sm:p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-0 overflow-x-hidden max-w-full">
 
-              <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 px-1">
-                {data.length > 0 && (
+              {data.length > 0 && (
+                <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 px-1">
                   <>
-                    <button
-                      onClick={togglePublic}
-                      className={`group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2
-          ${isPublic
-                          ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500"
-                          : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"}`}
-                    >
+                    <button onClick={togglePublic} className={`group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2 w-full sm:w-auto
+                      ${isPublic
+                        ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500"
+                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"}`} >
                       <div className="flex-shrink-0">{isPublic ? <FiEye size={18} /> : <FiEyeOff size={18} />}</div>
                       <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                        <span className="overflow-hidden whitespace-nowrap text-sm font-medium">
+                        <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
                           {isPublic ? "Public" : "Private"}
                         </span>
                       </div>
                     </button>
 
-                    <button
-                      onClick={handleSave}
-                      disabled={saveState === "saving"}
-                      className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg shadow-md transition-all duration-300"
-                    >
+                    <button onClick={handleSave} disabled={saveState === "saving"} className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg shadow-md transition-all duration-300 w-full sm:w-auto" >
                       <div className="flex-shrink-0">
                         {saveState === "saving" && <FiLoader className="animate-spin" size={18} />}
                         {saveState === "saved" && <FiCheck size={18} />}
                         {saveState === "idle" && <FiSave size={18} />}
                       </div>
                       <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                        <span className="overflow-hidden whitespace-nowrap text-sm font-medium">
+                        <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
                           {saveState === "saving" ? "Saving..." : saveState === "saved" ? "Saved" : "Save"}
                         </span>
                       </div>
                     </button>
 
-                    <button
-                      onClick={handleClearVisualizer}
-                      className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all duration-300"
-                    >
+                    <button onClick={handleClearVisualizer} className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all duration-300 w-full sm:w-auto" >
                       <div className="flex-shrink-0"><FiTrash2 size={18} /></div>
                       <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                        <span className="overflow-hidden whitespace-nowrap text-sm font-medium">Clear</span>
+                        <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">Clear</span>
                       </div>
                     </button>
 
                     <button
                       onClick={() => setSearchBar(!searchBar)}
                       disabled={data.length === 0 || viewMode === "graph" || viewMode === "tree"}
-                      className={`group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2
-                      ${searchBar
-                          ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500"
+                      className={`group flex items-center justify-center gap-0 sm:hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2 w-full sm:w-auto
+                        ${searchBar
+                          ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500 gap-2"
                           : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
                         } disabled:opacity-50 disabled:cursor-not-allowed`}>
                       <div className="flex-shrink-0"><FiSearch size={18} /></div>
                       <div className={`grid transition-all duration-300 ease-in-out ${searchBar ? "grid-cols-[1fr] gap-2" : "grid-cols-[0fr] group-hover:grid-cols-[1fr] group-hover:gap-2"}`}>
-                        <span className="overflow-hidden whitespace-nowrap text-sm font-medium">
+                        <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
                           Search
                         </span>
                       </div>
                     </button>
                   </>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="h-[1px] w-full bg-gray-100 dark:bg-gray-800 sm:hidden" />
-              <div className="hidden sm:block w-[1px] h-6 bg-gray-200 dark:bg-gray-700 mx-2" />
+              {data.length < 0 && <div className="h-[1px] w-full bg-gray-100 dark:bg-gray-800 sm:hidden" />}
+              {data.length < 0 && <div className="hidden sm:block w-[1px] h-6 bg-gray-200 dark:bg-gray-700 mx-2" />}
 
               <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 px-1 overflow-x-auto no-scrollbar">
                 {viewModes.map(v => {
@@ -352,14 +339,14 @@ const Visualizer = () => {
                     <button
                       key={v.id}
                       onClick={() => setViewMode(v.id)}
-                      className={`group flex items-center justify-center px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap flex-1 sm:flex-none
+                      className={`group flex items-center justify-center sm:px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap flex-1 sm:flex-none
                         ${isActive
-                          ? "bg-indigo-600 text-white shadow-md gap-2"
+                          ? "bg-indigo-600 text-white shadow-md sm:gap-2"
                           : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 gap-0 hover:gap-2"
                         }`}>
                       <div className="flex-shrink-0"><v.icon size={18} /></div>
                       <div className={`grid transition-all duration-300 ease-in-out ${isActive ? "grid-cols-[1fr]" : "grid-cols-[0fr] group-hover:grid-cols-[1fr]"}`}>
-                        <span className="overflow-hidden whitespace-nowrap">
+                        <span className="hidden sm:flex overflow-hidden whitespace-nowrap">
                           {v.label}
                         </span>
                       </div>
@@ -371,11 +358,7 @@ const Visualizer = () => {
           </div>
           {searchBar && viewMode !== "graph" && viewMode !== "tree" && (
             <div className="w-full transition-all duration-500 animate-in fade-in slide-in-from-top-2">
-              <Features
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                targetRef={reportRef}
-              />
+              <Features searchTerm={searchTerm} setSearchTerm={setSearchTerm} targetRef={reportRef} />
             </div>
           )}
         </div>

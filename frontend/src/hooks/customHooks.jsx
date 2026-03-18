@@ -1,11 +1,10 @@
 import { useContext } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 import { VizContext } from "../context/VizContext";
+import { ErrorContext } from "../context/ErrorContext";
 
-export function useTheme() {
-    return useContext(ThemeContext);
-}
+export const useTheme = () => useContext(ThemeContext);
 
-export function useViz() {
-    return useContext(VizContext);
-}
+export const useViz = () => useContext(VizContext);
+
+export const useError = () => useContext(ErrorContext);
