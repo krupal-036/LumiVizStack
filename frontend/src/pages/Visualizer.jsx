@@ -28,7 +28,7 @@ const Visualizer = () => {
   const [viewMode, setViewMode] = useState("table");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle");
   const [isPublic, setIsPublic] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");

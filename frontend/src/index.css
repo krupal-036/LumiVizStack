@@ -15,6 +15,6 @@
   }
 
   .animate-toast-progress {
-    animation: shrink 2000ms linear forwards;
+    animation: shrink 4000ms linear forwards;
   }
 }
