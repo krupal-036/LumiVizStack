@@ -1,11 +1,18 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import Loader from "./Loader";
-import Alert from "./Alert";
+import { useAlert } from "../../hooks/customHooks"
 const AdminRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
+  const { showAlert } = useAlert();
   const location = useLocation();
+  useEffect(() => {
+    if (!loading && user && user.role !== "admin") {
+      showAlert("You can't access Admin panel with user credentials", "Invalid User...");
+    }
+  }, [user, loading, showAlert]);
+
   if (loading) {
     return (
       <Loader data={"Loading Admin Panel..."} />
@@ -17,11 +24,10 @@ const AdminRoute = ({ children }) => {
   }
 
   if (user.role !== "admin") {
-    return ( <>
-    <Navigate to="/" replace />
-    <Alert message={"You cant access Admin panel wit user credentials"} />
+    return (<>
+      <Navigate to="/" replace />
     </>
-  );
+    );
   }
 
   return children;

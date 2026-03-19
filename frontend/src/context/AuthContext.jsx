@@ -12,10 +12,10 @@ export const AuthProvider = ({ children }) => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
     if (storedUser && storedToken) {
-    const parsedUser = JSON.parse(storedUser);
-    setUser(parsedUser);
-    setRole(parsedUser.role);
-  }
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+      setRole(parsedUser.role);
+    }
     setLoading(false);
   }, []);
 

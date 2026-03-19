@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import axios from "axios";
 import { Earth, Trash } from 'lucide-react';
 import { AuthContext } from "../context/AuthContext";
@@ -11,10 +12,10 @@ import {
   FiAlertTriangle,
   FiEye,
 } from "react-icons/fi";
-import { HiOutlineUserGroup } from "react-icons/hi";
+import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
 import Loader from "../components/common/Loader";
-
-
+import { useAlert } from "../hooks/customHooks";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const AdminPanel = () => {
   const [stats, setStats] = useState({ users: 0, records: 0, isPublic: 0, isDeleted: 0 });
@@ -24,8 +25,11 @@ const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState("users");
   const { user: currentUser } = useContext(AuthContext);
   const token = localStorage.getItem("token");
-
+  const { showAlert } = useAlert();
+  const navigate = useNavigate();
+  const location = useLocation();
   const fetchData = async () => {
+    setLoading(true);
     if (!token) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -40,7 +44,9 @@ const AdminPanel = () => {
       setHistory(historyRes.data);
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error(err.message);
+      showAlert(err.response?.data?.message || "Could not load administrative data.", "Error...",);
+      navigate("/", { state: { from: location }, replace: true });
       setLoading(false);
     }
   };
@@ -59,7 +65,7 @@ const AdminPanel = () => {
       setStats((prev) => ({ ...prev, users: prev.users - 1 }));
     } catch (err) {
       console.error(err);
-      alert("Failed to delete user.");
+      showAlert("Failed to delete user.");
     }
   };
   const handleDeleteAllHistoryOfUser = async (id) => {
@@ -70,7 +76,7 @@ const AdminPanel = () => {
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to delete user.");
+      showAlert("Failed to delete All History.");
     }
   };
 
@@ -93,10 +99,10 @@ const AdminPanel = () => {
         );
 
       } else {
-        alert("Failed to Update Status.");
+        showAlert("Failed to Update Status.");
       }
     } catch (err) {
-      console.error("Toggle error:", err);
+      showAlert(err || "Fail tot Toggle", "Toggle error");
     }
   };
 
@@ -118,10 +124,10 @@ const AdminPanel = () => {
         );
 
       } else {
-        alert("Failed to Update Status.");
+        showAlert("Failed to Update Status.");
       }
     } catch (err) {
-      console.error("Toggle error:", err);
+      showAlert(err || "Fail to toggle", "Toggle error");
     }
   };
 
@@ -135,7 +141,7 @@ const AdminPanel = () => {
       setStats((prev) => ({ ...prev, records: prev.records - 1 }));
     } catch (err) {
       console.error(err);
-      alert("Failed to delete record.");
+      showAlert("Failed to delete record.", "Error...");
     }
   };
 
@@ -156,7 +162,7 @@ const AdminPanel = () => {
       alert("All history deleted successfully.");
     } catch (err) {
       console.error(err);
-      alert("Failed to delete all history.");
+      showAlert("Failed to delete all history.");
     }
   };
 
@@ -256,12 +262,24 @@ const AdminPanel = () => {
                   <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
                 )}
               </button>
+              <button
+                onClick={() => setActiveTab("stats")}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "stats"
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
+              >
+                <HiOutlineChartBar className="w-5 h-5" />
+                Stats
+                {activeTab === "stats" && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
+                )}
+              </button>
             </div>
-
             {activeTab === "history" && history.length > 0 && (
               <button
                 onClick={handleDeleteAllHistory}
-                className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
               >
                 <FiTrash2 className="w-4 h-4" />
                 <span className="hidden sm:flex"> Delete All </span>
@@ -346,7 +364,6 @@ const AdminPanel = () => {
                       key={u._id}
                       className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4"
                     >
-                      {/* Header: Profile Info */}
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md shrink-0">
                           {u.username ? u.username[0].toUpperCase() : "U"}
@@ -364,7 +381,6 @@ const AdminPanel = () => {
                         </div>
                       </div>
 
-                      {/* Details Section */}
                       <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
                         <div className="flex flex-col">
                           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Email Address</span>
@@ -373,8 +389,6 @@ const AdminPanel = () => {
                           </span>
                         </div>
                       </div>
-
-                      {/* Action Buttons: Full width for mobile tap-friendliness */}
                       {currentUser?._id !== u._id && (
                         <div className="grid grid-cols-2 gap-3 pt-2">
                           <button
@@ -499,6 +513,15 @@ const AdminPanel = () => {
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 md:hidden">
+                      {activeTab === "history" && history.length > 0 && (
+                        <button
+                          onClick={handleDeleteAllHistory}
+                          className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors mx-auto"
+                        >
+                          <FiTrash2 className="w-4 h-4" />
+                          <span className=""> Delete All </span>
+                        </button>
+                      )}
                       {history.map((h) => (
                         <div key={h._id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                           <div className="flex justify-between items-start">
@@ -566,6 +589,58 @@ const AdminPanel = () => {
                 )}
               </div>
             )}
+            {activeTab === "stats" && (
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-6 text-slate-800 dark:text-slate-100 text-center">
+                  Platform Distribution
+                </h3>
+
+                <div style={{ width: '100%', height: 350 }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={[
+                          { name: 'Users', value: stats.users || 0, color: '#6366f1' },
+                          { name: 'Records', value: stats.records || 0, color: '#8b5cf6' },
+                          { name: 'Public', value: stats.isPublic || 0, color: '#10b981' },
+                          { name: 'Deleted', value: stats.isDeleted || 0, color: '#ef4444' },
+                        ]}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={80}
+                        outerRadius={110}
+                        paddingAngle={5}
+                        dataKey="value"
+                        animationBegin={0}
+                        animationDuration={1200}
+                      >
+                        {[
+                          { name: 'Users', color: '#6366f1' },
+                          { name: 'Records', color: '#8b5cf6' },
+                          { name: 'Public', color: '#10b981' },
+                          { name: 'Deleted', color: '#ef4444' }
+                        ].map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                        ))}
+                      </Pie>
+
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                          borderRadius: '12px',
+                          border: 'none',
+                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                          backdropFilter: 'blur(4px)'
+                        }}
+                      />
+                      <Legend verticalAlign="bottom" height={36} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch, FiLoader, FiSettings, FiSearch } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
-import { useError } from '../hooks/customHooks.jsx';
+import { useAlert } from '../hooks/customHooks.jsx';
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
@@ -18,7 +18,7 @@ const Visualizer = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  const { showError } = useError();
+  const { showAlert } = useAlert();
   const reportRef = useRef(null);
   const panelref = useRef(null);
   const [inputType, setInputType] = useState("paste");
@@ -145,7 +145,7 @@ const Visualizer = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        showError(result.message || result || "Failed to save history");
+        showAlert(result.message || result || "Failed to save history");
         setSaveState("idle");
         return;
       }

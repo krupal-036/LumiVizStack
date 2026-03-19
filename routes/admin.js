@@ -20,7 +20,7 @@ router.get("/stats", verifyToken, isAdmin, async (req, res) => {
     ]);
     res.json({ users: userCount, records: historyCount, isPublic: publicCount, isDeleted: deletedCount });
   } catch (err) {
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ message: "Failed to load dashboard statistics." });
   }
 });
 
@@ -32,7 +32,7 @@ router.get("/users", verifyToken, isAdmin, async (req, res) => {
     const users = await User.find().select("-password");
     res.json(users);
   } catch (err) {
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ message: "Failed to get All Users data..." });
   }
 });
 
@@ -50,7 +50,7 @@ router.delete("/user/:id", verifyToken, isAdmin, async (req, res) => {
 
     res.json({ message: "User and associated history deleted successfully" });
   } catch (err) {
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ message: "Error occured during Deletion of User & its all History" });
   }
 });
 
@@ -71,13 +71,13 @@ router.delete("/users/allhistory/:id", verifyToken, isAdmin, async (req, res) =>
 
     const result = await History.deleteMany({ userId });
 
-    res.json({ 
-      message: "Associated history deleted successfully", 
-      deletedCount: result.deletedCount 
+    res.json({
+      message: "Associated history deleted successfully",
+      deletedCount: result.deletedCount
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Server Error" });
+    res.status(500).json({ message: "Error Occured during Deletion of User's History" });
   }
 });
 
@@ -92,7 +92,7 @@ router.get("/allhistory", verifyToken, isAdmin, async (req, res) => {
     );
     res.json(allHistory);
   } catch (err) {
-    res.status(500).json("Server error");
+    res.status(500).json({ message: "Can't Get All History" });
   }
 });
 

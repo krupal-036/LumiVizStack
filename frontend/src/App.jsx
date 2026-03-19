@@ -18,13 +18,13 @@ import Guide from "./pages/Guide";
 import ApiDocs from "./pages/ApiDocs.jsx";
 import UserProfile from "./pages/UserProfile";
 import BackToTop from "./components/common/BackToTop";
-import { ErrorProvider } from './context/ErrorContext';
+import { AlertProvider } from './context/AlertContext';
 
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ErrorProvider>
+        <AlertProvider>
           <Router>
             <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors duration-200">
               <Navbar />
@@ -75,7 +75,7 @@ function App() {
               <BackToTop />
             </div>
           </Router>
-        </ErrorProvider>
+        </AlertProvider>
       </AuthProvider>
     </ThemeProvider>
   );
