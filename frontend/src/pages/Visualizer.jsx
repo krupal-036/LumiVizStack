@@ -168,8 +168,8 @@ const Visualizer = () => {
     const nextState = !isPublic;
     setIsPublic(nextState);
     const message = `Visualization is now ${nextState ? 'Public' : 'Private'}`;
-    const iconType = nextState ? 2 : 3;
-    showAlert(message, "Visibility Updated", iconType);
+    const alertType = nextState ? 2 : 3;
+    showAlert(message, "Visibility Updated", alertType);
   };
 
 

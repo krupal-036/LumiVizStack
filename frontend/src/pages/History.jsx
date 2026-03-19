@@ -22,7 +22,7 @@ export default function History() {
             setErrors("");
         }, sec * 1000);
     }
-
+    
     useEffect(() => {
         fetchHistory();
     }, []);
@@ -46,7 +46,7 @@ export default function History() {
             if (res.ok) {
                 setHistory(data);
             } else {
-                throw new Error(data.message || "Failed to fetch history");
+                showAlert(data.message || "Failed to fetch history", "History Error", 1);
             }
         } catch (err) {
             setErrors("Server connection failed");
@@ -71,12 +71,16 @@ export default function History() {
                 setHistory(prev =>
                     prev.map(item => item._id === id ? updatedItem : item)
                 );
+                const nextState = updatedItem?.isPublic;
+                const message = `Visualization is now ${nextState ? 'Public' : 'Private'}`;
+                const alertType = nextState ? 2 : 3;
+                showAlert(message, "Visibility Update", alertType);
             } else {
-                setErrors("Failed to Update Status");
+                showAlert(updatedItem?.message || "Failed to Update Status", "Toggle Error", 1);
                 clearError(3);
             }
         } catch (err) {
-            console.error("Toggle error:", err);
+            showAlert("Failed to Update Status" || err, "Toggle Error", 1);
         } finally {
             setActionId(null);
         }
@@ -96,13 +100,17 @@ export default function History() {
                 setHistory(prev =>
                     prev.map(item => item._id === id ? updatedItem : item)
                 );
+                const nextState = updatedItem?.isDeleted;
+                const message = `Visualization is now ${nextState ? 'Deleted' : 'Restored'}`;
+                const alertType = nextState ? 1 : 2;
+                showAlert(message, "History Update", alertType);
 
             } else {
-                setErrors("Failed to Update Status");
+                showAlert(updatedItem?.message || "Failed to Update Status", "Toggle Error", 1);
                 clearError(3);
             }
         } catch (err) {
-            console.error("Toggle error:", err);
+            showAlert("Failed to Update Status" || err, "Toggle Error", 1);
         } finally {
             setActionId(null);
         }
@@ -122,13 +130,14 @@ export default function History() {
 
             if (res.ok) {
                 setHistory(prev => prev.map(item => ({ ...item, isDeleted: true })));
-                console.log("All History Deleted")
+                showAlert("All History items Deleted", "Success", 2);
             } else {
                 const data = await res.json();
-                alert(data.message || "Failed to delete all history");
+                showAlert(data?.message || "Failed to delete all history", "History Error", 1);
             }
         } catch (err) {
             console.error("Delete all error:", err);
+            showAlert(err || err?.message || "Failed to delete all history", "History Error", 1);
         }
     };
 
@@ -137,11 +146,11 @@ export default function History() {
 
         navigator.clipboard.writeText(publicUrl).then(() => {
             setCopiedId(id);
-            setToast("Link copied to clipboard!");
+            showAlert("Link copied to clipboard!", "Success", 2);
             setTimeout(() => setCopiedId(null), 2000);
         }).catch(err => {
             console.error("Failed to copy:", err);
-            alert("Failed to copy link");
+            showAlert(err?.message || err || "Failed to copy link", "Copy error", 1);
         });
     };
 
