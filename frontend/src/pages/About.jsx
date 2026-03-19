@@ -38,7 +38,14 @@ const features = [
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
+      <div className="inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-5%] right-[-10%] w-[200px] h-[200px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[60px] md:blur-[120px] rounded-full" />
+        <div className="absolute top-[25%] left-[-10%] w-[180px] h-[180px] md:w-[500px] md:h-[500px] bg-violet-500/10 dark:bg-violet-600/10 blur-[50px] md:blur-[110px] rounded-full" />
+        <div className="absolute bottom-[15%] right-[-5%] w-[150px] h-[150px] md:w-[450px] md:h-[450px] bg-cyan-500/10 dark:bg-cyan-500/5 blur-[50px] md:blur-[100px] rounded-full" />
+        <div className="absolute bottom-[-10%] left-1/2 -translate-x-1/2 w-[250px] h-[150px] md:w-[700px] md:h-[400px] bg-emerald-500/5 dark:bg-emerald-500/5 blur-[80px] md:blur-[100px] rounded-full" />
+
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 sm:pt-4 xs:pt-4 pb-10">
         <div className="text-center max-w-3xl mx-auto mb-10 pt-4">
           <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">

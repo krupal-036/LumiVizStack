@@ -77,9 +77,10 @@ export default function Dashboard() {
 
   return (
     <section className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-slate-50 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 pb-20">
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-500/20 dark:bg-violet-600/20 blur-[120px] rounded-full pointer-events-none" />
-
+      <div className="inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/20 dark:bg-indigo-600/20 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-violet-500/20 dark:bg-violet-600/20 blur-[120px] rounded-full pointer-events-none" />
+      </div>
       <div className="relative z-10 w-full max-w-4xl px-4 flex flex-col items-center text-center pt-10">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 shadow-sm mb-8 backdrop-blur-sm">
           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">

@@ -11,6 +11,7 @@ import {
   FiUser,
   FiAlertTriangle,
   FiEye,
+  FiSettings,
 } from "react-icons/fi";
 import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
 import Loader from "../components/common/Loader";
@@ -189,22 +190,29 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0B0F19] py-10 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#0B0F19] py-4 sm:py-10 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[120px] rounded-full" />
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <div className="mb-4">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-2">
-            Admin Control Panel
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400">
-            Monitor system activity, manage users, and oversee data records.
-          </p>
-        </div>
 
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col items-center md:items-start md:text-left">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-3 w-full tracking-tight">
+              <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
+                <FiSettings className="w-6 h-6 stroke-[2.5px]" />
+              </div>
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                Admin Control Panel
+              </span>
+            </h1>
+            <p className="text-gray-500 text-center dark:text-gray-400 mt-1 text-sm">
+              Monitor system activity, manage users, and oversee data records.
+            </p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-6 my-4 sm:mb-8">
           <StatCard
             icon={<FiUsers className="w-6 h-6" />}

@@ -1,94 +1,102 @@
 import { useState, useContext } from "react";
+import { FiArrowRight, FiAlertCircle } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
+import { useAlert } from "../hooks/customHooks";
 
 export default function SignUp() {
   const navigate = useNavigate();
   const { login } = useContext(AuthContext);
-
+  const { showAlert } = useAlert();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
   });
-
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const getFieldError = (name, value) => {
+    const reservedWords = ["admin", "root", "support", "help", "official", "moderator", "krupal", "krupalfataniya", "user"];
+    const usernameRegex = /^[a-z][a-z0-9]*$/;
+    const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]{2,}\.[a-zA-Z]{2,}$/;
+
+    if (name === "username") {
+      const trimmed = value?.trim().toLowerCase();
+      if (!trimmed) return "Username is required";
+      if (!usernameRegex.test(trimmed)) return "Username must start with a letter";
+      if (trimmed.length < 3) return "Username must be at least 3 characters";
+      if (trimmed.length > 30) return "Username cannot be greater than 30 characters";
+      if (reservedWords.includes(trimmed)) return "This username is reserved.";
+    }
+
+    if (name === "email") {
+      if (!value) return "Email is required";
+      if (!emailRegex.test(value)) return "Email address is invalid";
+    }
+
+    if (name === "password") {
+      if (!value) return "Password is required";
+      if (value.length < 8) return "Must be at least 8 characters";
+      if (!/[A-Z]/.test(value)) return "Include at least one uppercase letter";
+      if (!/[a-z]/.test(value)) return "Include at least one lowercase letter";
+      if (!/[0-9]/.test(value)) return "Include at least one number";
+      if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) return "Include at least one special symbol";
+    }
+    return "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-    if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (value.length > 0) {
+      const fieldError = getFieldError(name, value);
+      setErrors((prev) => ({
+        ...prev,
+        [name]: fieldError,
+      }));
+    } else {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
+
   const clearError = (sec) => {
-        setTimeout(() => {
-            setErrors("");
-        }, sec * 1000);
-    }
-  const validate = () => {
+    setTimeout(() => {
+      setErrors({});
+    }, sec * 1000);
+  };
+
+  const validateAll = () => {
     const newErrors = {};
-
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Username must be at least 3 characters";
-    } else if (formData.username.length > 30) {
-      newErrors.username = "Username cannot be greater than 30 characters";
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email address is invalid";
-    }
-
-    const password = formData.password;
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 8) {
-      newErrors.password = "Must be at least 8 characters";
-    } else if (!/[A-Z]/.test(password)) {
-      newErrors.password = "Include at least one uppercase letter";
-    } else if (!/[a-z]/.test(password)) {
-      newErrors.password = "Include at least one lowercase letter";
-    } else if (!/[0-9]/.test(password)) {
-      newErrors.password = "Include at least one number";
-    } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      newErrors.password = "Include at least one special symbol";
-    }
-
+    Object.keys(formData).forEach((key) => {
+      const error = getFieldError(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
     setErrors(newErrors);
-    clearError(3);
     return Object.keys(newErrors).length === 0;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-
+    if (!validateAll()) return;
     setIsLoading(true);
     setErrors({});
-
     try {
       const response = await fetch(`/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
-
       const contentType = response.headers.get("content-type");
       let data;
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
         const text = await response.text();
-        throw new Error(text || "Server returned an invalid response");
+        showAlert(text || "Server returned an invalid response", "Server Error", 1);
       }
-
       if (!response.ok) {
         const backendErrors = {};
         if (Array.isArray(data.message)) {
@@ -98,24 +106,22 @@ export default function SignUp() {
             if (lowerMsg.includes("email")) backendErrors.email = msg;
             if (lowerMsg.includes("password")) backendErrors.password = msg;
           });
-        } else if (data?.message || data.error) {
+        } else if (data?.message || data?.error) {
           if (data.message?.toLowerCase().includes("email")) {
             backendErrors.email = data.message;
+            showAlert(data?.message || data.error, "Validation Error...");
           } else {
-            backendErrors.general = data.error;
+            showAlert(data?.message || data.error, "API Error...", 1);
           }
         }
-
         setErrors(backendErrors);
         clearError(3);
         return;
       }
-
       login(data.user, data.token);
       navigate("/");
-
     } catch (error) {
-      setErrors({ general: "Connection failed. Check if the server is running." });
+      showAlert("Connection failed. Check if the server is running.", "Server Error", 1);
       clearError(3);
     } finally {
       setIsLoading(false);
@@ -123,85 +129,145 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-black pt-0">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-300
-                   max-w-[450px] w-full mx-4 md:p-6 p-4 py-8 text-left text-sm
-                   rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
-      >
-        <h2 className="text-2xl font-bold mb-9 text-center text-gray-800 dark:text-white">
-          Sign Up
-        </h2>
-
-        {errors.general && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-center text-xs">
-            {errors.general}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f172a] p-4 transition-colors duration-300">
+      <div className="w-full max-w-md">
+        {/* Header Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/20">
+            <FiUser className="text-white text-2xl" />
           </div>
-        )}
-
-        <div className="mb-4">
-          <div className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.username ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}>
-            <FiUser className="text-gray-400" />
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              className="w-full outline-none bg-transparent py-2.5 text-gray-800 dark:text-gray-100"
-            />
-          </div>
-          {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username}</p>}
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+            Create account
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
+            Enter your details to get started.
+          </p>
         </div>
 
-        <div className="mb-4">
-          <div className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}>
-            <FiMail className="text-gray-400" />
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full outline-none bg-transparent py-2.5 text-gray-800 dark:text-gray-100"
-            />
-          </div>
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-        </div>
-
-        <div className="mb-6">
-          <div className={`flex items-center border rounded gap-2 pl-2 bg-indigo-500/5 ${errors.password ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}>
-            <FiLock className="text-gray-400" />
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full outline-none bg-transparent py-2.5 text-gray-800 dark:text-gray-100"
-            />
-          </div>
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-        </div>
-
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full mb-3 bg-indigo-500 hover:bg-indigo-600
-                     transition-all active:scale-95 py-2.5 rounded
-                     text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 p-6 md:p-8 rounded-3xl shadow-xl shadow-gray-200/60 dark:shadow-none"
         >
-          {isLoading ? "Creating Account..." : "Create Account"}
-        </button>
+          <div className="space-y-2">
 
-        <p className="text-center mt-4">
-          Already have an account?{" "}
-          <Link to="/login" className="text-blue-500 hover:underline">
-            Log In
-          </Link>
-        </p>
-      </form>
+            {/* Username Field */}
+            <div className={errors.username ? "animate-shake" : ""}>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+                Username
+              </label>
+              <div className={`group flex items-center bg-gray-100 dark:bg-gray-900/50 border-2 transition-all rounded-xl px-4 py-3 
+                ${errors.username
+                  ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20'
+                  : 'border-transparent focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-gray-900'
+                }`}>
+                <FiUser className={`shrink-0 transition-colors ${errors.username ? 'text-red-500' : 'text-gray-400 group-focus-within:text-indigo-500'}`} />
+                <input
+                  type="text"
+                  name="username"
+                  placeholder="johndoe"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full bg-transparent outline-none px-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 font-medium"
+                />
+                {errors.username && <FiAlertCircle className="text-red-500 shrink-0" />}
+              </div>
+              <div className="min-h-[24px] mt-1 ml-1">
+                {errors.username && (
+                  <p className="text-red-600 dark:text-red-400 text-xs font-bold animate-in fade-in animate-slide-down">
+                    {errors.username}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div className={errors.email ? "animate-shake" : ""}>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+                Email Address
+              </label>
+              <div className={`group flex items-center bg-gray-100 dark:bg-gray-900/50 border-2 transition-all rounded-xl px-4 py-3 
+                ${errors.email
+                  ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20'
+                  : 'border-transparent focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-gray-900'
+                }`}>
+                <FiMail className={`shrink-0 transition-colors ${errors.email ? 'text-red-500' : 'text-gray-400 group-focus-within:text-indigo-500'}`} />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="name@company.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full bg-transparent outline-none px-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 font-medium"
+                />
+                {errors.email && <FiAlertCircle className="text-red-500 shrink-0" />}
+              </div>
+              <div className="min-h-[24px] mt-1 ml-1">
+                {errors.email && (
+                  <p className="text-red-600 dark:text-red-400 text-xs font-bold animate-in fade-in animate-slide-down">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Password Field */}
+            <div className={errors.password ? "animate-shake" : ""}>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
+                Password
+              </label>
+              <div className={`group flex items-center bg-gray-100 dark:bg-gray-900/50 border-2 transition-all rounded-xl px-4 py-3 
+                ${errors.password
+                  ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20'
+                  : 'border-transparent focus-within:border-indigo-500 focus-within:bg-white dark:focus-within:bg-gray-900'
+                }`}>
+                <FiLock className={`shrink-0 transition-colors ${errors.password ? 'text-red-500' : 'text-gray-400 group-focus-within:text-indigo-500'}`} />
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full bg-transparent outline-none px-3 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600 font-medium"
+                />
+                {errors.password && <FiAlertCircle className="text-red-500 shrink-0" />}
+              </div>
+              <div className="min-h-[24px] mt-1 ml-1">
+                {errors.password && (
+                  <p className="text-red-600 dark:text-red-400 text-xs font-bold animate-in fade-in animate-slide-down">
+                    {errors.password}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-400 
+                       text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none 
+                       transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <span className="flex items-center gap-2">
+                <FiLoader className="animate-spin h-5 w-5 text-white" />
+                Creating Account...
+              </span>
+            ) : (
+              <>
+                Create Account <FiArrowRight className="text-lg" />
+              </>
+            )}
+          </button>
+
+          <p className="text-center mt-6 text-gray-500 dark:text-gray-400 text-sm">
+            Already have an account?{" "}
+            <Link to="/login" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+              Log In
+            </Link>
+          </p>
+        </form>
+      </div>
     </div>
   );
 }

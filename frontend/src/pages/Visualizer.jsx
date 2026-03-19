@@ -10,7 +10,7 @@ import ChartView from "../components/visualizations/ChartView";
 import TreeView from "../components/visualizations/TreeView";
 import GraphView from "../components/visualizations/GraphView";
 import { Features, renderValue } from "../components/Features.jsx";
-import { TbGhost } from "react-icons/tb";
+import { HiOutlineDatabase, HiPlusCircle, HiSparkles } from "react-icons/hi";
 
 const VISUALIZER_STORAGE_KEY = "visualizerState";
 
@@ -74,6 +74,7 @@ const Visualizer = () => {
     setError("");
     setSearchTerm("");
     sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
+    showAlert("Input Data Cleared successfully", "Message", 3)
   };
 
   const handleProcess = async () => {
@@ -151,6 +152,7 @@ const Visualizer = () => {
       }
 
       setSaveState("saved");
+      showAlert("History saved successfully", "Success", 2)
 
       setTimeout(() => {
         setSaveState("idle");
@@ -163,8 +165,13 @@ const Visualizer = () => {
   };
 
   const togglePublic = () => {
-    setIsPublic(!isPublic);
+    const nextState = !isPublic;
+    setIsPublic(nextState);
+    const message = `Visualization is now ${nextState ? 'Public' : 'Private'}`;
+    const iconType = nextState ? 2 : 3;
+    showAlert(message, "Visibility Updated", iconType);
   };
+
 
   const filteredData = useMemo(() => {
     if (!searchTerm) return data;
@@ -183,8 +190,11 @@ const Visualizer = () => {
 
 
   return (
-    <div className={`relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-auto w-full`}>
-
+    <div className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-auto overflow-hidden w-full `}>
+      <div className="inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] right-[-5%] w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-cyan-500/20 blur-[50px] md:blur-[80px] rounded-bl-full pointer-events-none" />
+        <div className="absolute bottom-[-5%] left-0 w-[180px] h-[180px] md:w-[300px] md:h-[300px] bg-fuchsia-500/20 blur-[50px] md:blur-[80px] rounded-tr-full pointer-events-none" />
+      </div>
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
       )}
@@ -243,10 +253,10 @@ const Visualizer = () => {
               )}
             </div>
 
-            {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-lg text-xs">{error}</div>}
+            {error && <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-lg text-sm ">{error}</div>}
 
             <button onClick={handleProcess} disabled={loading} className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50">
-              {loading ? "Processing..." : "Visualize Data"} <FiPlay />
+              {loading ? "Processing..." : "Visualize Data"} <HiSparkles size={16} />
             </button>
           </div>
         </div>
@@ -364,12 +374,36 @@ const Visualizer = () => {
         </div>
         <div ref={reportRef} className="pb-20">
           {data.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-xl border-gray-500 dark:border-gray-500 bg-white dark:bg-gray-800/50 p-4">
-              <div className="p-6 bg-gray-200/80 dark:bg-gray-800 rounded-full mb-4">
-                <TbGhost className="text-4xl text-gray-500 dark:text-gray-400" />
+            <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-2xl border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/20 backdrop-blur-sm p-8 transition-all">
+
+              <div className="relative p-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-full mb-6 group">
+                <HiOutlineDatabase className="text-5xl text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
+                <div className="absolute -top-1 -right-1">
+                  <span className="relative flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500"></span>
+                  </span>
+                </div>
               </div>
-              <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">No Data to Display</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Open the side panel and load your data source</p>
+              <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                Ready to get started?
+              </h3>
+              <p className="max-w-xs text-gray-500 dark:text-gray-400 mt-2 mb-8 leading-relaxed">
+                Your data workspace is empty. Open the side panel to connect your source.
+              </p>
+
+              <button
+                onClick={() => setIsPanelOpen(true)}
+                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
+                 bg-green-400 hover:bg-green-700 text-green-900 
+                 dark:bg-green-500 dark:hover:bg-green-600
+                 shadow-lg shadow-green-200 dark:shadow-none
+                 active:scale-95"
+              >
+                <HiPlusCircle className="w-5 h-5" />
+                Connect Data Source
+              </button>
+
             </div>
           ) : (
             <div className="overflow-x-auto">

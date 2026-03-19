@@ -57,7 +57,7 @@ const PublicView = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-100 dark:bg-black flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-md w-full text-center border border-gray-200 dark:border-gray-700">
           <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
             <FiAlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />

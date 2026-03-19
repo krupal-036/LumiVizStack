@@ -96,6 +96,7 @@ export default function History() {
                 setHistory(prev =>
                     prev.map(item => item._id === id ? updatedItem : item)
                 );
+
             } else {
                 setErrors("Failed to Update Status");
                 clearError(3);
@@ -155,26 +156,35 @@ export default function History() {
     };
 
     return (
-        <div className="min-h-screen pt-10 pb-12 px-4 bg-gray-50 dark:bg-[#0B0F19] transition-colors duration-300">
+        <div className="min-h-screen pt-4 sm:pt-10 pb-12 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
 
+            <div className="fixed inset-0 pointer-events-none -z-10">
+                <div className="absolute top-[-10%] left-[-5%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[100px] rounded-full" />
+            </div>
             {toast && (
                 <div className="fixed top-24 left-1/2 -translate-x-1/2 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-full shadow-xl flex items-center gap-2 animate-bounce font-medium">
                     <FiCheck /> {toast}
                 </div>
             )}
 
-            <div className="max-w-5xl mx-auto">
+            <div className="max-w-7xl mx-auto">
 
                 <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
-                            <FiClock className="text-indigo-500" />
-                            Visualization History
+                    <div className="flex flex-col items-center md:items-start md:text-left">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-3 w-full tracking-tight">
+                            <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
+                                <FiClock className="w-6 h-6 stroke-[2.5px]" />
+                            </div><span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                                Visualization History
+                            </span>
                         </h1>
                         <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
                             Your recent activity and saved charts
                         </p>
                     </div>
+
+
 
                     {history.length > 0 && (() => {
                         const savedItems = history.filter(item => !item.isDeleted);

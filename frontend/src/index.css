@@ -2,19 +2,45 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@layer base {
-    body {
-        font-family: 'Inter', sans-serif;
-    }
-}
-
-@layer utilities {
+@theme {
   @keyframes shrink {
     from { transform: scaleX(1); }
     to { transform: scaleX(0); }
   }
 
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+
+  @keyframes slide-down {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  --animate-toast-progress: shrink 4000ms linear forwards;
+  --animate-shake: shake 0.2s ease-in-out 0s 2;
+  --animate-slide-down: slide-down 0.2s ease-out forwards;
+}
+
+@layer base {
+  body {
+    font-family: "Inter", sans-serif;
+  }
+}
+
+/* @layer utilities {
+  @keyframes shrink {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+
   .animate-toast-progress {
     animation: shrink 4000ms linear forwards;
   }
-}
+} */

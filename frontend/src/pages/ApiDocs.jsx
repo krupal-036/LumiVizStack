@@ -80,39 +80,47 @@ const EndpointCard = ({
 
 export default function ApiDocs() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
-      <div className="max-w-4xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    
+    <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[400px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[80px] md:blur-[130px] rounded-full" />
+
+    <div className="absolute top-[20%] right-[-5%] w-[200px] h-[200px] md:w-[500px] md:h-[500px] bg-blue-500/10 dark:bg-blue-600/10 blur-[70px] md:blur-[110px] rounded-full" />
+
+    <div className="absolute top-[50%] left-[-10%] w-[180px] h-[180px] md:w-[450px] md:h-[450px] bg-emerald-500/5 dark:bg-emerald-600/5 blur-[60px] md:blur-[100px] rounded-full" />
+
+    <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[90px] md:blur-[140px] rounded-full" />
+
+  </div>
+      <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
 
         <div className="flex flex-col items-center justify-center mb-10 sm:mb-12 lg:mb-16 text-center px-4">
 
-  {/* Badge */}
-  <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-5 sm:mb-6">
-    <FiServer className="w-4 h-4" />
-    API Reference
-  </div>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-5 sm:mb-6">
+            <FiServer className="w-4 h-4" />
+            API Reference
+          </div>
 
-  {/* Heading */}
-  <h1 className="flex flex-wrap items-center justify-center text-center text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 sm:mb-6">
-    
-    <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
-      LumiVizStack&nbsp;
-    </span>
+          <h1 className="flex flex-wrap items-center justify-center text-center text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 sm:mb-6">
 
-    <span className="text-gray-900 dark:text-white">
-      API Docs
-    </span>
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
+              LumiVizStack&nbsp;
+            </span>
 
-  </h1>
+            <span className="text-gray-900 dark:text-white">
+              API Docs
+            </span>
 
-  {/* Description */}
-  <p className="max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-    This document provides detailed information about the REST API
-    endpoints available in LumiVizStack. The API allows you to manage
-    authentication, history, and data visualization configurations
-    programmatically.
-  </p>
+          </h1>
 
-</div>
+          <p className="max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+            This document provides detailed information about the REST API
+            endpoints available in LumiVizStack. The API allows you to manage
+            authentication, history, and data visualization configurations
+            programmatically.
+          </p>
+
+        </div>
 
 
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-10 text-sm text-blue-700 dark:text-blue-300 flex gap-3 items-start">

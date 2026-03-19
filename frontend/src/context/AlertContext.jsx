@@ -5,7 +5,7 @@ export const AlertContext = createContext();
 
 export const AlertProvider = ({ children }) => {
   const [alert, setAlert] = useState({ type: 1 });
-  const [close, setClose] = useState(true);
+  const [close, setClose] = useState(false);
   const showAlert = useCallback((message, title = "Unknown Error...", type = 1) => {
     setAlert({ title, message, type });
     setClose(true);
