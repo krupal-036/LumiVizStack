@@ -117,7 +117,7 @@ export default function History() {
     };
 
     const handleDeleteAll = async () => {
-        if (!window.confirm("Are you sure? This will permanently delete ALL history.")) {
+        if (!window.confirm("Are you sure? This will delete ALL history.")) {
             return;
         }
 
@@ -130,7 +130,7 @@ export default function History() {
 
             if (res.ok) {
                 setHistory(prev => prev.map(item => ({ ...item, isDeleted: true })));
-                showAlert("All History items Deleted", "Success", 2);
+                showAlert("All History items Deleted", "History Delete", 3);
             } else {
                 const data = await res.json();
                 showAlert(data?.message || "Failed to delete all history", "History Error", 1);
@@ -363,8 +363,6 @@ export default function History() {
 
                                                         <Link
                                                             to={`/view/${item._id}`}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
                                                             className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
                                                             title="Open Public Page"
                                                         >

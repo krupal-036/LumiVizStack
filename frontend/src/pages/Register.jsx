@@ -1,5 +1,5 @@
 import { useState, useContext } from "react";
-import { FiArrowRight, FiAlertCircle } from "react-icons/fi";
+import { FiArrowRight, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
@@ -83,12 +83,14 @@ export default function SignUp() {
     if (!validateAll()) return;
     setIsLoading(true);
     setErrors({});
+
     try {
-      const response = await fetch(`/api/auth/register`, {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
+
       const contentType = response.headers.get("content-type");
       let data;
       if (contentType && contentType.includes("application/json")) {
@@ -98,6 +100,7 @@ export default function SignUp() {
         showAlert(text || "Server returned an invalid response", "Server Error", 1);
       }
       if (!response.ok) {
+        
         const backendErrors = {};
         if (Array.isArray(data.message)) {
           data.message?.forEach((msg) => {
@@ -106,6 +109,7 @@ export default function SignUp() {
             if (lowerMsg.includes("email")) backendErrors.email = msg;
             if (lowerMsg.includes("password")) backendErrors.password = msg;
           });
+          
         } else if (data?.message || data?.error) {
           if (data.message?.toLowerCase().includes("email")) {
             backendErrors.email = data.message;
@@ -114,10 +118,12 @@ export default function SignUp() {
             showAlert(data?.message || data.error, "API Error...", 1);
           }
         }
+        showAlert(data?.error || data?.message || "Invalid credentials....", "Validation Error");
         setErrors(backendErrors);
         clearError(3);
         return;
       }
+
       login(data.user, data.token);
       navigate("/");
     } catch (error) {
@@ -129,28 +135,27 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f172a] p-4 transition-colors duration-300">
+    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f172a] p-4 transition-colors duration-300">
       <div className="w-full max-w-md">
-        {/* Header Section */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/20">
-            <FiUser className="text-white text-2xl" />
-          </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Create account
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Enter your details to get started.
-          </p>
-        </div>
-
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 p-6 md:p-8 rounded-3xl shadow-xl shadow-gray-200/60 dark:shadow-none"
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 py-6 px-4 md:p-8 rounded-3xl shadow-xl shadow-gray-200/60 dark:shadow-none"
         >
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/20">
+              <FiUser className="text-white text-2xl" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              Create account
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              Enter your details to get started.
+            </p>
+          </div>
+
+
           <div className="space-y-2">
 
-            {/* Username Field */}
             <div className={errors.username ? "animate-shake" : ""}>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
                 Username
@@ -179,8 +184,6 @@ export default function SignUp() {
                 )}
               </div>
             </div>
-
-            {/* Email Field */}
             <div className={errors.email ? "animate-shake" : ""}>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
                 Email Address
@@ -210,7 +213,6 @@ export default function SignUp() {
               </div>
             </div>
 
-            {/* Password Field */}
             <div className={errors.password ? "animate-shake" : ""}>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5 ml-1">
                 Password

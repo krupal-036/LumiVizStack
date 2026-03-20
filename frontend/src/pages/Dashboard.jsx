@@ -1,77 +1,24 @@
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext";
-import {
-  FiCheck,
-  FiLink,
-  FiFileText,
-  FiCode,
-  FiCopy,
-  FiTerminal,
-  FiArrowRight,
+import React, { useState } from "react";
+
+import { FiCheck, FiLink, FiFileText, FiCode, FiCopy,
 } from "react-icons/fi";
 import { HiSparkles } from "react-icons/hi";
 import VisualizeButton from "../components/common/Button";
-
-import Alert from "../components/common/Alert";
-
-const copyjsondata = JSON.stringify(
-  {
-    employees: [
-      {
-        id: 1,
-        name: "Alice Johnson",
-        department: "HR",
-        salary: 50000,
-        avatar: "https://picsum.photos/seed/alice/40/40.jpg",
-      },
-      {
-        id: 2,
-        name: "Bob Smith",
-        department: "Engineering",
-        salary: 85000,
-        avatar: "https://picsum.photos/seed/bob/40/40.jpg",
-      },
-      {
-        id: 3,
-        name: "Charlie Brown",
-        department: "Marketing",
-        salary: 60000,
-        avatar: "https://picsum.photos/seed/charlie/40/40.jpg",
-      },
-    ],
-    company: "LumiVizStack",
-  },
-  null,
-  2,
-);
+import { useAlert } from "../hooks/customHooks";
+import { jsondata } from "../utils/mockData.js";
 
 export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
-  const [error, setError] = useState("");
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { showAlert } = useAlert();
+  
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(copyjsondata);
+      await navigator.clipboard.writeText(jsondata);
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 3000);
     } catch {
-      setError("Failed to copy to clipboard.");
-    }
-  };
-
-  const handleVisualizeClick = () => {
-    if (user) {
-      navigate("/visualize");
-    } else {
-      setError("You must be logged in to visualize your data.");
-      setTimeout(
-        () =>
-          navigate("/login", { state: { error: "Please login to continue" } }),
-        1500,
-      );
+      showAlert("Failed to copy to clipboard.", "Error", 1);
     }
   };
 

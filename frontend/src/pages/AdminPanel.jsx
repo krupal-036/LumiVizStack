@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import axios from "axios";
-import { Earth, Trash } from 'lucide-react';
+import { Earth, Trash, Settings, UserCheck, UserPlus } from 'lucide-react';
 import { AuthContext } from "../context/AuthContext";
 import {
   FiUsers,
@@ -23,6 +23,10 @@ const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState({
+    isLoginEnabled: null,
+    isSignupEnabled: null
+  });
   const [activeTab, setActiveTab] = useState("users");
   const { user: currentUser } = useContext(AuthContext);
   const token = localStorage.getItem("token");
@@ -56,6 +60,65 @@ const AdminPanel = () => {
     fetchData();
   }, [token]);
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const response = await fetch('/api/admin/settings', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch');
+
+        const data = await response.json();
+        setSettings(data);
+      } catch (err) {
+        showAlert("Could not load settings", "Error", 1);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchSettings();
+  }, [token]);
+
+
+  const handleToggle = async (field) => {
+    const updatedValue = !settings[field];
+    const originalValue = settings[field];
+
+    // Optimistic UI update
+    setSettings({ ...settings, [field]: updatedValue });
+
+    try {
+      const response = await fetch('/api/admin/settings/auth', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...settings,
+          [field]: updatedValue
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error('Update failed');
+
+      const fieldName = field === 'isLoginEnabled' ? 'Login' : 'Sign-up';
+      const status = updatedValue ? 'Enabled' : 'Disabled';
+      const type = updatedValue ? 2 : 3;
+      showAlert(`${fieldName} has been successfully ${status}`, "Success", type);
+    } catch (err) {
+      // Revert state if the server call fails
+      setSettings({ ...settings, [field]: originalValue });
+      showAlert("Failed to update server settings", "Error", 1);
+    }
+  };
+
+
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
@@ -83,7 +146,7 @@ const AdminPanel = () => {
 
   const handleToggleStatus = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+
       const res = await fetch(`/api/history/${id}/toggle`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
@@ -109,7 +172,7 @@ const AdminPanel = () => {
 
   const handleSoftDelete = async (id) => {
     try {
-      const token = localStorage.getItem("token");
+
       const res = await fetch(`/api/history/${id}`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
@@ -155,15 +218,20 @@ const AdminPanel = () => {
       return;
 
     try {
-      await axios.delete("/api/history/all", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch("/api/admin/history/all", {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
       });
+
+      const data = await res.json();
+      if (res.ok) {
+        showAlert(data.message, "Success", 2);
+      }
       setHistory([]);
       setStats((prev) => ({ ...prev, records: 0 }));
-      alert("All history deleted successfully.");
     } catch (err) {
       console.error(err);
-      showAlert("Failed to delete all history.");
+      showAlert("Failed to delete all history.", "Error", 1);
     }
   };
 
@@ -242,58 +310,76 @@ const AdminPanel = () => {
         </div>
 
         <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-xl overflow-hidden backdrop-blur-md">
-          <div className="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 px-6 pt-4">
-            <div className="flex">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-700 px-4 sm:px-6 pt-4 gap-4">
+            <div className="flex flex-wrap items-center">
               <button
                 onClick={() => setActiveTab("users")}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "users"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "users"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <HiOutlineUserGroup className="w-5 h-5" />
-                Users
+                <span>Users</span>
                 {activeTab === "users" && (
                   <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
                 )}
               </button>
+
               <button
                 onClick={() => setActiveTab("history")}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "history"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "history"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <FiActivity className="w-5 h-5" />
-                History
+                <span>History</span>
                 {activeTab === "history" && (
                   <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
                 )}
               </button>
+
               <button
                 onClick={() => setActiveTab("stats")}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "stats"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "stats"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <HiOutlineChartBar className="w-5 h-5" />
-                Stats
+                <span>Stats</span>
                 {activeTab === "stats" && (
                   <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
                 )}
               </button>
+
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "settings"
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
+              >
+                <FiSettings className="w-5 h-5" />
+                <span>Settings</span>
+                {activeTab === "settings" && (
+                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
+                )}
+              </button>
             </div>
+
             {activeTab === "history" && history.length > 0 && (
               <button
                 onClick={handleDeleteAllHistory}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
+                className="hidden md:flex items-center gap-2 px-4 py-2 mb-3 sm:mb-0 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
               >
                 <FiTrash2 className="w-4 h-4" />
-                <span className="hidden sm:flex"> Delete All </span>
+                <span> Delete All1 </span>
               </button>
             )}
           </div>
+
 
           <div className="p-6">
             {activeTab === "users" && (
@@ -647,8 +733,63 @@ const AdminPanel = () => {
                 </div>
               </div>
             )}
+            {activeTab === "settings" && (
+              <div className="p-0">
+                <div className="max-w-full mx-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+
+                  <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex items-center gap-3">
+                    <Settings className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                    <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Site Control Panel</h2>
+                  </div>
+
+                  <div className="p-6 space-y-4">
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-colors gap-4">
+                      <div className="flex gap-4">
+                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg h-fit">
+                          <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">User Login</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">Allow existing users to log in (Admins always allowed)</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleToggle('isLoginEnabled')}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.isLoginEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+                          }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isLoginEnabled ? 'translate-x-6' : 'translate-x-1'
+                          }`} />
+                      </button>
+                    </div>
 
 
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-colors gap-4">
+                      <div className="flex gap-4">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg h-fit">
+                          <UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">New Signups</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">Allow new users to create accounts</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => handleToggle('isSignupEnabled')}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.isSignupEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
+                          }`}
+                      >
+                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isSignupEnabled ? 'translate-x-6' : 'translate-x-1'
+                          }`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

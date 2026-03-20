@@ -9,6 +9,7 @@ import historyRoutes from "./routes/history.js";
 import { apiLimiter, authLimiter, rateLimiter } from "./middleware/apiLimiter.js";
 import { serveFrontend } from "./middleware/serveFrontend.js";
 import { corsMiddleware, dbMiddleware } from "./middleware/config.js";
+import { siteGuard } from "./middleware/siteGuard.js";
 
 const app = express();
 app.set("trust proxy", 1);
@@ -22,7 +23,7 @@ app.use(express.static(DIST_PATH));
 app.use(corsMiddleware);
 app.use(dbMiddleware);
 
-app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/auth", siteGuard, authLimiter, authRoutes);
 app.use("/api/admin", apiLimiter, adminRoutes);
 app.use("/api/history", apiLimiter, historyRoutes);
 app.use("/api/profile", apiLimiter, profileRoutes);

@@ -20,7 +20,7 @@ const AdminRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location, error: "You must be logged in to Access Admin Panel." }} replace />;
   }
 
   if (user.role !== "admin") {

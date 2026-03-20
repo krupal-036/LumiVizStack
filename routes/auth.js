@@ -6,8 +6,14 @@ import User from "../models/User.js";
 const router = express.Router();
 
 // @route   POST api/auth/register
+// @desc    Create new User
 
 router.post("/register", async (req, res) => {
+
+  if (req.siteSignupDisabled) {
+    return res.status(403).json({ message: "New sign-ups are currently disabled by the administrator." });
+  }
+
   const { username, password, credits } = req.body;
   const email = req.body.email?.trim()?.toLowerCase();
   if (!email || !password || !username) {
@@ -89,6 +95,7 @@ router.post("/register", async (req, res) => {
 });
 
 // @route   POST api/auth/login
+// @desk    Login Existing User
 
 router.post("/login", async (req, res) => {
   const { password } = req.body;
@@ -102,6 +109,12 @@ router.post("/login", async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: "Invalid email Address.." });
+    }
+
+    if (req.siteLoginDisabled && user.role !== "admin") {
+      return res.status(403).json({
+        message: "Login is temporarily disabled for users. Please try again later."
+      });
     }
 
     if (!user || user?.isDeleted) {

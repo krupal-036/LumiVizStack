@@ -1,6 +1,6 @@
 export const isAdmin = (req, res, next) => {
   if (!req.user) {
-    return res.status(401).json({ message: "Token missing" });
+    return res.status(401).json({ message: "Token is missing" });
   }
 
   if (req.user.role !== "admin") {

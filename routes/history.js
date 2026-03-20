@@ -4,6 +4,7 @@ import verifyToken from "../middleware/verifyToken.js";
 
 const router = express.Router();
 
+
 // @route   POST api/history/save
 // @desc    Save visualization history (Max 10 per user)
 
@@ -14,10 +15,46 @@ router.post("/save", verifyToken, async (req, res) => {
 
     const trimmedInput = rawInput?.trim();
 
+    if (data) {
+      const duplicate = await History.findOne({
+        userId,
+        data: data
+      });
+
+      if (duplicate) {
+        return res.status(400).json({ message: "A visualization with this exact data already exists in your history." });
+      }
+    }
+
+    if (rawInput) {
+
+      let normalizedInput;
+      try {
+        normalizedInput = JSON.stringify(JSON.parse(rawInput));
+      } catch (e) {
+        normalizedInput = rawInput.trim();
+      }
+
+      const histories = await History.find({ userId });
+
+      const isDuplicate = histories.some(h => {
+        try {
+          return JSON.stringify(JSON.parse(h.rawInput)) === normalizedInput;
+        } catch (e) {
+          return h.rawInput === rawInput;
+        }
+      });
+
+      if (isDuplicate) {
+        return res.status(400).json({
+          message: "A visualization with this exact data input already exists in your history."
+        });
+      }
+    }
+
     if (trimmedInput) {
       const duplicate = await History.findOne({ userId, rawInput: trimmedInput });
       if (duplicate) {
-        // Explicitly send a 400 with a clear message
         return res.status(400).json({
           message: "A visualization with this exact data already exists in your history."
         });
@@ -25,7 +62,7 @@ router.post("/save", verifyToken, async (req, res) => {
     }
 
     const newHistory = new History({
-      userId, title, type, data, rawInput, urlInput, inputType, isPublic: isPublic || false, isDeleted: isDeleted || false,
+      userId, title, type, data, rawInput: trimmedInput, urlInput, inputType, isPublic: isPublic || false, isDeleted: isDeleted || false,
     });
 
     const savedItem = await newHistory.save();
@@ -39,9 +76,10 @@ router.post("/save", verifyToken, async (req, res) => {
     res.status(201).json(savedItem);
   } catch (err) {
     console.error("Save error:", err.message);
-    res.status(500).json("Server error");
+    res.status(500).json({ message: "Server Unavailable..." });
   }
 });
+
 
 // @route   PUT api/history/:id/toggle
 // @desc    Toggle isPublic flag
@@ -71,6 +109,7 @@ router.put("/:id/toggle", verifyToken, async (req, res) => {
   }
 });
 
+
 // @route   GET api/history/user
 // @desc    Get logged-in user's history
 router.get("/user", verifyToken, async (req, res) => {
@@ -82,6 +121,7 @@ router.get("/user", verifyToken, async (req, res) => {
     res.status(500).json("Server error really");
   }
 });
+
 
 // @route   GET api/history/public/:id
 // @desc    Get public history by ID (accessible by anyone)
@@ -128,7 +168,6 @@ router.put("/delete-all", verifyToken, async (req, res) => {
 });
 
 
-
 // @route   DELETE api/history/delete-all
 // @desc    Delete all history items
 
@@ -143,6 +182,7 @@ router.delete("/delete-all", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Failed to delete history" });
   }
 });
+
 
 // @route   DELETE api/history/:id
 // @desc    Delete a history item
@@ -168,6 +208,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
     res.status(500).json("Server error");
   }
 });
+
 
 // @route   PUT api/history/:id/
 // @desc    Toggle isDelete flag
@@ -196,9 +237,5 @@ router.put("/:id", verifyToken, async (req, res) => {
     res.status(500).json("Server error");
   }
 });
-
-
-
-
 
 export default router;

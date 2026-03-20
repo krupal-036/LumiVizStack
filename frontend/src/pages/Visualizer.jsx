@@ -146,7 +146,7 @@ const Visualizer = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        showAlert(result.message || result || "Failed to save history");
+        showAlert(result.message || result || "Failed to save history", "Save Error", 1);
         setSaveState("idle");
         return;
       }
@@ -167,7 +167,7 @@ const Visualizer = () => {
   const togglePublic = () => {
     const nextState = !isPublic;
     setIsPublic(nextState);
-    const message = `Visualization is now ${nextState ? 'Public' : 'Private'}`;
+    const message = `Visualization will be saved as ${nextState ? 'Public' : 'Private'}`;
     const alertType = nextState ? 2 : 3;
     showAlert(message, "Visibility Updated", alertType);
   };

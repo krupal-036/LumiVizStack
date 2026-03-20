@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { HiSparkles } from "react-icons/hi";
 import { FiArrowRight } from "react-icons/fi";
-import Alert from "./Alert";
+import { useAlert } from "../../hooks/customHooks";
 import { AuthContext } from "../../context/AuthContext";
 
 const VisualizeButton = ({
@@ -11,18 +11,20 @@ const VisualizeButton = ({
 }) => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
-    const [error, setError] = useState("");
-
+    const { showAlert } = useAlert();
     const handleVisualizeClick = () => {
-        if (user) {
-            navigate("/visualize");
-        } else {
-            setError("You must be logged in to visualize your data.");
+        if (!user) {
+            const authMessage = "You must be logged in to visualize your data."
+            showAlert(authMessage, "Authentication Required", 1);
+
             setTimeout(() => {
-                navigate("/login", { state: { error: "Please login to continue" } });
-            }, 1500);
+                navigate("/login");
+            }, 1000);
+            return;
         }
+        navigate("/visualize");
     };
+
 
     return (
         <div className="flex items-center justify-center mt-8">
@@ -34,12 +36,6 @@ const VisualizeButton = ({
                 {text}
                 <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </button>
-
-            {error && (
-                <div className="mt-6 animate-fade-in-up">
-                    <Alert message={error} type="error" />
-                </div>
-            )}
         </div>
     );
 };

@@ -1,5 +1,5 @@
-import { useState, useContext } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
+import { Link, useNavigate, useLocation, redirect } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLogIn, FiLoader } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
 import { useAlert } from "../hooks/customHooks";
@@ -10,12 +10,17 @@ export default function Login() {
   const { login } = useContext(AuthContext);
 
   const redirectError = location.state?.error;
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     remember: false,
   });
+
+  useEffect(() => {
+    if (redirectError) {
+      showAlert(redirectError, "Authentication Required", 1);
+    }
+  }, [redirectError]);
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -127,29 +132,23 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-[#0f172a] p-4 transition-colors duration-300">
+    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-100 dark:bg-[#0f172a] p-4 transition-colors duration-300">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/20">
-            <FiLogIn className="text-white text-2xl" />
-          </div>
-          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-            Welcome Back
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">
-            Please enter your details to sign in.
-          </p>
-        </div>
-
         <form
           onSubmit={handleSubmit}
-          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 p-6 md:p-8 rounded-3xl shadow-xl shadow-gray-200/60 dark:shadow-none"
+          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700/50 py-6 px-4 md:p-8 rounded-3xl shadow-xl shadow-gray-200/60 dark:shadow-none"
         >
-          {redirectError && (
-            <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-200 px-4 py-3 rounded-xl mb-6 text-center text-xs font-medium animate-in fade-in zoom-in-95">
-              {redirectError}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-600 mb-4 shadow-lg shadow-indigo-500/20">
+              <FiLogIn className="text-white text-2xl" />
             </div>
-          )}
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+              Welcome Back
+            </h2>
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
+              Please enter your details to sign in.
+            </p>
+          </div>
 
           <div className="space-y-2">
             <div className={errors.email ? "animate-shake" : ""}>

@@ -4,8 +4,46 @@ import History from "../models/History.js";
 import verifyToken from "../middleware/verifyToken.js";
 import mongoose from "mongoose";
 import { isAdmin } from "../middleware/adminAuth.js";
+import SystemSettings from "../models/SystemSettings.js";
 
 const router = express.Router();
+
+
+// @route   GET api/admin/settings
+// @desc    Get current site settings
+
+router.get("/settings", verifyToken, isAdmin, async (req, res) => {
+  try {
+    let settings = await SystemSettings.findOne({ configName: "global_config" });
+    if (!settings) settings = await SystemSettings.create({ configName: "global_config" });
+    res.json(settings);
+  } catch (err) {
+    res.status(500).json({ message: "Server not available..., error fetching settings" });
+  }
+});
+
+
+// @route   PATCH api/admin/settings/auth
+// @desc    Update login/signup toggles
+
+router.patch("/settings/auth", verifyToken, isAdmin, async (req, res) => {
+  const { isLoginEnabled, isSignupEnabled } = req.body;
+
+  try {
+    const updated = await SystemSettings.findOneAndUpdate(
+      { configName: "global_config" },
+      { isLoginEnabled, isSignupEnabled },
+      {
+        upsert: true,
+        returnDocument: 'after'
+      }
+    );
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: "Server not available..., error updating settings" });
+  }
+});
+
 
 // @route   GET api/admin/stats
 // @desc    Get count of documents
@@ -51,6 +89,22 @@ router.delete("/user/:id", verifyToken, isAdmin, async (req, res) => {
     res.json({ message: "User and associated history deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Error occured during Deletion of User & its all History" });
+  }
+});
+
+// @route   DELETE api/admin/history/all
+// @desc    DELETE all history of History Collection at Admin Side
+
+router.delete("/history/all", verifyToken, isAdmin, async (req, res) => {
+  try {
+    const result = await History.deleteMany({});
+
+    res.json({
+      message: `Total ${result.deletedCount} history records have been permanently deleted`
+    },
+    );
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete history" });
   }
 });
 
