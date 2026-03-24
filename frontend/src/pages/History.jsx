@@ -354,15 +354,15 @@ export default function History() {
                                                 {item.isPublic && (
                                                     <>
                                                         <button
-                                                            onClick={() => handleCopyLink(item._id)}
+                                                            onClick={() => handleCopyLink(item.shareId)}
                                                             className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all relative group"
                                                             title="Copy Public Link"
                                                         >
-                                                            {copiedId === item._id ? <FiCheck className="text-green-500" /> : <FiLink size={16} />}
+                                                            {copiedId === item.shareId ? <FiCheck className="text-green-500" /> : <FiLink size={16} />}
                                                         </button>
 
                                                         <Link
-                                                            to={`/view/${item._id}`}
+                                                            to={`/view/${item.shareId}`}
                                                             className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
                                                             title="Open Public Page"
                                                         >

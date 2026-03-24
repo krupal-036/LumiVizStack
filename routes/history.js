@@ -13,6 +13,19 @@ router.post("/save", verifyToken, async (req, res) => {
     const { title, type, data, rawInput, urlInput, inputType, isPublic, isDeleted } = req.body;
     const userId = req.user.id;
 
+    if (title) {
+      const existingTitle = await History.findOne({
+        userId,
+        title: title.trim(),
+      });
+
+      if (existingTitle) {
+        return res.status(400).json({
+          message: "You already have a visualization with this title. Please choose a unique name."
+        });
+      }
+    }
+
     const trimmedInput = rawInput?.trim();
 
     if (data) {
@@ -20,7 +33,6 @@ router.post("/save", verifyToken, async (req, res) => {
         userId,
         data: data
       });
-
       if (duplicate) {
         return res.status(400).json({ message: "A visualization with this exact data already exists in your history." });
       }
@@ -123,12 +135,12 @@ router.get("/user", verifyToken, async (req, res) => {
 });
 
 
-// @route   GET api/history/public/:id
-// @desc    Get public history by ID (accessible by anyone)
+// @route   GET api/history/public/:shareId
+// @desc    Get public history by Share ID (accessible by anyone)
 
-router.get("/public/:id", async (req, res) => {
+router.get("/public/:shareId", async (req, res) => {
   try {
-    const historyItem = await History.findById(req.params.id);
+    const historyItem = await History.findOne({ shareId: req.params.shareId });
 
     if (!historyItem) {
       return res.status(404).json({ message: "History not found..." });
@@ -137,12 +149,14 @@ router.get("/public/:id", async (req, res) => {
     if (!historyItem.isPublic) {
       return res.status(403).json({ message: "This visualization is private..." });
     }
+
     if (historyItem.isDeleted) {
-      return res.status(403).json({ message: "This visualization is Deleted by user..." });
+      return res.status(410).json({ message: "This visualization has been deleted by the user..." });
     }
+
     res.json(historyItem);
   } catch (err) {
-    console.error(err.message);
+    console.error("Public fetch error:", err.message);
     res.status(500).json("Server error");
   }
 });

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
 
 const { Schema } = mongoose;
 
@@ -32,6 +33,12 @@ const HistorySchema = new Schema({
     type: Boolean,
     default: false,
     index: true
+  },
+  shareId: {
+    type: String,
+    unique: true,
+    sparse: true,
+    default: () => crypto.randomBytes(6).toString('hex')
   },
   createdAt: {
     type: Date,

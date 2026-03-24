@@ -1,22 +1,29 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import Loader from "./Loader";
-import { useAlert } from "../../hooks/customHooks"
+import { useAlert } from "../../hooks/customHooks";
+
 const AdminRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
   const { showAlert } = useAlert();
   const location = useLocation();
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+
   useEffect(() => {
     if (!loading && user && user.role !== "admin") {
-      showAlert("You can't access Admin panel with user credentials", "Invalid User...");
+      showAlert("You can't access Admin panel with user credentials", "Invalid User...", 1);
+
+      const timer = setTimeout(() => {
+        setShouldRedirect(true);
+      }, 2000);
+
+      return () => clearTimeout(timer);
     }
   }, [user, loading, showAlert]);
 
   if (loading) {
-    return (
-      <Loader data={"Loading Admin Panel..."} />
-    );
+    return <Loader data={"Loading Admin Panel..."} />;
   }
 
   if (!user) {
@@ -24,10 +31,10 @@ const AdminRoute = ({ children }) => {
   }
 
   if (user.role !== "admin") {
-    return (<>
-      <Navigate to="/" replace />
-    </>
-    );
+    if (!shouldRedirect) {
+      return <Loader data={"Restricted Access. Redirecting..."} />;
+    }
+    return <Navigate to="/" replace />;
   }
 
   return children;

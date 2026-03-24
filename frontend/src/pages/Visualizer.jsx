@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch, FiLoader, FiSettings, FiSearch } from "react-icons/fi";
+import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch, FiLoader, FiSettings, FiSearch, FiRefreshCw } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
 import { useAlert } from '../hooks/customHooks.jsx';
@@ -31,6 +31,8 @@ const Visualizer = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [saveState, setSaveState] = useState("idle");
   const [isPublic, setIsPublic] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viztitle, setViztitle] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
   const [searchBar, setSearchBar] = useState(false);
@@ -64,6 +66,18 @@ const Visualizer = () => {
     const snapshot = { data, viewMode, rawInput, urlInput, inputType };
     sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(snapshot));
   }, [data, viewMode, rawInput, urlInput, inputType]);
+
+
+
+  const generateRandomTitle = () => {
+    const randomID = Math.random().toString(36).substring(2, 10).toLowerCase();
+    setViztitle(`Viz_${randomID}`);
+  };
+
+  useEffect(() => {
+    if (isModalOpen) generateRandomTitle();
+  }, [isModalOpen]);
+
 
   const handleClearVisualizer = () => {
     setData([]);
@@ -110,20 +124,23 @@ const Visualizer = () => {
     reader.readAsText(file);
   };
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!user || data.length === 0) return;
+    setIsModalOpen(true);
+  };
 
+  const confirmSave = async () => {
     const token = localStorage.getItem("token");
-
     if (!token) {
       setError("Authentication error. Please log in again.");
       return;
     }
 
     setSaveState("saving");
+    setIsModalOpen(false);
 
     const newHistoryItem = {
-      title: `Visual ${new Date().toLocaleDateString()}`,
+      title: viztitle?.trim() || `Visual ${new Date().toLocaleDateString()}`,
       type: viewMode,
       dataLength: data.length,
       data: data,
@@ -153,7 +170,7 @@ const Visualizer = () => {
 
       setSaveState("saved");
       showAlert("History saved successfully", "Success", 2)
-
+      setViztitle("")
       setTimeout(() => {
         setSaveState("idle");
       }, 2000);
@@ -190,21 +207,22 @@ const Visualizer = () => {
 
 
   return (
-    <div className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-auto overflow-hidden w-full `}>
+    <div className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-full overflow-hidden w-full `}>
       <div className="inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-5%] w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-cyan-500/20 blur-[50px] md:blur-[80px] rounded-bl-full pointer-events-none" />
         <div className="absolute bottom-[-5%] left-0 w-[180px] h-[180px] md:w-[300px] md:h-[300px] bg-fuchsia-500/20 blur-[50px] md:blur-[80px] rounded-tr-full pointer-events-none" />
       </div>
+
       {isPanelOpen && (
         <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setIsPanelOpen(false)} />
       )}
 
-      <div className={`fixed inset-y-0 left-0 z-40 w-80 max-w-full transform transition-transform duration-300 ease-in-out
+      <div className={`fixed inset-y-0 left-0 z-40 w-80 sm:w-[calc(100vw-75%)] max-w-full transform transition-transform duration-300 ease-in-out
                     md:sticky md:top-0 md:translate-x-0 md:transform-none 
                     ${isPanelOpen ? 'translate-x-0' : '-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none'}`}>
-        <div className="min-h-screen sm:min-h-auto sm:h-[calc(100vh-64px)] bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none" >
+        <div className="min-h-screen sm:min-h-auto sm:h-[calc(100vh-64px)] bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none pt-10 sm:pt-0" >
 
-          <div className="p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-800">
+          <div className="hidden md:flex p-6 justify-between items-center border-b border-gray-200 dark:border-gray-800">
             <h2 className="font-bold text-gray-800 dark:text-white flex items-center gap-2">
               <FiSettings className="text-indigo-500" /> Input Source
             </h2>
@@ -213,7 +231,7 @@ const Visualizer = () => {
             </button>
           </div>
 
-          <div className="p-6 flex-1 overflow-y-auto flex flex-col text-xs">
+          <div className="p-4 py-10 sm:py-4 flex-1 overflow-y-auto flex flex-col text-xs">
             <div className="flex gap-2 mb-4">
               {[
                 { id: 'paste', icon: FiCode, label: 'Paste' },
@@ -416,6 +434,58 @@ const Visualizer = () => {
           )}
         </div>
       </div>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 p-4 sm:p-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-md p-6 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 transition-all">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+              Save Visualization
+            </h3>
+
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+              Enter a title for your data OR Continue with the auto-generated name.
+            </p>
+
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                className="w-full pl-4 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none 
+               bg-gray-50 dark:bg-gray-900 
+               text-gray-900 dark:text-white 
+               border-gray-300 dark:border-gray-600 transition-all"
+                placeholder="Enter title..."
+                value={viztitle}
+                onChange={(e) => setViztitle(e.target.value)}
+                autoFocus
+                onFocus={(e) => e.target.select()}
+              />
+              <button
+                type="button"
+                onClick={generateRandomTitle}
+                className="absolute right-2 p-2 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
+                title="Regenerate Title"
+              >
+                <FiRefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmSave}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+              >
+                Save Data
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

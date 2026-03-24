@@ -12,6 +12,7 @@ import {
   FiAlertTriangle,
   FiEye,
   FiSettings,
+  FiExternalLink,
 } from "react-icons/fi";
 import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
 import Loader from "../components/common/Loader";
@@ -50,7 +51,7 @@ const AdminPanel = () => {
       setLoading(false);
     } catch (err) {
       console.error(err.message);
-      showAlert(err.response?.data?.message || "Could not load administrative data.", "Error...",);
+      showAlert(err.response?.data?.message || "Could not load administrative data.", "Error...", 1);
       navigate("/", { state: { from: location }, replace: true });
       setLoading(false);
     }
@@ -76,7 +77,7 @@ const AdminPanel = () => {
         const data = await response.json();
         setSettings(data);
       } catch (err) {
-        showAlert("Could not load settings", "Error", 1);
+        showAlert("Could not load administrative data.", "Invalid Role", 1);
       } finally {
         setLoading(false);
       }
@@ -140,7 +141,7 @@ const AdminPanel = () => {
       });
     } catch (err) {
       console.error(err);
-      showAlert("Failed to delete All History.");
+      showAlert("Failed to delete All History.", "Error", 1);
     }
   };
 
@@ -163,7 +164,7 @@ const AdminPanel = () => {
         );
 
       } else {
-        showAlert("Failed to Update Status.");
+        showAlert("Failed to Update Status.", "Error", 1);
       }
     } catch (err) {
       showAlert(err || "Fail tot Toggle", "Toggle error");
@@ -264,7 +265,7 @@ const AdminPanel = () => {
         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[120px] rounded-full" />
       </div>
 
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-full mx-auto">
 
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex flex-col items-center md:items-start md:text-left">
@@ -315,8 +316,8 @@ const AdminPanel = () => {
               <button
                 onClick={() => setActiveTab("users")}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "users"
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <HiOutlineUserGroup className="w-5 h-5" />
@@ -329,8 +330,8 @@ const AdminPanel = () => {
               <button
                 onClick={() => setActiveTab("history")}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "history"
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <FiActivity className="w-5 h-5" />
@@ -343,8 +344,8 @@ const AdminPanel = () => {
               <button
                 onClick={() => setActiveTab("stats")}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "stats"
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <HiOutlineChartBar className="w-5 h-5" />
@@ -357,8 +358,8 @@ const AdminPanel = () => {
               <button
                 onClick={() => setActiveTab("settings")}
                 className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "settings"
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  ? "text-indigo-600 dark:text-indigo-400"
+                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                   }`}
               >
                 <FiSettings className="w-5 h-5" />
@@ -375,7 +376,7 @@ const AdminPanel = () => {
                 className="hidden md:flex items-center gap-2 px-4 py-2 mb-3 sm:mb-0 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
               >
                 <FiTrash2 className="w-4 h-4" />
-                <span> Delete All1 </span>
+                <span> Delete All </span>
               </button>
             )}
           </div>
@@ -391,6 +392,7 @@ const AdminPanel = () => {
                         <th className="py-4 px-6 font-semibold">User</th>
                         <th className="py-4 px-6 font-semibold">Email</th>
                         <th className="py-4 px-6 font-semibold">Role</th>
+                        <th className="py-4 px-6 font-semibold">Total_Viz</th>
                         <th className="py-4 px-6 font-semibold text-right">Delete User</th>
                         <th className="py-4 px-6 font-semibold text-right">Delete History</th>
                       </tr>
@@ -424,10 +426,21 @@ const AdminPanel = () => {
                               {u.role}
                             </span>
                           </td>
+                          <td className="py-4 px-6">
+                            <span
+                              className={`px-2.5 py-1 rounded-full text-xs font-semibold inline-block ${u.role === "admin"
+                                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                                : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
+                                }`}
+                            >
+                              {u.historyCount}
+                            </span>
+                          </td>
                           <td className="py-4 px-6 text-right">
-                            {currentUser?._id !== u._id && (
+                            {currentUser?.id !== u._id && (
                               <button
                                 onClick={() => handleDeleteUser(u._id)}
+                                disabled={u.role === "admin" ? true : false}
                                 className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                 title="Delete User"
                               >
@@ -436,9 +449,10 @@ const AdminPanel = () => {
                             )}
                           </td>
                           <td className="py-4 px-6 text-right">
-                            {currentUser?._id !== u._id && (
+                            {currentUser?.id !== u._id && (
                               <button
                                 onClick={() => handleDeleteAllHistoryOfUser(u._id)}
+                                disabled={u.role == "admin" ? true : false}
                                 className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                                 title="Delete User"
                               >
@@ -462,7 +476,7 @@ const AdminPanel = () => {
                         <div className="w-12 h-12 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md shrink-0">
                           {u.username ? u.username[0].toUpperCase() : "U"}
                         </div>
-                        <div className="flex flex-col min-w-0">
+                        <div className="flex flex justify-center gap-2 min-w-0">
                           <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
                             {u.username}
                           </span>
@@ -471,6 +485,9 @@ const AdminPanel = () => {
                             : "bg-slate-100 text-slate-600 dark:bg-slate-800"
                             }`}>
                             {u.role}
+                          </span>
+                          <span className="font-bold text-slate-800 dark:text-slate-100">
+                            {u.historyCount}
                           </span>
                         </div>
                       </div>
@@ -483,7 +500,7 @@ const AdminPanel = () => {
                           </span>
                         </div>
                       </div>
-                      {currentUser?._id !== u._id && (
+                      {currentUser?.id !== u._id && (
                         <div className="grid grid-cols-2 gap-3 pt-2">
                           <button
                             onClick={() => handleDeleteAllHistoryOfUser(u._id)}
@@ -526,6 +543,7 @@ const AdminPanel = () => {
                             <th className="py-4 px-6 font-semibold">User</th>
                             <th className="py-4 px-6 font-semibold">Type</th>
                             <th className="py-4 px-6 font-semibold text-center">Status</th>
+                            <th className="py-4 px-6 font-semibold text-center">Public Link</th>
                             <th className="py-4 px-6 font-semibold text-right">Actions</th>
                           </tr>
                         </thead>
@@ -591,6 +609,19 @@ const AdminPanel = () => {
                                 </div>
                               </td>
 
+                              {h.shareId && h.isPublic ? (
+                                <td className="py-4 px-6 text-center">
+                                  <button
+                                    onClick={() => window.open(`/view/${h.shareId}`, '_blank', 'noopener,noreferrer')}
+                                    className="p-2 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                    title="View Public Link"
+                                  >
+                                    <FiExternalLink className="w-4 h-4" />
+                                  </button>
+                                </td>
+                              ) : (
+                                <td className="py-4 px-6 text-center text-slate-500 italic">Private</td>
+                              )}
 
                               <td className="py-4 px-6 text-right">
                                 <button
