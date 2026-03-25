@@ -4,7 +4,7 @@ export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
   message: {
-    error: "Too many login attempts, please try again in 15 minutes",
+    message: "Too many login attempts, please try again in 15 minutes",
     code: 429
   },
   standardHeaders: "draft-7",
@@ -15,7 +15,7 @@ export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   message: {
-    error: "Too many requests from this IP, please try again later",
+    message: "Too many requests from this IP, please try again later",
     code: 429
   },
   standardHeaders: "draft-7",

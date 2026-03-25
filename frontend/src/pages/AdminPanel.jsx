@@ -3,17 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import axios from "axios";
 import { Earth, Trash, Settings, UserCheck, UserPlus } from 'lucide-react';
 import { AuthContext } from "../context/AuthContext";
-import {
-  FiUsers,
-  FiDatabase,
-  FiTrash2,
-  FiActivity,
-  FiUser,
-  FiAlertTriangle,
-  FiEye,
-  FiSettings,
-  FiExternalLink,
-} from "react-icons/fi";
+import { FiUsers, FiDatabase, FiTrash2, FiActivity, FiUser, FiAlertTriangle, FiEye, FiSettings, FiExternalLink } from "react-icons/fi";
 import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
 import Loader from "../components/common/Loader";
 import { useAlert } from "../hooks/customHooks";
@@ -77,7 +67,7 @@ const AdminPanel = () => {
         const data = await response.json();
         setSettings(data);
       } catch (err) {
-        showAlert("Could not load administrative data.", "Invalid Role", 1);
+        showAlert(data?.message || "Could not load administrative data.", "Invalid Role", 1);
       } finally {
         setLoading(false);
       }
@@ -90,7 +80,6 @@ const AdminPanel = () => {
     const updatedValue = !settings[field];
     const originalValue = settings[field];
 
-    // Optimistic UI update
     setSettings({ ...settings, [field]: updatedValue });
 
     try {
@@ -106,14 +95,14 @@ const AdminPanel = () => {
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error('Update failed');
-
+      if (!response.ok) {
+        showAlert(data?.message || 'Update failed', "Error", 1);
+      }
       const fieldName = field === 'isLoginEnabled' ? 'Login' : 'Sign-up';
       const status = updatedValue ? 'Enabled' : 'Disabled';
       const type = updatedValue ? 2 : 3;
       showAlert(`${fieldName} has been successfully ${status}`, "Success", type);
     } catch (err) {
-      // Revert state if the server call fails
       setSettings({ ...settings, [field]: originalValue });
       showAlert("Failed to update server settings", "Error", 1);
     }

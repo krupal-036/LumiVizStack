@@ -139,19 +139,20 @@ router.get("/user", verifyToken, async (req, res) => {
 // @desc    Get public history by Share ID (accessible by anyone)
 
 router.get("/public/:shareId", async (req, res) => {
+  const { shareId } = req.params;
   try {
-    const historyItem = await History.findOne({ shareId: req.params.shareId });
+    const historyItem = await History.findOne({ shareId });
 
     if (!historyItem) {
       return res.status(404).json({ message: "History not found..." });
     }
 
-    if (!historyItem.isPublic) {
-      return res.status(403).json({ message: "This visualization is private..." });
+    if (historyItem.isDeleted) {
+      return res.status(403).json({ message: "This visualization has been deleted by the user..." });
     }
 
-    if (historyItem.isDeleted) {
-      return res.status(410).json({ message: "This visualization has been deleted by the user..." });
+    if (!historyItem.isPublic) {
+      return res.status(403).json({ message: "This visualization is private..." });
     }
 
     res.json(historyItem);

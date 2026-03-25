@@ -76,7 +76,7 @@ export default function History() {
                 const alertType = nextState ? 2 : 3;
                 showAlert(message, "Visibility Update", alertType);
             } else {
-                showAlert(updatedItem?.message || "Failed to Update Status", "Toggle Error", 1);
+                showAlert(updatedItem.message || "Failed to Update Status", "Toggle Error", 1);
                 clearError(3);
             }
         } catch (err) {
@@ -106,7 +106,7 @@ export default function History() {
                 showAlert(message, "History Update", alertType);
 
             } else {
-                showAlert(updatedItem?.message || "Failed to Update Status", "Toggle Error", 1);
+                showAlert(updatedItem.message || "Failed to Update Status", "Toggle Error", 1);
                 clearError(3);
             }
         } catch (err) {
@@ -133,10 +133,9 @@ export default function History() {
                 showAlert("All History items Deleted", "History Delete", 3);
             } else {
                 const data = await res.json();
-                showAlert(data?.message || "Failed to delete all history", "History Error", 1);
+                showAlert(data.message || "Failed to delete all history", "History Error", 1);
             }
         } catch (err) {
-            console.error("Delete all error:", err);
             showAlert(err || err?.message || "Failed to delete all history", "History Error", 1);
         }
     };

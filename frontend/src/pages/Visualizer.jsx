@@ -163,7 +163,7 @@ const Visualizer = () => {
       const result = await response.json();
 
       if (!response.ok) {
-        showAlert(result.message || result || "Failed to save history", "Save Error", 1);
+        showAlert(result?.message || result?.error || "Failed to save history", "Save Error", 1);
         setSaveState("idle");
         return;
       }

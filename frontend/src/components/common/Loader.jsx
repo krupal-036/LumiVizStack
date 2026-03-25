@@ -13,4 +13,4 @@ const Loader = ({ data }) => {
   )
 }
 
-export default Loader
+export default Loader;
