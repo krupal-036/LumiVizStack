@@ -1,6 +1,7 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FiUser, FiMail, FiSave, FiLoader, FiCheckCircle, FiAlertCircle, FiTrash2, FiRotateCcw, FiBarChart2, FiEye, FiEyeOff, FiHash, FiToggleRight, FiToggleLeft, FiTrash, FiKey, FiLock } from "react-icons/fi";
+import { useAlert } from "../hooks/customHooks";
 
 export default function UserProfile() {
     const { user, setUser, logout } = useContext(AuthContext);
@@ -14,6 +15,7 @@ export default function UserProfile() {
     const [isDeletingHistory, setIsDeletingHistory] = useState(false);
     const [countdown, setCountdown] = useState(30);
     const timerRef = useRef(null);
+    const { showAlert } = useAlert();
 
     const [visualizations, setVisualizations] = useState([]);
     const [loadingVis, setLoadingVis] = useState(true);
@@ -32,6 +34,9 @@ export default function UserProfile() {
                 const data = await res.json();
                 if (res.ok) {
                     setVisualizations(data);
+                }
+                else {
+                    showAlert(data.message || "Fail to fetch Visualizations");
                 }
             } catch (err) {
                 console.error("Failed to fetch visualizations:", err);
@@ -66,9 +71,6 @@ export default function UserProfile() {
             return;
         }
 
-
-
-
         if (password) {
             let passwordError = "";
             if (password.length < 8) {
@@ -82,7 +84,6 @@ export default function UserProfile() {
             } else if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
                 passwordError = "Must include at least one special symbol";
             }
-
             if (passwordError) {
                 setMessage({ type: "error", text: passwordError });
                 setTimeout(() => setMessage({ type: "", text: "" }), 4000);
@@ -114,6 +115,7 @@ export default function UserProfile() {
                 setMessage({ type: "success", text: "Profile updated successfully!" });
             } else {
                 setMessage({ type: "error", text: data.message || "Failed to update profile." });
+                showAlert(data?.message || "Failed to update Profile");
             }
         } catch (err) {
             console.error("Update error:", err);
@@ -137,6 +139,9 @@ export default function UserProfile() {
                 setVisualizations(prev =>
                     prev.map(v => v._id === id ? updatedItem : v)
                 );
+            }
+            else {
+                showAlert(updatedItem.message || "Failed to update Profile");
             }
         } catch (err) {
             console.error("Toggle failed", err);
@@ -176,6 +181,10 @@ export default function UserProfile() {
                 alert("Account deactivated.");
                 logout();
             }
+            else {
+                const data = await res.json();
+                showAlert(data.message || "Failed to update Profile");
+            }
         } catch (err) {
             console.error("Delete failed", err);
             setIsDeleting(false);
@@ -198,10 +207,10 @@ export default function UserProfile() {
 
             if (res.ok) {
                 setVisualizations([]);
-                alert("All history deleted successfully");
+                showAlert("All history deleted successfully", "Success", 2);
             } else {
                 const data = await res.json();
-                alert(data.message || "Failed to delete all history");
+                showAlert(data.message || "Failed to delete all history");
             }
         } catch (err) {
             console.error("Delete all error:", err);
@@ -226,7 +235,7 @@ export default function UserProfile() {
                 setVisualizations(prev => prev.filter(item => item._id !== id));
             } else {
                 const data = await res.json();
-                alert(data.message || "Delete failed");
+                showAlert(data.message || "Delete failed");
             }
         } catch (err) {
             console.error("Delete error:", err);

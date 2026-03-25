@@ -97,7 +97,7 @@ export default function SignUp() {
         data = await response.json();
       } else {
         const text = await response.text();
-        showAlert(text || "Server returned an invalid response", "Server Error", 1);
+        showAlert(text || text?.message || "Server returned an invalid response", "Server Error", 1);
       }
       if (!response.ok) {
         

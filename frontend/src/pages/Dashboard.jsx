@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 
-import { FiCheck, FiLink, FiFileText, FiCode, FiCopy,
+import {
+  FiCheck, FiLink, FiFileText, FiCode, FiCopy,
 } from "react-icons/fi";
-import { HiSparkles } from "react-icons/hi";
 import VisualizeButton from "../components/common/Button";
 import { useAlert } from "../hooks/customHooks";
 import { jsondata } from "../utils/mockData.js";
@@ -10,7 +10,6 @@ import { jsondata } from "../utils/mockData.js";
 export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
   const { showAlert } = useAlert();
-  
 
   const handleCopy = async () => {
     try {
@@ -63,55 +62,56 @@ export default function Dashboard() {
         <div className="my-12 flex items-center w-full max-w-sm">
           <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
           <span className="px-4 text-sm text-slate-400 font-medium">
-            or try with sample data
+            or try with sample payload
           </span>
           <div className="flex-1 h-px bg-slate-200 dark:bg-slate-800"></div>
         </div>
 
-        <div className="w-full max-w-lg bg-white dark:bg-slate-900/80 backdrop-blur-md rounded-3xl border border-slate-200 dark:border-slate-700 shadow-xl overflow-hidden group hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
-          <div className="flex items-center justify-between px-4 py-3 bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-red-400/80"></div>
-                <div className="w-3 h-3 rounded-full bg-amber-400/80"></div>
-                <div className="w-3 h-3 rounded-full bg-green-400/80"></div>
-              </div>
-              <span className="text-xs font-mono text-slate-500 dark:text-slate-400 ml-2">
-                sample-data.json
-              </span>
-            </div>
-            <button
-              onClick={handleCopy}
-              className={`
-                flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all
-                ${isCopied
-                  ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-600"
-                }
-              `}
-            >
-              {isCopied ? (
-                <>
-                  <FiCheck className="w-3.5 h-3.5" /> Copied!
-                </>
-              ) : (
-                <>
-                  <FiCopy className="w-3.5 h-3.5" /> Copy Code
-                </>
-              )}
-            </button>
-          </div>
 
-          <div className="p-2 bg-slate-50 dark:bg-[#0B0F19]">
-            <div className="font-mono text-xs sm:text-sm text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-pre-wrap break-all leading-relaxed select-none">
-              {`{
-"employees": [
-  { "id": 1, "name": "Alice Johnson", ... },
-  { "id": 2, "name": "Bob Smith", ... },
-  ...
-],
-"company": "LumiVizStack"
-}`}
+        <div className="relative w-full max-w-2xl mx-auto group">
+          <div className="relative flex flex-col w-full overflow-hidden border bg-white/70 dark:bg-slate-950/80 backdrop-blur-2xl border-white/20 dark:border-slate-800 rounded-3xl shadow-2xl">
+
+            <div className="flex items-center justify-between px-6 py-4 bg-linear-to-b from-white/50 to-transparent dark:from-slate-800/50 dark:to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10">
+                  <FiCode className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold tracking-tight text-slate-800 dark:text-slate-100">Sample Data</h3>
+                  <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">payload.json</p>
+                </div>
+              </div>
+
+              <button
+                onClick={handleCopy}
+                className="relative overflow-hidden px-5 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 bg-slate-900 dark:bg-white text-white dark:text-slate-900"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {isCopied ? <><FiCheck className="w-4 h-4" /> Done!</> : <><FiCopy className="w-4 h-4" /> Copy JSON</>}
+                </span>
+              </button>
+            </div>
+
+            <div className="p-6 pt-2 font-mono text-sm text-left leading-relaxed">
+              <div className="overflow-x-auto selection:bg-pink-500/30">
+                <div className="space-y-1">
+                  <code>
+                    <span className="text-slate-400">{"{"}</span><br />
+                    <span className="pl-4 text-rose-500 dark:text-rose-400">"users"</span>: <span className="text-slate-400">[</span><br />
+                    <span className="pl-8 text-slate-400">{"{"}</span> <span className="text-cyan-600 dark:text-cyan-400">"id"</span>: <span className="text-amber-500">1</span>, <span className="text-cyan-600 dark:text-cyan-400">"name"</span>: <span className="text-emerald-500">"Alice Johnson"</span>, ...<span className="text-slate-400">{"}"}</span>,<br />
+                    <span className="pl-8 text-slate-400">{"{"}</span> <span className="text-cyan-600 dark:text-cyan-400">"id"</span>: <span className="text-amber-500">2</span>, <span className="text-cyan-600 dark:text-cyan-400">"name"</span>: <span className="text-emerald-500">"Bob Smith"</span>, ...<span className="text-slate-400">{"}"}</span>,<br />
+                    <span className="pl-8 text-slate-100">...</span><br />
+                    <span className="pl-4 text-slate-400">]</span>,<br />
+                    <span className="pl-4 text-rose-500 dark:text-rose-400">"company"</span>: <span className="text-emerald-500">"LumiVizStack"</span><br />
+                    <span className="text-slate-400">{"}"}</span>
+                  </code>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-3 text-[10px] border-t border-slate-100 dark:border-slate-800/50 text-slate-400 flex justify-between items-center bg-slate-50/30 dark:bg-transparent">
+              <span>UTF-8 Encoding</span>
+              <span className="flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Read Only</span>
             </div>
           </div>
         </div>

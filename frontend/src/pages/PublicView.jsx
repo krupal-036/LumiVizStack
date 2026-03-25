@@ -9,13 +9,15 @@ import GraphView from "../components/visualizations/GraphView";
 import Loader from "../components/common/Loader.jsx"
 import { renderValue } from "../components/Features.jsx";
 import { FiAlertCircle, FiArrowLeft, FiBarChart2, FiCalendar, FiClock, FiCode, FiEye, FiGrid, FiHome, FiSearch, FiShare, FiShare2, FiTable, FiWatch } from "react-icons/fi";
+import { useAlert } from "../hooks/customHooks.jsx";
 
 const PublicView = () => {
   const { historyId } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [historyData, setHistoryData] = useState(null);
+  const { showAlert } = useAlert();
+  const [historyData, setHistoryData] = useState("");
   const [viewMode, setViewMode] = useState("table");
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
@@ -25,15 +27,16 @@ const PublicView = () => {
       try {
         const res = await fetch(`/api/history/public/${historyId}`);
 
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.message || "Failed to load visualization");
-        }
-
         const data = await res.json();
-        setHistoryData(data);
+        if (res.ok) {
+          setHistoryData(data);
+        } else {
+          showAlert(data?.message || "Failed to load visualization");
+          setError(data.message || "Visualization not available");
+        }
       } catch (err) {
-        setError(err.message || "Visualization not available");
+        showAlert("Visualization not available", "Server Error");
+        setError("Visualization not available");
       } finally {
         setLoading(false);
       }
@@ -51,7 +54,7 @@ const PublicView = () => {
 
   if (loading) {
     return (
-      <Loader data={"Loading Visualization..."}/>
+      <Loader data={"Loading Visualization..."} />
     );
   }
 
