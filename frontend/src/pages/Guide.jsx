@@ -89,7 +89,7 @@ const guideSteps = [
 
 export default function Guide() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 pt-10 sm:pt-14 selection:text-white">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
 
         <div className="absolute top-[-5%] left-[-10%] w-[200px] h-[200px] md:w-[500px] md:h-[500px] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[60px] md:blur-[110px] rounded-full" />
@@ -107,8 +107,8 @@ export default function Guide() {
             <FiBookOpen className="w-4 h-4" />
             User Guide
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
-            How to use <br />
+          <h1 className="text-4xl flex flex-col sm:flex-row align-center justify-center sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-6">
+            How to use&nbsp;
             <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
               LumiVizStack
             </span>

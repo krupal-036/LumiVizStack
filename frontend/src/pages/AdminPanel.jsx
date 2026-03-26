@@ -248,7 +248,7 @@ const AdminPanel = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#0B0F19] py-4 sm:py-10 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
+    <div className="min-h-screen bg-slate-100 dark:bg-[#0B0F19] py-20 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[120px] rounded-full" />

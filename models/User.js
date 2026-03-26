@@ -26,6 +26,7 @@ const UserSchema = new Schema({
   credits: {
     type: Number,
     default: 10,
+    min: [0, "Credits cannot be negative"],
   },
   role: {
     type: String,

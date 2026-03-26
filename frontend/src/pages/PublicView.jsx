@@ -87,7 +87,7 @@ const PublicView = () => {
     { id: 'graph', icon: FiShare2, label: 'Graph' },
   ];
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100  p-4 pt-20 md:pt-24">
       <div className="max-w-screen-2xl mx-auto">
 
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">

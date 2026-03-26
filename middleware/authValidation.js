@@ -11,7 +11,7 @@ export const validateRegister = async (req, res, next) => {
     return res.status(403).json({ message: "New sign-ups are currently disabled by the administrator." });
   }
 
-  const { username, password, credits } = req.body;
+  const { username, password } = req.body;
   const email = req.body.email?.trim()?.toLowerCase();
 
   if (!email || !password || !username) {

@@ -207,7 +207,7 @@ const Visualizer = () => {
 
 
   return (
-    <div className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-full overflow-hidden w-full `}>
+    <div className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-full overflow-hidden w-full pt-10 sm:pt-16`}>
       <div className="inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] right-[-5%] w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-cyan-500/20 blur-[50px] md:blur-[80px] rounded-bl-full pointer-events-none" />
         <div className="absolute bottom-[-5%] left-0 w-[180px] h-[180px] md:w-[300px] md:h-[300px] bg-fuchsia-500/20 blur-[50px] md:blur-[80px] rounded-tr-full pointer-events-none" />
@@ -232,7 +232,7 @@ const Visualizer = () => {
           </div>
 
           <div className="p-4 py-10 sm:py-4 flex-1 overflow-y-auto flex flex-col text-xs">
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 z-100">
               {[
                 { id: 'paste', icon: FiCode, label: 'Paste' },
                 { id: 'file', icon: FiUploadCloud, label: 'File' },
@@ -279,7 +279,7 @@ const Visualizer = () => {
           </div>
         </div>
       </div>
-      <div className="flex-1 min-w-0 transition-all duration-300 lg:max-w-screen-2xl mx-auto px-4 lg:px-8">
+      <div className="flex-1 min-w-0 transition-all duration-300 md:max-w-7xl mx-auto px-2 sm:px-0">
         {!isPanelOpen && (
           <button onClick={() => {
             panelref.current.focus();

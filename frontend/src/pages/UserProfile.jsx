@@ -245,7 +245,7 @@ export default function UserProfile() {
     };
 
     return (
-        <div className="min-h-screen py-10 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
+        <div className="min-h-screen pt-20 sm:pt-24 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
             <div className="max-w-5xl mx-auto">
 
                 {message.text && (

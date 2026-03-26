@@ -132,7 +132,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-100 dark:bg-[#0f172a] p-4 transition-colors duration-300">
+    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-100 dark:bg-[#0f172a] pt-24 p-4 transition-colors duration-300">
       <div className="w-full max-w-md">
         <form
           onSubmit={handleSubmit}

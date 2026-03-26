@@ -1,12 +1,13 @@
 import { createContext, useState, useEffect } from "react";
+import { useAlert } from "../hooks/customHooks";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
-  const [credits, setCredits] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { showAlert } = useAlert();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -29,9 +30,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const userName = user?.name || "there";
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     sessionStorage.clear();
+    showAlert(`See you later, ${userName}! You've been logged out.`, "Logged Out", 2);
     setUser(null);
   };
 

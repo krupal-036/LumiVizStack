@@ -38,7 +38,7 @@ const features = [
 
 export default function About() {
   return (
-    <div className="relative min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 overflow-hidden selection:text-white">
+    <div className="relative min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 overflow-hidden selection:text-white pt-6 sm:pt-16">
       <div className="inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-5%] right-[-10%] w-[200px] h-[200px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/15 blur-[60px] md:blur-[120px] rounded-full" />
         <div className="absolute top-[25%] left-[-10%] w-[180px] h-[180px] md:w-[500px] md:h-[500px] bg-violet-500/10 dark:bg-violet-600/10 blur-[50px] md:blur-[110px] rounded-full" />

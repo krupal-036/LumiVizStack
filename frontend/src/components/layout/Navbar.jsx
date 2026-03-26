@@ -1,172 +1,218 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { useTheme } from "../../hooks/customHooks";
-
 import {
-  FiSun, FiMoon, FiMenu, FiX, FiLogOut, FiUser, FiHome, FiBarChart2, FiClock, FiInfo, FiBookOpen, FiServer,
+  FiSun, FiMoon, FiMenu, FiX, FiLogOut, FiUser, FiHome,
+  FiBarChart2, FiClock, FiInfo, FiBookOpen, FiServer, FiZap, FiChevronRight
 } from "react-icons/fi";
 
 const navLinks = [
   { path: "/", label: "Home", icon: FiHome },
-  {
-    path: "/visualize",
-    label: "Visualize",
-    icon: FiBarChart2,
-    protected: true,
-  },
+  { path: "/visualize", label: "Visualize", icon: FiBarChart2, protected: true },
   { path: "/history", label: "History", icon: FiClock, protected: true },
   { path: "/about", label: "About", icon: FiInfo },
   { path: "/guide", label: "Guide", icon: FiBookOpen },
-  { path: "/docs/api", label: "API Docs", icon: FiServer },
+  { path: "/docs/api", label: "API", icon: FiServer },
 ];
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, logout } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    if (user?.role === "user") {
+      return
+    }
+    if (user?.role === "admin") {
+      navLinks.push({ path: "/admin", label: "Admin", icon: FiUser });
+    }
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [user]);
+
   const isActive = (path) => location.pathname === path;
+
   const handleLogout = () => {
+    navLinks.filter(n => n.label !== "Admin");
     logout();
     setMenuOpen(false);
     navigate("/");
   };
-  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/70 dark:bg-[#0B0F19]/70 border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-full mx-4 px-4 h-16 flex items-center justify-between">
-        <Link to="/" onClick={closeMenu} className="flex items-center gap-3 group">
-          <div className="w-9 h-9 flex items-center justify-center rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 text-white shadow-lg">
-            <FiBarChart2 size={18} />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
-            LumiVizStack
-          </span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => {
-            if (link.protected && !user) return null;
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "py-2" : "py-2 sm:py-4"
+      }`}>
+      <div className={`mx-auto max-w-screen-2xl z-70 px-2 transition-all duration-300`}>
+        <div className={`flex items-center justify-between px-4 h-16 rounded-2xl border transition-all duration-300 ${scrolled
+          ? menuOpen ? "bg-white/80 dark:bg-slate-900/80 z-70 border-slate-200 dark:border-slate-800 shadow-lg" : "backdrop-blur-md bg-white/80 dark:bg-slate-700/50 z-70 border-slate-200 dark:border-slate-800 shadow-lg"
+          : "bg-transparent z-70 border-transparent"
+          }`}>
 
-            return (
-              <Link
-                key={link.path}
-                to={link.path}
-                onClick={closeMenu}
-                className={`flex items-center gap-2 px-4 py-2 text-sm rounded-full transition
-                ${isActive(link.path) ? "bg-indigo-600 text-white shadow" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
-                <link.icon size={16} />
-                {link.label}
-              </Link>
-            );
-          })}
+          <Link to="/"
+            title="LumiVizStack | Transform complex JSON data into interactive visual architectures"
+            className="flex items-center z-70 gap-2 group">
+            <div className="relative">
+              <div className="relative w-10 h-10 flex items-center justify-center rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl transition-colors">
+                <FiZap size={22} className="fill-current" />
+              </div>
+            </div>
+            <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Lumi
+              <span className="text-indigo-500">Viz</span>
+              <span className="font-normal text-gray-500 dark:text-slate-500">Stack</span>
+            </span>
+          </Link>
 
-          {user?.role === "admin" && (
-            <Link to="/admin" className={`flex items-center gap-2 px-4 py-2 text-sm rounded-full transition
-              ${isActive("/admin")
-                ? "bg-indigo-600 text-white"
-                : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-              }`}>
-              <FiUser size={16} />
-              Admin
-            </Link>
-          )}
-        </nav>
-
-        <div className="flex items-center gap-2">
-          <button onClick={toggleTheme} className="p-2 rounded-full border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-            {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
-          </button>
-
-          <div className="hidden md:flex items-center gap-2">
-            {user ? (
-              <>
-                <Link
-                  to="/profile"
-                  className={`flex items-center gap-2 px-3 py-2 rounded-full transition ${isActive("/profile") ? "bg-indigo-600 text-white shadow" : "bg-gray-100 dark:bg-gray-800 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"}`}
-                >
-                  <FiUser size={16} />
-                  <span className="max-w-[90px] truncate">{user.name || "User"}</span>
-                </Link>
-
-                <button onClick={handleLogout} className="flex items-center gap-1 px-3 py-1 rounded-full text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 transition">
-                  <FiLogOut size={16} />
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="px-4 py-1.5 rounded-full text-sm border border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                  Login
-                </Link>
-
-                <Link to="/register" className="px-4 py-1.5 rounded-full text-sm bg-indigo-600 hover:bg-indigo-700 text-white transition">
-                  Sign Up
-                </Link>
-              </>
-            )}
-          </div>
-
-          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" >
-            {menuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
-          </button>
-        </div>
-      </div>
-
-      {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-[#0B0F19]">
-          <div className="px-4 py-4 flex flex-col gap-2">
+          <nav className="hidden lg:flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-full border border-slate-300 dark:border-slate-500">
             {navLinks.map((link) => {
               if (link.protected && !user) return null;
+              const active = isActive(link.path);
               return (
-                <Link key={link.path} to={link.path} onClick={closeMenu} className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive(link.path) ? "bg-indigo-600 text-white" : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"}`} >
-                  <link.icon size={18} />
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  title={active ? `Currently viewing ${link.label}` : `Navigate to ${link.label}`}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${active
+                    ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm"
+                    : "text-slate-600 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-300"
+                    }`}
+                >
+                  <link.icon size={16} className={active ? "text-indigo-600 dark:text-indigo-300" : ""} />
                   {link.label}
                 </Link>
               );
             })}
+          </nav>
 
-            {user?.role === "admin" && (
-              <Link to="/admin" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" >
-                <FiUser size={18} />
-                Admin
-              </Link>
+          <div className="flex items-center gap-1 z-70 sm:gap-3">
+            {user && (
+              <div className="flex flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500 text-indigo-600 dark:text-indigo-400 text-xs font-bold"
+                title={`You've got ${user.credits} credits left to use today!`}
+              >
+                <FiZap size={14} className="fill-current shrink-0 animate-bounce duration-2000 delay-500" />
+                <span className={`flex items-center gap-1 transition-colors duration-300 ${user.credits > 5
+                  ? "text-emerald-500 dark:text-emerald-400"
+                  : user.credits > 2
+                    ? "text-amber-500 dark:text-amber-400"
+                    : "text-rose-500 dark:text-rose-400"
+                  }`}>
+                  {user.credits}
+                  <span className="hidden sm:inline ml-0.5 text-indigo-300">Credits</span>
+                </span>
+
+              </div>
             )}
+            <button
+              onClick={toggleTheme}
+              title={`Switch theme to ${theme === "dark" ? "light" : "dark"}`}
+              className="p-2.5 rounded-xl z-70 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition-all"
+            >
+              {theme === "dark" ? <FiSun size={18} /> : <FiMoon size={18} />}
+            </button>
 
-            <div className="border-t border-gray-200 dark:border-gray-800 my-2" />
+            <div className="hidden md:flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 ml-2 pl-4">
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <div className="relative group">
+                    <Link to="/profile" className="flex items-center gap-2">
+                      <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white font-bold ring-2 ring-transparent group-hover:ring-indigo-500/30 transition-all">
+                        {user.name?.[0] || <FiUser />}
+                      </div>
+                    </Link>
 
-            {user ? (
-              <>
+                    <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-max px-3 py-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl border border-slate-700">
+                      Hello, {user.name}! 👋
+                      <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45" />
+                    </div>
+                  </div>
+
+                  <button onClick={handleLogout} title={`See you soon, ${user.name}! Ready to sign out?`} className="text-slate-400 hover:text-red-500 transition-colors">
+                    <FiLogOut size={20} />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login" className="text-sm font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-500 transition-colors">
+                    Log in
+                  </Link>
+                  <Link to="/register" className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all active:scale-95">
+                    Get Started
+                  </Link>
+                </>
+              )}
+            </div>
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2.5 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 relative z-[70] active:scale-95 transition-transform"
+            >
+              {menuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+            </button>
+
+          </div>
+        </div>
+      </div>
+      <div className={`fixed inset-0 z-40 lg:hidden transition-transform duration-500 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}>
+        <div className="absolute inset-0 bg-white dark:bg-slate-950 pt-20 px-6">
+
+          <div className="h-px bg-slate-100 dark:bg-slate-800" />
+          <div className="flex flex-col gap-2 pt-2">
+            {navLinks.map((link) => {
+              if (link.protected && !user) return null;
+              return (
                 <Link
-                  to="/profile"
-                  onClick={closeMenu}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${isActive("/profile") ? "bg-indigo-600 text-white" : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}`}
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className={`flex items-center justify-between p-4 rounded-2xl transition-all ${isActive(link.path)
+                    ? "bg-indigo-50 p-4 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+                    : "text-slate-600 dark:text-slate-400"
+                    }`}
                 >
-                  <FiUser size={18} />
-                  {user.name || "User"}
+                  <div className="flex items-center gap-4">
+                    <link.icon size={22} />
+                    <span className="text-sm font-semibold">{link.label}</span>
+                  </div>
+                  <FiChevronRight />
                 </Link>
-
-
-                <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30" >
-                  <FiLogOut size={18} />
-                  Logout
+              );
+            })}
+            {user ? (
+              <div className="space-y-0">
+                <Link to="/profile" onClick={() => setMenuOpen(false)} className="flex items-center gap-4 px-4 pb-4">
+                  <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <FiUser size={24} className="text-indigo-500" />
+                  </div>
+                  <div>
+                    <p className="font-bold dark:text-white">{user.name}</p>
+                    <p className="text-xs text-slate-500">View Profile</p>
+                  </div>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-600 font-bold"
+                >
+                  <FiLogOut /> Sign Out
                 </button>
-              </>
+              </div>
             ) : (
-              <>
-                <Link to="/login" onClick={closeMenu} className="px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 text-center" >
-                  Login
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-center font-bold">
+                  Log In
                 </Link>
-
-                <Link to="/register" onClick={closeMenu} className="px-4 py-3 rounded-lg bg-indigo-600 text-white text-center" >
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="p-4 rounded-2xl bg-indigo-600 text-white text-center font-bold">
                   Sign Up
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

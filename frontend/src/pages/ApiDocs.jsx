@@ -80,7 +80,7 @@ const EndpointCard = ({
 
 export default function ApiDocs() {
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white pt-14">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
     
     <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[400px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[80px] md:blur-[130px] rounded-full" />
@@ -95,8 +95,7 @@ export default function ApiDocs() {
       <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
 
         <div className="flex flex-col items-center justify-center mb-10 sm:mb-12 lg:mb-16 text-center px-4">
-
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs sm:text-sm font-semibold uppercase tracking-wider mb-5 sm:mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
             <FiServer className="w-4 h-4" />
             API Reference
           </div>

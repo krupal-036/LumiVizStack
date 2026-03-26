@@ -5,11 +5,11 @@ const NotFound = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="relative min-h-[80vh] flex flex-col items-center justify-center overflow-hidden bg-slate-100 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 px-4 py-10">
+    <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-slate-100 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 px-4">
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-red-500/10 dark:bg-red-600/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full pointer-events-none" />
 
-      <div className="relative z-10 text-center max-w-lg mx-auto">
+      <div className="relative z-10 text-center max-w-lg mx-auto pt-1">
         <div className="mb-6 inline-flex items-center justify-center w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400 border border-red-200 dark:border-red-800 shadow-sm">
           <FiAlertCircle className="w-10 h-10" />
         </div>

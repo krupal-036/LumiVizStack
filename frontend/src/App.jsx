@@ -23,12 +23,12 @@ import { AlertProvider } from './context/AlertContext';
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <AlertProvider>
+      <AlertProvider>
+        <AuthProvider>
           <Router>
             <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors duration-200">
               <Navbar />
-              <main className="grow pt-16 w-full">
+              <main className="grow w-full">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/login" element={<Login />} />
@@ -75,8 +75,8 @@ function App() {
               <BackToTop />
             </div>
           </Router>
-        </AlertProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </AlertProvider>
     </ThemeProvider>
   );
 }

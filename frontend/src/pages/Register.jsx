@@ -135,7 +135,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f172a] p-4 transition-colors duration-300">
+    <div className="min-h-full md:min-h-screen flex items-center justify-center bg-gray-50 dark:bg-[#0f172a] pt-20 p-4 transition-colors duration-300">
       <div className="w-full max-w-md">
         <form
           onSubmit={handleSubmit}

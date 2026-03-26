@@ -164,7 +164,7 @@ export default function History() {
     };
 
     return (
-        <div className="min-h-screen pt-4 sm:pt-10 pb-12 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
+        <div className="min-h-screen pt-20 sm:pt-24 pb-12 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
 
             <div className="fixed inset-0 pointer-events-none -z-10">
                 <div className="absolute top-[-10%] left-[-5%] w-[300px] md:w-[600px] h-[300px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />

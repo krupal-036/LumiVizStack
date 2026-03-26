@@ -25,7 +25,7 @@ router.post("/register", validateRegister, async (req, res) => {
       role: user.role,
       credits: user.credits,
     };
-    
+
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "30d",
     });
@@ -37,6 +37,7 @@ router.post("/register", validateRegister, async (req, res) => {
         name: user.username,
         email: user.email,
         role: user.role,
+        credits: user.credits,
       },
     });
   } catch (err) {
@@ -52,11 +53,11 @@ router.post("/login", validateLogin, async (req, res) => {
 
   try {
     const payload = { userId: user.id, role: user.role, credits: user.credits };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "9h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30d" });
 
     res.json({
       token,
-      user: {id: user.id, name: user.username, email: user.email, role: user.role },
+      user: { id: user.id, name: user.username, email: user.email, role: user.role, credits: user.credits },
     });
   } catch (err) {
     handleErrors(err, res);

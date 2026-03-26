@@ -21,7 +21,7 @@ const BackToTop = ({ threshold = 300 }) => {
   if (!isVisible) return null;
 
   return (
-    <button onClick={scrollToTop} className={`fixed z-50 p-4 text-white rounded-full shadow-xl transition-all duration-300 animate-in fade-in zoom-in bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700`} aria-label="Back to top" >
+    <button onClick={scrollToTop} className={`fixed z-55 p-4 text-white rounded-full shadow-xl transition-all duration-300 animate-in fade-in zoom-in bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700`} aria-label="Back to top" >
       <FiArrowUp size={20} />
     </button>
   );
