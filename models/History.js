@@ -25,8 +25,24 @@ const HistorySchema = new Schema({
   data: {
     type: Schema.Types.Mixed,
     required: true,
+    validate: {
+      validator: function (v) {
+        const lineCount = JSON.stringify(v, null, 2).split('\n').length;
+        return lineCount <= 500;
+      },
+      message: props => `The data object exceeds 500 lines.`
+    }
   },
-  rawInput: String,
+  rawInput: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        if (!v) return true;
+        return v.trim().split('\n').length <= 500;
+      },
+      message: "The raw input text exceeds 500 lines."
+    }
+  },
   urlInput: String,
   inputType: String,
   isDeleted: {

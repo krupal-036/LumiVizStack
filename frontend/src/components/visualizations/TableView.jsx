@@ -1,38 +1,53 @@
-import React from 'react';
-import { FiHash } from 'react-icons/fi';
+import SmartCell from "../common/SmartCell";
+import { FiHash } from "react-icons/fi";
 
-const TableView = ({ data, renderValue, forceImages, setForceImages }) => {
+const TableView = ({ data, forceImages, setForceImages }) => {
   if (!data || data.length === 0) return null;
   const headers = Object.keys(data[0]);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700">
-          <tr>
-            <th className="p-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-10">
-              <FiHash />
-            </th>
-            {headers.map(h => (
-              <th key={h} className="p-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider whitespace-nowrap">
-                {h}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, i) => (
-            <tr key={i} className="border-b border-gray-100 dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-              <td className="p-4 text-sm text-gray-400 font-mono">{i + 1}</td>
-              {headers.map(h => (
-                <td key={h} className="p-4 text-sm align-top whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis">
-                  {renderValue ? renderValue(row[h], `row-${i}-${h}`, forceImages, setForceImages) : String(row[h])}
-                </td>
+    <div className="w-full transition-all duration-300">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm shadow-slate-200/50 dark:shadow-none">
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-separate border-spacing-0">
+            <thead>
+              <tr className="bg-slate-50/50 dark:bg-slate-800/50">
+                <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 p-4 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800 w-12 text-center">
+                  <div className="flex justify-center"><FiHash size={14} /></div>
+                </th>
+                {headers.map((key) => (
+                  <th
+                    key={key}
+                    className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800 whitespace-nowrap"
+                  >
+                    {key.replace(/_/g, ' ')}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              {data.map((row, rowIndex) => (
+                <tr
+                  key={rowIndex}
+                  className="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors duration-150"
+                >
+                  <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10 p-4 text-xs font-medium text-slate-400 dark:text-slate-600 font-mono text-center border-r border-slate-100 dark:border-slate-800">
+                    {rowIndex + 1}
+                  </td>
+                  {headers.map((key) => (
+                    <td key={`${rowIndex}-${key}`} className="px-6 py-4 align-middle">
+                      <SmartCell value={row[key]} forceImages={forceImages} setForceImages={setForceImages} />
+                    </td>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="mt-3 text-[11px] text-slate-400 dark:text-slate-600 px-1">
+        Showing {data.length} entries
+      </div>
     </div>
   );
 };

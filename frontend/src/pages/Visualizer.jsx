@@ -61,13 +61,12 @@ const Visualizer = () => {
     }
   }, []);
 
+
   useEffect(() => {
     if (data.length === 0) return;
     const snapshot = { data, viewMode, rawInput, urlInput, inputType };
     sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(snapshot));
   }, [data, viewMode, rawInput, urlInput, inputType]);
-
-
 
   const generateRandomTitle = () => {
     const randomID = Math.random().toString(36).substring(2, 10).toLowerCase();
@@ -119,10 +118,21 @@ const Visualizer = () => {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    const maxSize = 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      showAlert("File is too large! Please upload a file smaller than 2MB.", "Upload Error", 2);
+      e.target.value = "";
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onload = (ev) => { setRawInput(ev.target.result); setInputType("paste"); };
+    reader.onload = (ev) => {
+      setRawInput(ev.target.result);
+      setInputType("paste");
+    };
     reader.readAsText(file);
   };
+
 
   const handleSave = () => {
     if (!user || data.length === 0) return;
@@ -134,6 +144,22 @@ const Visualizer = () => {
     if (!token) {
       setError("Authentication error. Please log in again.");
       return;
+    }
+
+    if (rawInput) {
+      const rawLines = rawInput.trim().split('\n').length;
+      if (rawLines > 500) {
+        showAlert(`Input text is too long (${rawLines} lines). Please limit to 500 lines.`, "Validation Error", 1);
+        return;
+      }
+    }
+
+    if (data) {
+      const dataLines = JSON.stringify(data, null, 2).split('\n').length;
+      if (dataLines > 500) {
+        showAlert(`The data structure is too large (${dataLines} lines). Please reduce the amount of data.`, "Validation Error", 1);
+        return;
+      }
     }
 
     setSaveState("saving");

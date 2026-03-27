@@ -13,6 +13,20 @@ router.post("/save", verifyToken, async (req, res) => {
     const { title, type, data, rawInput, urlInput, inputType, isPublic, isDeleted } = req.body;
     const userId = req.user.id;
 
+    if (rawInput) {
+      const rawLines = rawInput.trim().split('\n').length;
+      if (rawLines > 500) {
+        return res.status(400).json({ message: `Input text is too long (${rawLines} lines). Max 500.` });
+      }
+    }
+
+    if (data) {
+      const dataLines = JSON.stringify(data, null, 2).split('\n').length;
+      if (dataLines > 500) {
+        return res.status(400).json({ message: `JSON data structure is too large (${dataLines} lines). Max 500.` });
+      }
+    }
+
     if (title) {
       const existingTitle = await History.findOne({
         userId,
@@ -38,29 +52,27 @@ router.post("/save", verifyToken, async (req, res) => {
       }
     }
 
-    if (rawInput) {
+    if (trimmedInput) {
 
       let normalizedInput;
       try {
-        normalizedInput = JSON.stringify(JSON.parse(rawInput));
+        normalizedInput = JSON.stringify(JSON.parse(trimmedInput));
       } catch (e) {
-        normalizedInput = rawInput.trim();
+        normalizedInput = trimmedInput.trim();
       }
 
-      const histories = await History.find({ userId });
-
+      const histories = await History.find({ userId, isDeleted: false });
       const isDuplicate = histories.some(h => {
         try {
-          return JSON.stringify(JSON.parse(h.rawInput)) === normalizedInput;
+          const storedNorm = h.rawInput ? JSON.stringify(JSON.parse(h.rawInput)) : h.rawInput;
+          return storedNorm === normalizedInput;
         } catch (e) {
-          return h.rawInput === rawInput;
+          return h.rawInput === trimmedInput;
         }
       });
 
       if (isDuplicate) {
-        return res.status(400).json({
-          message: "A visualization with this exact data input already exists in your history."
-        });
+        return res.status(400).json({ message: "A visualization with this exact data input already exists." });
       }
     }
 
@@ -74,7 +86,7 @@ router.post("/save", verifyToken, async (req, res) => {
     }
 
     const newHistory = new History({
-      userId, title, type, data, rawInput: trimmedInput, urlInput, inputType, isPublic: isPublic || false, isDeleted: isDeleted || false,
+      userId, title, type, data, rawInput: trimmedInput, urlInput, inputType, isPublic: !!isPublic || false, isDeleted: !!isDeleted || false,
     });
 
     const savedItem = await newHistory.save();
