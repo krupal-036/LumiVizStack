@@ -369,8 +369,6 @@ const AdminPanel = () => {
               </button>
             )}
           </div>
-
-
           <div className="p-6">
             {activeTab === "users" && (
               <div className="w-full">
@@ -381,6 +379,7 @@ const AdminPanel = () => {
                         <th className="py-4 px-6 font-semibold">User</th>
                         <th className="py-4 px-6 font-semibold">Email</th>
                         <th className="py-4 px-6 font-semibold">Role</th>
+                        <th className="py-4 px-6 font-semibold">Created At</th>
                         <th className="py-4 px-6 font-semibold">Total_Viz</th>
                         <th className="py-4 px-6 font-semibold text-right">Delete User</th>
                         <th className="py-4 px-6 font-semibold text-right">Delete History</th>
@@ -413,6 +412,18 @@ const AdminPanel = () => {
                                 }`}
                             >
                               {u.role}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6">
+                            <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
+                              {new Date(u.createdAt).toLocaleString('en-IN', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                              })}
                             </span>
                           </td>
                           <td className="py-4 px-6">
@@ -531,6 +542,7 @@ const AdminPanel = () => {
                             <th className="py-4 px-6 font-semibold">Title</th>
                             <th className="py-4 px-6 font-semibold">User</th>
                             <th className="py-4 px-6 font-semibold">Type</th>
+                            <th className="py-4 px-6 font-semibold">Created At</th>
                             <th className="py-4 px-6 font-semibold text-center">Status</th>
                             <th className="py-4 px-6 font-semibold text-center">Public Link</th>
                             <th className="py-4 px-6 font-semibold text-right">Actions</th>
@@ -560,6 +572,18 @@ const AdminPanel = () => {
                               <td className="py-4 px-6">
                                 <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
                                   {h.type}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
+                                  {new Date(h.createdAt).toLocaleString('en-IN', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                  })}
                                 </span>
                               </td>
                               <td className="py-4 px-6">
