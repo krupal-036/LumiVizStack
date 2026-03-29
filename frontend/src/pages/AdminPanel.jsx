@@ -19,11 +19,13 @@ const AdminPanel = () => {
     isSignupEnabled: null
   });
   const [activeTab, setActiveTab] = useState("users");
+  const [isDark, setIsDark] = useState(false);
   const { user: currentUser } = useContext(AuthContext);
   const token = localStorage.getItem("token");
   const { showAlert } = useAlert();
   const navigate = useNavigate();
   const location = useLocation();
+
   const fetchData = async () => {
     setLoading(true);
     if (!token) return;
@@ -34,7 +36,6 @@ const AdminPanel = () => {
         axios.get("/api/admin/users", config),
         axios.get("/api/admin/allhistory", config),
       ]);
-
       setStats(statsRes.data);
       setUsers(usersRes.data);
       setHistory(historyRes.data);
@@ -61,13 +62,11 @@ const AdminPanel = () => {
             'Content-Type': 'application/json'
           }
         });
-
         if (!response.ok) throw new Error('Failed to fetch');
-
         const data = await response.json();
         setSettings(data);
       } catch (err) {
-        showAlert(data?.message || "Could not load administrative data.", "Invalid Role", 1);
+        showAlert(err?.message || "Could not load administrative data.", "Invalid Role", 1);
       } finally {
         setLoading(false);
       }
@@ -75,13 +74,10 @@ const AdminPanel = () => {
     fetchSettings();
   }, [token]);
 
-
   const handleToggle = async (field) => {
     const updatedValue = !settings[field];
     const originalValue = settings[field];
-
     setSettings({ ...settings, [field]: updatedValue });
-
     try {
       const response = await fetch('/api/admin/settings/auth', {
         method: 'PATCH',
@@ -89,10 +85,7 @@ const AdminPanel = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          ...settings,
-          [field]: updatedValue
-        })
+        body: JSON.stringify({ ...settings, [field]: updatedValue })
       });
       const data = await response.json();
       if (!response.ok) {
@@ -108,7 +101,6 @@ const AdminPanel = () => {
     }
   };
 
-
   const handleDeleteUser = async (id) => {
     if (!window.confirm("Are you sure you want to delete this user?")) return;
     try {
@@ -122,6 +114,7 @@ const AdminPanel = () => {
       showAlert("Failed to delete user.");
     }
   };
+
   const handleDeleteAllHistoryOfUser = async (id) => {
     if (!window.confirm("Are you sure you want to delete all History of this user?")) return;
     try {
@@ -136,33 +129,27 @@ const AdminPanel = () => {
 
   const handleToggleStatus = async (id) => {
     try {
-
       const res = await fetch(`/api/history/${id}/toggle`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
       if (res.ok) {
-
         setHistory(prevHistory =>
           prevHistory.map(item =>
-            item._id === id
-              ? { ...item, isPublic: data.isPublic }
-              : item
+            item._id === id ? { ...item, isPublic: data.isPublic } : item
           )
         );
-
       } else {
         showAlert("Failed to Update Status.", "Error", 1);
       }
     } catch (err) {
-      showAlert(err || "Fail tot Toggle", "Toggle error");
+      showAlert(err || "Fail to Toggle", "Toggle error");
     }
   };
 
   const handleSoftDelete = async (id) => {
     try {
-
       const res = await fetch(`/api/history/${id}`, {
         method: "PUT",
         headers: { "Authorization": `Bearer ${token}` }
@@ -171,12 +158,9 @@ const AdminPanel = () => {
       if (res.ok) {
         setHistory(prevHistory =>
           prevHistory.map(item =>
-            item._id === id
-              ? { ...item, isDeleted: data.isDeleted }
-              : item
+            item._id === id ? { ...item, isDeleted: data.isDeleted } : item
           )
         );
-
       } else {
         showAlert("Failed to Update Status.");
       }
@@ -200,19 +184,12 @@ const AdminPanel = () => {
   };
 
   const handleDeleteAllHistory = async () => {
-    if (
-      !window.confirm(
-        "⚠️ WARNING: This will permanently delete ALL visualization history for EVERY user. This cannot be undone.",
-      )
-    )
-      return;
-
+    if (!window.confirm("WARNING: This will permanently delete ALL visualization history for EVERY user. This cannot be undone.")) return;
     try {
       const res = await fetch("/api/admin/history/all", {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
-
       const data = await res.json();
       if (res.ok) {
         showAlert(data.message, "Success", 2);
@@ -225,421 +202,355 @@ const AdminPanel = () => {
     }
   };
 
-  const StatCard = ({ icon, label, value, color }) => (
-    <div className="bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-2xl p-2 sm:p-1 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow">
-      <div className={`p-3 rounded-xl ${color} bg-opacity-10 text-xl`}>
-        {icon}
-      </div>
-      <div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
-          {label}
-        </p>
-        <p className="text-2xl font-bold text-slate-900 dark:text-white">
-          {value}
-        </p>
+  const StatCard = ({ icon, label, value, iconBg }) => (
+    <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/6 p-5 group hover:shadow-xl hover:shadow-black/4 dark:hover:shadow-black/20 transition-all duration-300 hover:-translate-y-0.5">
+      <div className="flex items-center justify-between pl-3">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-1.5">{label}</p>
+          <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</p>
+        </div>
+        <div className={`p-3 rounded-xl ${iconBg} transition-transform duration-300 group-hover:scale-110`}>
+          {icon}
+        </div>
       </div>
     </div>
   );
 
   if (loading) {
-    return (
-      <Loader data={"Loading Admin Panel..."} />
-    );
+    return <Loader data={"Loading Admin Panel..."} />;
   }
 
+  const tabs = [
+    { id: "users", label: "Users", icon: <HiOutlineUserGroup className="w-4 h-4" /> },
+    { id: "history", label: "History", icon: <FiActivity className="w-4 h-4" /> },
+    { id: "stats", label: "Stats", icon: <HiOutlineChartBar className="w-4 h-4" /> },
+    { id: "settings", label: "Settings", icon: <FiSettings className="w-4 h-4" /> },
+  ];
+
+  const pieData = [
+    { name: 'Users', value: stats.users || 0, color: '#0d9488' },
+    { name: 'Records', value: stats.records || 0, color: '#f59e0b' },
+    { name: 'Public', value: stats.isPublic || 0, color: '#10b981' },
+    { name: 'Deleted', value: stats.isDeleted || 0, color: '#f43f5e' },
+  ];
+
+  const totalItems = pieData.reduce((s, d) => s + d.value, 0);
+
+  const CenterLabel = ({ viewBox }) => {
+    const { cx, cy } = viewBox;
+    return (
+      <text x={cx} y={cy - 8} textAnchor="middle" dominantBaseline="middle">
+        <tspan style={{ fontSize: '28px', fontWeight: 900, fill: isDark ? '#f1f5f9' : '#0f172a' }}>{totalItems}</tspan>
+        <tspan x={cx} dy="22" style={{ fontSize: '10px', fontWeight: 700, fill: isDark ? '#64748b' : '#94a3b8', letterSpacing: '0.15em' }}>TOTAL</tspan>
+      </text>
+    );
+  };
+
+  const fmtDate = (d) =>
+    new Date(d).toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-[#0B0F19] py-20 px-4 sm:px-6 lg:px-8 text-slate-800 dark:text-slate-100">
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[100px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-violet-500/10 dark:bg-violet-600/10 blur-[120px] rounded-full" />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0c0e14] relative">
+
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-[550px] h-[550px] bg-indigo-400/8 dark:bg-indigo-500/4 rounded-full blur-[140px]" />
+        <div className="absolute -bottom-40 -left-40 w-[480px] h-[480px] bg-blue-400/6 dark:bg-blue-500/3 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-amber-300/3 dark:bg-amber-500/2 rounded-full blur-[100px]" />
+        <div
+          className="absolute inset-0 opacity-3 dark:opacity-[0.05]"
+          style={{ backgroundImage: 'radial-linear(#94a3b8 1px, transparent 1px)', backgroundSize: '28px 28px' }}
+        />
       </div>
 
-      <div className="max-w-full mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
 
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col items-center md:items-start md:text-left">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white flex items-center justify-center md:justify-start gap-3 w-full tracking-tight">
-              <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
-                <FiSettings className="w-6 h-6 stroke-[2.5px]" />
-              </div>
-              <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
-                Admin Control Panel
+        <header className="mb-10">
+          <div className="flex items-center gap-3.5 mb-2">
+            <div className="w-11 h-11 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 dark:shadow-indigo-500/10">
+              <FiSettings className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                Admin Panel
+              </h1>
+              <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] bg-indigo-50 dark:bg-indigo-900/25 text-indigo-700 dark:text-indigo-400 rounded-md border border-indigo-200/60 dark:border-indigo-700/30">
+                Admin
               </span>
-            </h1>
-            <p className="text-gray-500 text-center dark:text-gray-400 mt-1 text-sm">
-              Monitor system activity, manage users, and oversee data records.
-            </p>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 sm:gap-6 my-4 sm:mb-8">
+          <p className="text-slate-500 dark:text-slate-400 text-sm ml-[58px]">
+            Monitor activity, manage users, and configure system settings.
+          </p>
+        </header>
+
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8" aria-label="Statistics overview">
           <StatCard
-            icon={<FiUsers className="w-6 h-6" />}
+            icon={<FiUsers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
             label="Total Users"
             value={stats.users}
-            color="text-indigo-600 bg-indigo-100 dark:bg-indigo-900/40"
+            iconBg="bg-indigo-50 dark:bg-indigo-900/20"
           />
-
           <StatCard
-            icon={<FiDatabase className="w-6 h-6" />}
+            icon={<FiDatabase className="w-5 h-5 text-amber-600 dark:text-amber-400" />}
             label="Total Records"
             value={stats.records}
-            color="text-violet-600 bg-violet-100 dark:bg-violet-900/40"
+            iconBg="bg-amber-50 dark:bg-amber-900/20"
           />
           <StatCard
-            icon={<Earth className="w-6 h-6" />}
-            label="Total Public Records"
+            icon={<Earth className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+            label="Public Records"
             value={stats.isPublic}
-            color="text-violet-600 bg-violet-100 dark:bg-violet-900/40"
+            iconBg="bg-blue-50 dark:bg-blue-900/20"
           />
           <StatCard
-            icon={<Trash className="w-6 h-6" />}
-            label="Total Deleted Records"
+            icon={<Trash className="w-5 h-5 text-rose-600 dark:text-rose-400" />}
+            label="Deleted Records"
             value={stats.isDeleted}
-            color="text-violet-600 bg-violet-100 dark:bg-violet-900/40"
+            iconBg="bg-rose-50 dark:bg-rose-900/20"
           />
-        </div>
+        </section>
 
-        <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-3xl shadow-xl overflow-hidden backdrop-blur-md">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 dark:border-slate-700 px-4 sm:px-6 pt-4 gap-4">
-            <div className="flex flex-wrap items-center">
+        <nav className="flex items-center justify-between gap-4 mb-4 flex-wrap" aria-label="Admin panel tabs">
+          <div className="inline-flex items-center gap-1 p-1.5 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200/80 dark:border-white/6 shadow-sm">
+            {tabs.map((tab) => (
               <button
-                onClick={() => setActiveTab("users")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "users"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${activeTab === tab.id
+                    ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 dark:shadow-indigo-500/15"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/4"
                   }`}
               >
-                <HiOutlineUserGroup className="w-5 h-5" />
-                <span>Users</span>
-                {activeTab === "users" && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
-                )}
+                {tab.icon}
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
-
-              <button
-                onClick={() => setActiveTab("history")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "history"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-              >
-                <FiActivity className="w-5 h-5" />
-                <span>History</span>
-                {activeTab === "history" && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab("stats")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "stats"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-              >
-                <HiOutlineChartBar className="w-5 h-5" />
-                <span>Stats</span>
-                {activeTab === "stats" && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
-                )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab("settings")}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium transition-colors relative ${activeTab === "settings"
-                  ? "text-indigo-600 dark:text-indigo-400"
-                  : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                  }`}
-              >
-                <FiSettings className="w-5 h-5" />
-                <span>Settings</span>
-                {activeTab === "settings" && (
-                  <div className="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-500 rounded-full"></div>
-                )}
-              </button>
-            </div>
-
-            {activeTab === "history" && history.length > 0 && (
-              <button
-                onClick={handleDeleteAllHistory}
-                className="hidden md:flex items-center gap-2 px-4 py-2 mb-3 sm:mb-0 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors"
-              >
-                <FiTrash2 className="w-4 h-4" />
-                <span> Delete All </span>
-              </button>
-            )}
+            ))}
           </div>
-          <div className="p-6">
-            {activeTab === "users" && (
-              <div className="w-full">
-                <div className="hidden md:block overflow-hidden border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50">
-                  <table className="w-full text-left border-collapse">
+
+          {activeTab === "history" && history.length > 0 && (
+            <button
+              onClick={handleDeleteAllHistory}
+              className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 bg-rose-50 dark:bg-rose-900/10 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/20 active:scale-[0.97] transition-all duration-200"
+            >
+              <FiTrash2 className="w-3.5 h-3.5" />
+              Delete All History
+            </button>
+          )}
+        </nav>
+
+        <main className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/80 dark:border-white/6 rounded-2xl overflow-hidden shadow-xl shadow-black/3 dark:shadow-black/20">
+
+          {activeTab === "users" && (
+            <div className="p-4 sm:p-6">
+              <div className="hidden md:block overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800/60">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
                     <thead>
-                      <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                        <th className="py-4 px-6 font-semibold">User</th>
-                        <th className="py-4 px-6 font-semibold">Email</th>
-                        <th className="py-4 px-6 font-semibold">Role</th>
-                        <th className="py-4 px-6 font-semibold">Created At</th>
-                        <th className="py-4 px-6 font-semibold">Total_Viz</th>
-                        <th className="py-4 px-6 font-semibold text-right">Delete User</th>
-                        <th className="py-4 px-6 font-semibold text-right">Delete History</th>
+                      <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-200/60 dark:border-slate-700/40">
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">User</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Email</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Role</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Joined</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Viz</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
                       {users.map((u) => (
-                        <tr
-                          key={u._id}
-                          className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
-                        >
-                          <td className="py-4 px-6">
+                        <tr key={u._id} className="hover:bg-slate-50/60 dark:hover:bg-white/2 transition-colors">
+                          <td className="py-4 px-5">
                             <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 shrink-0 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                              <div className="w-9 h-9 shrink-0 rounded-full bg-linear-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
                                 {u.username ? u.username[0].toUpperCase() : "U"}
                               </div>
-                              <span className="font-medium text-slate-800 dark:text-slate-100">
-                                {u.username}
-                              </span>
+                              <span className="font-semibold text-slate-800 dark:text-slate-100">{u.username}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-6 text-slate-600 dark:text-slate-300 text-sm">
-                            {u.email}
-                          </td>
-                          <td className="py-4 px-6">
-                            <span
-                              className={`px-2.5 py-1 rounded-full text-xs font-semibold inline-block ${u.role === "admin"
-                                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-                                : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-                                }`}
-                            >
+                          <td className="py-4 px-5 text-sm text-slate-500 dark:text-slate-400">{u.email}</td>
+                          <td className="py-4 px-5">
+                            <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider ${u.role === "admin"
+                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-700/30"
+                                : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30"
+                              }`}>
                               {u.role}
                             </span>
                           </td>
-                          <td className="py-4 px-6">
-                            <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
-                              {new Date(u.createdAt).toLocaleString('en-IN', {
-                                day: '2-digit',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                hour12: true
-                              })}
-                            </span>
+                          <td className="py-4 px-5">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{fmtDate(u.createdAt)}</span>
                           </td>
-                          <td className="py-4 px-6">
-                            <span
-                              className={`px-2.5 py-1 rounded-full text-xs font-semibold inline-block ${u.role === "admin"
-                                ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
-                                : "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
-                                }`}
-                            >
+                          <td className="py-4 px-5 text-center">
+                            <span className="inline-flex items-center justify-center min-w-[32px] px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/30">
                               {u.historyCount}
                             </span>
                           </td>
-                          <td className="py-4 px-6 text-right">
-                            {currentUser?.id !== u._id && (
-                              <button
-                                onClick={() => handleDeleteUser(u._id)}
-                                disabled={u.role === "admin" ? true : false}
-                                className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                title="Delete User"
-                              >
-                                <FiTrash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </td>
-                          <td className="py-4 px-6 text-right">
-                            {currentUser?.id !== u._id && (
-                              <button
-                                onClick={() => handleDeleteAllHistoryOfUser(u._id)}
-                                disabled={u.role == "admin" ? true : false}
-                                className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
-                                title="Delete User"
-                              >
-                                <FiTrash2 className="w-4 h-4" />
-                              </button>
-                            )}
+                          <td className="py-4 px-5">
+                            <div className="flex items-center justify-end gap-1">
+                              {currentUser?.id !== u._id && u.role !== "admin" && (
+                                <>
+                                  <button
+                                    onClick={() => handleDeleteAllHistoryOfUser(u._id)}
+                                    className="p-2 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors"
+                                    title="Delete user's history"
+                                  >
+                                    <FiTrash2 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteUser(u._id)}
+                                    className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors"
+                                    title="Delete user"
+                                  >
+                                    <Trash className="w-4 h-4" />
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 gap-4 md:hidden">
-                  {users.map((u) => (
-                    <div
-                      key={u._id}
-                      className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md shrink-0">
+              <div className="grid grid-cols-1 gap-3 md:hidden">
+                {users.map((u) => (
+                  <div key={u._id} className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-full border border-slate-200/60 dark:border-white/4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-lg bg-linear-to-br from-indigo-800 to-blue-500 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
                           {u.username ? u.username[0].toUpperCase() : "U"}
                         </div>
-                        <div className="flex flex justify-center gap-2 min-w-0">
-                          <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
-                            {u.username}
-                          </span>
-                          <span className={`w-fit px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider mt-1 ${u.role === "admin"
-                            ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50"
-                            : "bg-slate-100 text-slate-600 dark:bg-slate-800"
-                            }`}>
-                            {u.role}
-                          </span>
-                          <span className="font-bold text-slate-800 dark:text-slate-100">
-                            {u.historyCount}
-                          </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-800 dark:text-slate-100 truncate">{u.username}</span>
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 ${u.role === "admin"
+                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
+                                : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                              }`}>
+                              {u.role}
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{u.email}</p>
                         </div>
                       </div>
-
-                      <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Email Address</span>
-                          <span className="text-sm text-slate-600 dark:text-slate-300 break-all">
-                            {u.email}
-                          </span>
-                        </div>
-                      </div>
-                      {currentUser?.id !== u._id && (
-                        <div className="grid grid-cols-2 gap-3 pt-2">
-                          <button
-                            onClick={() => handleDeleteAllHistoryOfUser(u._id)}
-                            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 text-xs font-bold active:scale-95 transition-transform border border-amber-100 dark:border-amber-900/20"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                            <span>Clear History</span>
-                          </button>
-
-                          <button
-                            onClick={() => handleDeleteUser(u._id)}
-                            className="flex items-center justify-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 text-xs font-bold active:scale-95 transition-transform border border-red-100 dark:border-red-900/20"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                            <span>Delete User</span>
-                          </button>
-                        </div>
-                      )}
+                      <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg shrink-0">
+                        {u.historyCount} viz
+                      </span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-
-            {activeTab === "history" && (
-              <div className="w-full">
-                {history.length === 0 ? (
-                  <div className="text-center py-10 text-slate-500 dark:text-slate-400">
-                    <FiDatabase className="w-8 h-8 mx-auto mb-3 opacity-50" />
-                    No history records found.
+                    {currentUser?.id !== u._id && u.role !== "admin" && (
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-white/4">
+                        <button
+                          onClick={() => handleDeleteAllHistoryOfUser(u._id)}
+                          className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-xs font-bold active:scale-[0.97] transition-all border border-amber-200/60 dark:border-amber-800/30"
+                        >
+                          <FiTrash2 className="w-3.5 h-3.5" />
+                          Clear History
+                        </button>
+                        <button
+                          onClick={() => handleDeleteUser(u._id)}
+                          className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30"
+                        >
+                          <Trash className="w-3.5 h-3.5" />
+                          Delete User
+                        </button>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="w-full">
-                    <div className="hidden md:block overflow-hidden border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/50">
-                      <table className="w-full text-left border-collapse">
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "history" && (
+            <div className="p-4 sm:p-6">
+              {history.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800/40 flex items-center justify-center mb-4">
+                    <FiDatabase className="w-7 h-7" />
+                  </div>
+                  <p className="font-semibold text-slate-500 dark:text-slate-400">No history records found</p>
+                  <p className="text-sm mt-1 text-slate-400 dark:text-slate-500">Records will appear here as users create visualizations.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="hidden md:block overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800/60">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left">
                         <thead>
-                          <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                            <th className="py-4 px-6 font-semibold">Title</th>
-                            <th className="py-4 px-6 font-semibold">User</th>
-                            <th className="py-4 px-6 font-semibold">Type</th>
-                            <th className="py-4 px-6 font-semibold">Created At</th>
-                            <th className="py-4 px-6 font-semibold text-center">Status</th>
-                            <th className="py-4 px-6 font-semibold text-center">Public Link</th>
-                            <th className="py-4 px-6 font-semibold text-right">Actions</th>
+                          <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-200/60 dark:border-slate-700/40">
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Title</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">User</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Type</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Created</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Visibility</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Link</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-right">Delete</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
                           {history.map((h) => (
-                            <tr key={h._id} className="hover:bg-slate-100 dark:hover:bg-slate-800/40 transition-colors">
-                              <td className="py-4 px-6">
-                                <div className="flex items-center gap-3">
-                                  <div className="w-10 h-10 shrink-0 rounded-full bg-linear-to-tr from-slate-400 to-slate-600 flex items-center justify-center text-white shadow-md">
-                                    <FiDatabase className="w-5 h-5" />
-                                  </div>
-
-                                  <span className="font-medium text-slate-800 dark:text-slate-100 italic">
-                                    {h.title || "Untitled Record"}
-                                  </span>
+                            <tr key={h._id} className="hover:bg-slate-50/60 dark:hover:bg-white/2 transition-colors">
+                              <td className="py-4 px-5">
+                                <span className="font-medium text-slate-800 dark:text-slate-100">{h.title || "Untitled Record"}</span>
+                              </td>
+                              <td className="py-4 px-5">
+                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                                  <FiUser className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                  <span className="truncate max-w-[160px]">{h.userId?.email || "Unknown"}</span>
                                 </div>
                               </td>
-
-                              <td className="py-4 px-6 text-slate-600 dark:text-slate-300 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <FiUser className="w-5 h-5 opacity-50" />
-                                  {h.userId?.email || "Unknown"}
-                                </div>
-                              </td>
-                              <td className="py-4 px-6">
-                                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
+                              <td className="py-4 px-5">
+                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30">
                                   {h.type}
                                 </span>
                               </td>
-                              <td className="py-4 px-6">
-                                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-xs font-mono text-slate-600 dark:text-slate-400">
-                                  {new Date(h.createdAt).toLocaleString('en-IN', {
-                                    day: '2-digit',
-                                    month: 'short',
-                                    year: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
-                                  })}
-                                </span>
+                              <td className="py-4 px-5">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{fmtDate(h.createdAt)}</span>
                               </td>
-                              <td className="py-4 px-6">
-                                <div className="flex flex-col items-center gap-2">
-                                  <label className="inline-flex items-center cursor-pointer group">
+                              <td className="py-4 px-5">
+                                <div className="flex items-center justify-center gap-3">
+                                  <label className="inline-flex items-center cursor-pointer">
                                     <div className="relative">
-                                      <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={h.isPublic}
-                                        onChange={() => handleToggleStatus(h._id)}
-                                      />
-                                      <div className="w-7 h-3.5 bg-slate-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
-                                      <div className="absolute left-[2px] top-[2px] bg-white w-2.5 h-2.5 rounded-full transition-transform peer-checked:translate-x-3.5"></div>
+                                      <input type="checkbox" className="sr-only peer" checked={h.isPublic} onChange={() => handleToggleStatus(h._id)} />
+                                      <div className="w-8 h-4 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-500 transition-colors" />
+                                      <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
                                     </div>
-                                    <span className={`ml-2 text-[9px] font-bold uppercase w-10 text-left ${h.isPublic ? 'text-green-700' : 'text-slate-500'}`}>
-                                      {h.isPublic ? "Public" : "Private"}
+                                    <span className={`ml-1.5 text-[10px] font-bold uppercase ${h.isPublic ? 'text-emerald-600 dark:text-green-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                                      {h.isPublic ? "On" : "Off"}
                                     </span>
                                   </label>
-
-                                  <label className="inline-flex items-center cursor-pointer group">
+                                  <label className="inline-flex items-center cursor-pointer">
                                     <div className="relative">
-                                      <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={h.isDeleted}
-                                        onChange={() => handleSoftDelete(h._id)}
-                                      />
-                                      <div className="w-7 h-3.5 bg-slate-200 rounded-full peer peer-checked:bg-red-500 transition-colors"></div>
-                                      <div className="absolute left-[2px] top-[2px] bg-white w-2.5 h-2.5 rounded-full transition-transform peer-checked:translate-x-3.5"></div>
+                                      <input type="checkbox" className="sr-only peer" checked={h.isDeleted} onChange={() => handleSoftDelete(h._id)} />
+                                      <div className="w-8 h-4 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-rose-500 transition-colors" />
+                                      <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
                                     </div>
-                                    <span className={`ml-2 text-[9px] font-bold uppercase w-10 text-left ${h.isDeleted ? 'text-red-700' : 'text-slate-500'}`}>
-                                      {h.isDeleted ? "Deleted" : "Active"}
+                                    <span className={`ml-1.5 text-[10px] font-bold uppercase ${h.isDeleted ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                                      {h.isDeleted ? "Del" : "Act"}
                                     </span>
                                   </label>
                                 </div>
                               </td>
-
-                              {h.shareId && h.isPublic ? (
-                                <td className="py-4 px-6 text-center">
+                              <td className="py-4 px-5 text-center">
+                                {h.shareId && h.isPublic ? (
                                   <button
                                     onClick={() => window.open(`/view/${h.shareId}`, '_blank', 'noopener,noreferrer')}
-                                    className="p-2 rounded-lg text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                                    title="View Public Link"
+                                    className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors inline-flex"
+                                    title="Open public link"
                                   >
                                     <FiExternalLink className="w-4 h-4" />
                                   </button>
-                                </td>
-                              ) : (
-                                <td className="py-4 px-6 text-center text-slate-500 italic">Private</td>
-                              )}
-
-                              <td className="py-4 px-6 text-right">
+                                ) : (
+                                  <span className="text-slate-300 dark:text-slate-600">&mdash;</span>
+                                )}
+                              </td>
+                              <td className="py-4 px-5 text-right">
                                 <button
                                   onClick={() => handleDeleteHistoryItem(h._id)}
-                                  className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                                  className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors inline-flex"
                                 >
                                   <FiTrash2 className="w-4 h-4" />
                                 </button>
@@ -649,195 +560,219 @@ const AdminPanel = () => {
                         </tbody>
                       </table>
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 gap-4 md:hidden">
-                      {activeTab === "history" && history.length > 0 && (
-                        <button
-                          onClick={handleDeleteAllHistory}
-                          className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors mx-auto"
-                        >
-                          <FiTrash2 className="w-4 h-4" />
-                          <span className=""> Delete All </span>
-                        </button>
-                      )}
-                      {history.map((h) => (
-                        <div key={h._id} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-                          <div className="flex justify-between items-start">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-linear-to-tr from-slate-400 to-slate-600 flex items-center justify-center text-white shadow-md">
-                                <FiDatabase className="w-5 h-5" />
-                              </div>
-                              <div>
-                                <h3 className="font-bold text-slate-800 dark:text-slate-100">{h.title || "Untitled"}</h3>
-                                <p className="text-xs text-slate-500">{h.type}</p>
-                              </div>
+                  <div className="grid grid-cols-1 gap-3 md:hidden">
+                    {history.map((h) => (
+                      <div key={h._id} className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-xl border border-slate-200/60 dark:border-white/4 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-slate-800 dark:text-slate-100 truncate">{h.title || "Untitled Record"}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400">
+                                {h.type}
+                              </span>
+                              <span className="text-xs text-slate-400 truncate">{h.userId?.email}</span>
                             </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteHistoryItem(h._id)}
+                            className="p-2 rounded-lg bg-rose-50 dark:bg-rose-900/10 text-rose-500 shrink-0 active:scale-90 transition-transform"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="flex items-center gap-4 pt-2 border-t border-slate-200/60 dark:border-white/4">
+                          <label className="inline-flex items-center cursor-pointer">
+                            <div className="relative">
+                              <input type="checkbox" className="sr-only peer" checked={h.isPublic} onChange={() => handleToggleStatus(h._id)} />
+                              <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-500 transition-colors" />
+                              <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
+                            </div>
+                            <span className={`ml-2 text-[10px] font-bold uppercase tracking-wide ${h.isPublic ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`}>
+                              Public
+                            </span>
+                          </label>
+                          <label className="inline-flex items-center cursor-pointer">
+                            <div className="relative">
+                              <input type="checkbox" className="sr-only peer" checked={h.isDeleted} onChange={() => handleSoftDelete(h._id)} />
+                              <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-rose-500 transition-colors" />
+                              <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
+                            </div>
+                            <span className={`ml-2 text-[10px] font-bold uppercase tracking-wide ${h.isDeleted ? 'text-rose-600 dark:text-rose-400' : 'text-slate-400'}`}>
+                              Deleted
+                            </span>
+                          </label>
+                          {h.shareId && h.isPublic && (
                             <button
-                              onClick={() => handleDeleteHistoryItem(h._id)}
-                              className="p-2.5 rounded-xl bg-red-50 dark:bg-red-900/10 text-red-500 active:scale-95 transition-transform"
+                              onClick={() => window.open(`/view/${h.shareId}`, '_blank', 'noopener,noreferrer')}
+                              className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                             >
-                              <FiTrash2 className="w-5 h-5" />
+                              <FiExternalLink className="w-4 h-4" />
                             </button>
-                          </div>
-
-                          <div className="grid grid-cols-1 gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                            <div className="flex flex-col">
-                              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-widest">Creator</span>
-                              <span className="text-sm text-slate-600 dark:text-slate-300 truncate">{h.userId?.email}</span>
-                            </div>
-                            <div className="flex gap-4 items-center">
-                              <label className="flex items-center cursor-pointer group">
-                                <div className="relative">
-                                  <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={h.isPublic}
-                                    onChange={() => handleToggleStatus(h._id)}
-                                  />
-                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
-                                  <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform peer-checked:translate-x-4"></div>
-                                </div>
-                                <span className="ml-2 text-[10px] font-bold uppercase tracking-tight text-slate-600">
-                                  {h.isPublic ? "Public" : "Private"}
-                                </span>
-                              </label>
-
-                              <label className="flex items-center cursor-pointer group">
-                                <div className="relative">
-                                  <input
-                                    type="checkbox"
-                                    className="sr-only peer"
-                                    checked={h.isDeleted}
-                                    onChange={() => handleSoftDelete(h._id)}
-                                  />
-                                  <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-red-500 transition-colors"></div>
-                                  <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full transition-transform peer-checked:translate-x-4"></div>
-                                </div>
-                                <span className="ml-2 text-[10px] font-bold uppercase tracking-tight text-slate-600">
-                                  {h.isDeleted ? "Deleted" : "Active"}
-                                </span>
-                              </label>
-                            </div>
-
-                          </div>
+                          )}
                         </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {activeTab === "stats" && (
+            <div className="p-6 sm:p-10">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 text-center mb-2">
+                Platform Distribution
+              </h3>
+              <p className="text-sm text-slate-400 dark:text-slate-500 text-center mb-8">
+                Breakdown of all platform entities by category
+              </p>
+              <div style={{ width: '100%', height: 400 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={90}
+                      outerRadius={125}
+                      paddingAngle={4}
+                      dataKey="value"
+                      animationBegin={0}
+                      animationDuration={1200}
+                      animationEasing="ease-out"
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
                       ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-            {activeTab === "stats" && (
-              <div className="p-6">
-                <h3 className="text-lg font-semibold mb-6 text-slate-800 dark:text-slate-100 text-center">
-                  Platform Distribution
-                </h3>
-
-                <div style={{ width: '100%', height: 350 }}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: 'Users', value: stats.users || 0, color: '#6366f1' },
-                          { name: 'Records', value: stats.records || 0, color: '#8b5cf6' },
-                          { name: 'Public', value: stats.isPublic || 0, color: '#10b981' },
-                          { name: 'Deleted', value: stats.isDeleted || 0, color: '#ef4444' },
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={80}
-                        outerRadius={110}
-                        paddingAngle={5}
-                        dataKey="value"
-                        animationBegin={0}
-                        animationDuration={1200}
+                      <text
+                        x="50%"
+                        y="46%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        style={{ fontSize: '28px', fontWeight: 900, fill: isDark ? '#f1f5f9' : '#0f172a' }}
                       >
-                        {[
-                          { name: 'Users', color: '#6366f1' },
-                          { name: 'Records', color: '#8b5cf6' },
-                          { name: 'Public', color: '#10b981' },
-                          { name: 'Deleted', color: '#ef4444' }
-                        ].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
-                        ))}
-                      </Pie>
+                        {totalItems}
+                      </text>
+                      <text
+                        x="50%"
+                        y="55%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        style={{ fontSize: '10px', fontWeight: 700, fill: isDark ? '#64748b' : '#94a3b8', letterSpacing: '0.15em' }}
+                      >
+                        TOTAL
+                      </text>
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.92)' : 'rgba(255, 255, 255, 0.96)',
+                        borderRadius: '12px',
+                        border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.06)',
+                        boxShadow: isDark ? '0 20px 40px rgba(0,0,0,0.5)' : '0 20px 40px rgba(0,0,0,0.08)',
+                        backdropFilter: 'blur(12px)',
+                        color: isDark ? '#e2e8f0' : '#1e293b',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                      }}
+                      itemStyle={{ color: isDark ? '#e2e8f0' : '#1e293b' }}
+                      cursor={{ fill: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)' }}
+                    />
+                    <Legend
+                      verticalAlign="bottom"
+                      height={40}
+                      iconType="circle"
+                      iconSize={10}
+                      formatter={(value) => (
+                        <span style={{ color: isDark ? '#94a3b8' : '#64748b', fontSize: '13px', fontWeight: 600, marginLeft: '4px' }}>{value}</span>
+                      )}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                          borderRadius: '12px',
-                          border: 'none',
-                          boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-                          backdropFilter: 'blur(4px)'
-                        }}
-                      />
-                      <Legend verticalAlign="bottom" height={36} />
-                    </PieChart>
-                  </ResponsiveContainer>
+          {activeTab === "settings" && (
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center">
+                  <Settings className="w-[18px] h-[18px] text-slate-600 dark:text-slate-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Site Control</h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Manage authentication and access settings</p>
                 </div>
               </div>
-            )}
-            {activeTab === "settings" && (
-              <div className="p-0">
-                <div className="max-w-full mx-auto bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
 
-                  <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900/50 flex items-center gap-3">
-                    <Settings className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                    <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Site Control Panel</h2>
-                  </div>
-
-                  <div className="p-6 space-y-4">
-
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-colors gap-4">
-                      <div className="flex gap-4">
-                        <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg h-fit">
-                          <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100">User Login</p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">Allow existing users to log in (Admins always allowed)</p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleToggle('isLoginEnabled')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.isLoginEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
-                          }`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isLoginEnabled ? 'translate-x-6' : 'translate-x-1'
-                          }`} />
-                      </button>
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-slate-50/80 dark:bg-white/2 border border-slate-200/60 dark:border-white/4 rounded-xl hover:border-indigo-200/60 dark:hover:border-indigo-800/30 transition-colors gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl h-fit shrink-0">
+                      <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-
-
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-indigo-100 dark:hover:border-indigo-900/50 transition-colors gap-4">
-                      <div className="flex gap-4">
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg h-fit">
-                          <UserPlus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-slate-900 dark:text-slate-100">New Signups</p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">Allow new users to create accounts</p>
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => handleToggle('isSignupEnabled')}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.isSignupEnabled ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-600'
-                          }`}
-                      >
-                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.isSignupEnabled ? 'translate-x-6' : 'translate-x-1'
-                          }`} />
-                      </button>
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">User Login</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Allow existing users to authenticate. Admins are always permitted.</p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => handleToggle('isLoginEnabled')}
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 shrink-0 ${settings.isLoginEnabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                    role="switch"
+                    aria-checked={settings.isLoginEnabled}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${settings.isLoginEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                    />
+                  </button>
+                </div>
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-slate-50/80 dark:bg-white/2 border border-slate-200/60 dark:border-white/4 rounded-xl hover:border-amber-200/60 dark:hover:border-amber-800/30 transition-colors gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl h-fit shrink-0">
+                      <UserPlus className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">New Signups</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Allow new users to create accounts on the platform.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleToggle('isSignupEnabled')}
+                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 shrink-0 ${settings.isSignupEnabled ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'
+                      }`}
+                    role="switch"
+                    aria-checked={settings.isSignupEnabled}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${settings.isSignupEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                    />
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
-        </div>
+
+              <div className="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-white/2 border border-slate-200/60 dark:border-white/4">
+                <div className="flex items-start gap-3">
+                  <div className="p-1.5 bg-slate-200/60 dark:bg-slate-700/40 rounded-lg h-fit shrink-0 mt-0.5">
+                    <FiAlertTriangle className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Disabling login will prevent all non-admin users from accessing the platform. Disabling signup closes registration while keeping existing accounts active.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+        </main>
       </div>
     </div>
   );
 };
+
 export default AdminPanel;
