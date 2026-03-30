@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FiPlay, FiCode, FiUploadCloud, FiLink, FiX, FiSave, FiCheck, FiTrash2, FiEye, FiEyeOff, FiTable, FiGrid, FiBarChart2, FiDatabase, FiGitBranch, FiLoader, FiSettings, FiSearch, FiRefreshCw } from "react-icons/fi";
 import { parseData } from "../utils/dataParser";
 import { AuthContext } from "../context/AuthContext";
-import { useAlert } from '../hooks/customHooks.jsx';
+import { useAlert, useTitle } from '../hooks/customHooks.jsx';
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
@@ -36,6 +36,8 @@ const Visualizer = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
   const [searchBar, setSearchBar] = useState(false);
+
+  useTitle("Visualizer");
 
   useEffect(() => {
     const forceLoad = location.state?.forceLoad === true;

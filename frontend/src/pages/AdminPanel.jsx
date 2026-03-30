@@ -6,9 +6,10 @@ import { AuthContext } from "../context/AuthContext";
 import { FiUsers, FiDatabase, FiTrash2, FiActivity, FiUser, FiAlertTriangle, FiEye, FiSettings, FiExternalLink } from "react-icons/fi";
 import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
 import Loader from "../components/common/Loader";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert, useTheme, useTitle } from "../hooks/customHooks";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { MdBlock } from "react-icons/md";
+import { FaRocket } from "react-icons/fa";
 const AdminPanel = () => {
   const [stats, setStats] = useState({ users: 0, records: 0, isPublic: 0, isDeleted: 0 });
   const [users, setUsers] = useState([]);
@@ -20,12 +21,11 @@ const AdminPanel = () => {
   });
   const [activeTab, setActiveTab] = useState("users");
   const [isDark, setIsDark] = useState(false);
-  const { user: currentUser } = useContext(AuthContext);
-  const token = localStorage.getItem("token");
+  const { user: currentUser, token } = useContext(AuthContext);
   const { showAlert } = useAlert();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { theme } = useTheme();
   const fetchData = async () => {
     setLoading(true);
     if (!token) return;
@@ -46,12 +46,20 @@ const AdminPanel = () => {
       navigate("/", { state: { from: location }, replace: true });
       setLoading(false);
     }
-  };
 
+  };
+  useTitle("Admin Panel");
   useEffect(() => {
     fetchData();
   }, [token]);
-
+  useEffect(() => {
+    if (theme === "dark") {
+      setIsDark(true)
+    }
+    else {
+      setIsDark(false)
+    }
+  }, [theme]);
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -74,6 +82,14 @@ const AdminPanel = () => {
     fetchSettings();
   }, [token]);
 
+  const handleLoad = (item) => {
+    navigate("/visualize", {
+      state: {
+        config: item,
+        forceLoad: true
+      }
+    });
+  };
   const handleToggle = async (field) => {
     const updatedValue = !settings[field];
     const originalValue = settings[field];
@@ -138,6 +154,27 @@ const AdminPanel = () => {
         setHistory(prevHistory =>
           prevHistory.map(item =>
             item._id === id ? { ...item, isPublic: data.isPublic } : item
+          )
+        );
+      } else {
+        showAlert("Failed to Update Status.", "Error", 1);
+      }
+    } catch (err) {
+      showAlert(err || "Fail to Toggle", "Toggle error");
+    }
+  };
+
+  const handledisableuser = async (id) => {
+    try {
+      const res = await fetch(`/api/admin/user/${id}`, {
+        method: "PUT",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(prev =>
+          prev.map(item =>
+            item._id === id ? { ...item, isDeleted: data.isDeleted } : item
           )
         );
       } else {
@@ -320,8 +357,8 @@ const AdminPanel = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${activeTab === tab.id
-                    ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 dark:shadow-indigo-500/15"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/4"
+                  ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 dark:shadow-indigo-500/15"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/4"
                   }`}
               >
                 {tab.icon}
@@ -355,7 +392,7 @@ const AdminPanel = () => {
                         <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Role</th>
                         <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Joined</th>
                         <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Viz</th>
-                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-right">Actions</th>
+                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
@@ -372,8 +409,8 @@ const AdminPanel = () => {
                           <td className="py-4 px-5 text-sm text-slate-500 dark:text-slate-400">{u.email}</td>
                           <td className="py-4 px-5">
                             <span className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider ${u.role === "admin"
-                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-700/30"
-                                : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30"
+                              ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-700/30"
+                              : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30"
                               }`}>
                               {u.role}
                             </span>
@@ -387,7 +424,7 @@ const AdminPanel = () => {
                             </span>
                           </td>
                           <td className="py-4 px-5">
-                            <div className="flex items-center justify-end gap-1">
+                            <div className="flex items-center justify-center gap-1">
                               {currentUser?.id !== u._id && u.role !== "admin" && (
                                 <>
                                   <button
@@ -400,9 +437,16 @@ const AdminPanel = () => {
                                   <button
                                     onClick={() => handleDeleteUser(u._id)}
                                     className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors"
-                                    title="Delete user"
+                                    title="Delete User"
                                   >
                                     <Trash className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handledisableuser(u._id)}
+                                    className={`p-2 rounded-lg ${u.isDeleted ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/10" : "text-slate-400"} hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors`}
+                                    title={u.isDeleted ? `${u.username} is Disabled` : `Disable ${u.username}`}
+                                  >
+                                    <MdBlock className="w-4 h-4" />
                                   </button>
                                 </>
                               )}
@@ -417,7 +461,7 @@ const AdminPanel = () => {
 
               <div className="grid grid-cols-1 gap-3 md:hidden">
                 {users.map((u) => (
-                  <div key={u._id} className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-full border border-slate-200/60 dark:border-white/4 space-y-3">
+                  <div key={u._id} className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-xl border border-slate-200/60 dark:border-white/4 space-y-3">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-10 h-10 rounded-lg bg-linear-to-br from-indigo-800 to-blue-500 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
@@ -427,8 +471,8 @@ const AdminPanel = () => {
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-slate-800 dark:text-slate-100 truncate">{u.username}</span>
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 ${u.role === "admin"
-                                ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
-                                : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                              ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
+                              : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
                               }`}>
                               {u.role}
                             </span>
@@ -441,20 +485,27 @@ const AdminPanel = () => {
                       </span>
                     </div>
                     {currentUser?.id !== u._id && u.role !== "admin" && (
-                      <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 dark:border-white/4">
+                      <div className="flex flex-wrap sm:flex-row gap-2 pt-2 border-t border-slate-200/60 dark:border-white/4">
                         <button
                           onClick={() => handleDeleteAllHistoryOfUser(u._id)}
-                          className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-xs font-bold active:scale-[0.97] transition-all border border-amber-200/60 dark:border-amber-800/30"
+                          className="flex-1 min-w-fit flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-xs font-bold active:scale-[0.97] transition-all border border-amber-200/60 dark:border-amber-800/30"
                         >
                           <FiTrash2 className="w-3.5 h-3.5" />
-                          Clear History
+                          <span>Clear History</span>
                         </button>
+
                         <button
                           onClick={() => handleDeleteUser(u._id)}
-                          className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30"
+                          className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30"
                         >
                           <Trash className="w-3.5 h-3.5" />
-                          Delete User
+                        </button>
+
+                        <button
+                          onClick={() => handledisableuser(u._id)}
+                          className={`flex-1 sm:flex-none flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl ${u.isDeleted ? "bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400" : "bg-slate-50 dark:bg-slate-900/10 text-slate-600 dark:text-slate-400"} text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30`}
+                        >
+                          <MdBlock className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     )}
@@ -484,7 +535,8 @@ const AdminPanel = () => {
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Title</th>
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">User</th>
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Type</th>
-                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">Created</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Created</th>
+                            <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Action</th>
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Visibility</th>
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">Link</th>
                             <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-right">Delete</th>
@@ -507,9 +559,22 @@ const AdminPanel = () => {
                                   {h.type}
                                 </span>
                               </td>
-                              <td className="py-4 px-5">
-                                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{fmtDate(h.createdAt)}</span>
+                              <td className="py-4 px-2">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono text-center">{fmtDate(h.createdAt)}</span>
                               </td>
+                              <td className="py-4 px-2 text-center">
+                                <span className="flex items-center justify-center">
+                                  <button
+                                    onClick={() => handleLoad(h)}
+                                    className="flex items-center gap-2 p-2 bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-all text-xs font-mono"
+                                    title="Load this Visualization"
+                                  >
+                                    <FaRocket size={16} />
+                                    <span>Load</span>
+                                  </button>
+                                </span>
+                              </td>
+
                               <td className="py-4 px-5">
                                 <div className="flex items-center justify-center gap-3">
                                   <label className="inline-flex items-center cursor-pointer">
@@ -604,12 +669,19 @@ const AdminPanel = () => {
                             </span>
                           </label>
                           {h.shareId && h.isPublic && (
-                            <button
-                              onClick={() => window.open(`/view/${h.shareId}`, '_blank', 'noopener,noreferrer')}
-                              className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                            >
-                              <FiExternalLink className="w-4 h-4" />
-                            </button>
+                            <>
+                              <button
+                                onClick={() => window.open(`/view/${h.shareId}`, '_blank', 'noopener,noreferrer')}
+                                className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                              >
+                                <FiExternalLink className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleLoad(h)}
+                                className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                              >
+                                <FaRocket className="w-4 h-4" />
+                              </button></>
                           )}
                         </div>
                       </div>

@@ -7,6 +7,7 @@ import {
   FiCheckCircle,
   FiAlertCircle,
 } from "react-icons/fi";
+import { useTitle } from "../hooks/customHooks";
 
 const MethodBadge = ({ method }) => {
   const colors = {
@@ -79,6 +80,7 @@ const EndpointCard = ({
 );
 
 export default function ApiDocs() {
+  useTitle("API Docs");
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white pt-14">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">

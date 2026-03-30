@@ -4,6 +4,7 @@ import {
   FiCode, FiUploadCloud, FiLink, FiPlay, FiTable, FiGrid, FiBarChart2, FiShare2, FiSave, FiEye, FiEyeOff, FiBookOpen, FiCheckCircle,
 } from "react-icons/fi";
 import VisualizeButton from "../components/common/Button";
+import { useTitle } from "../hooks/customHooks";
 const guideSteps = [
   {
     step: "01",
@@ -88,6 +89,7 @@ const guideSteps = [
 ];
 
 export default function Guide() {
+  useTitle("Guide");
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 pt-10 sm:pt-14 selection:text-white">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">

@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [credits, setCredits] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(localStorage.getItem("token"));
   const { showAlert } = useAlert();
 
   useEffect(() => {
@@ -19,7 +20,6 @@ export const AuthProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(storedToken);
         setUser(decoded);
-        console.log(decoded);
         setRole(decoded.role);
         if (storedCredits) {
           setCredits(JSON.parse(storedCredits));
@@ -34,17 +34,17 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     localStorage.setItem("credits", JSON.stringify(credits));
-  }, [credits])
-
-  const login = (token) => {
-    if (token) {
-      localStorage.setItem("token", token);
+  }, [credits]);
+  const login = (tokenval) => {
+    if (tokenval) {
+      localStorage.setItem("token", tokenval);
     }
-    const decoded = jwtDecode(token);
+    const decoded = jwtDecode(tokenval);
     localStorage.setItem("credits", JSON.stringify(decoded.credits));
     setUser(decoded);
     setRole(decoded.role);
     setCredits(decoded.credits);
+    setToken(tokenval);
   };
 
   const logout = () => {
@@ -56,10 +56,11 @@ export const AuthProvider = ({ children }) => {
     showAlert(`See you later, ${userName}! You've been logged out.`, "Logged Out", 2);
     setUser(null);
     setCredits(null);
+    setToken(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, setUser, logout, loading, role, credits, setCredits }}>
+    <AuthContext.Provider value={{ user, login, setUser, logout, loading, role, credits, setCredits, token }}>
       {!loading && children}
     </AuthContext.Provider>
   );

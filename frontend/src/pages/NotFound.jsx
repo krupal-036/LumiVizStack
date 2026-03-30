@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { FiHome, FiArrowLeft, FiAlertCircle } from "react-icons/fi";
+import { useTitle } from "../hooks/customHooks";
 
 const NotFound = () => {
   const navigate = useNavigate();
+  useTitle("404");
 
   return (
     <section className="relative min-h-[100vh] flex flex-col items-center justify-center overflow-hidden bg-slate-100 dark:bg-[#0B0F19] text-slate-900 dark:text-slate-100 px-4">

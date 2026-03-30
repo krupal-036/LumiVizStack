@@ -2,7 +2,7 @@ import React from "react";
 import {
   FiDatabase, FiShield, FiPieChart, FiDownload, FiCode, FiLayout, FiCpu, FiServer, FiCheck,
 } from "react-icons/fi";
-
+import { useTitle } from "../hooks/customHooks";
 const features = [
   {
     icon: FiDatabase,
@@ -37,6 +37,7 @@ const features = [
 ];
 
 export default function About() {
+  useTitle("About");
   return (
     <div className="relative min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 overflow-hidden selection:text-white pt-6 sm:pt-16">
       <div className="inset-0 overflow-hidden pointer-events-none z-0">

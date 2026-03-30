@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation, redirect } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLogIn, FiLoader } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert, useTitle } from "../hooks/customHooks";
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -15,7 +15,7 @@ export default function Login() {
     password: "",
     remember: false,
   });
-
+  useTitle("Login");
   useEffect(() => {
     if (redirectError) {
       showAlert(redirectError, "Authentication Required", 1);

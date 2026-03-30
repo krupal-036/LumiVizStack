@@ -1,12 +1,14 @@
 import { useContext, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { Link } from "react-router-dom";
 import {
     FiTrash2, FiEye, FiEyeOff, FiClock, FiActivity,
     FiLoader, FiAlertCircle, FiBarChart2, FiLink, FiExternalLink, FiCheck,
-    FiRefreshCw
+    FiRefreshCw,
 } from "react-icons/fi";
-import { useAlert } from "../hooks/customHooks";
+import { FaRocket } from 'react-icons/fa';
+import { useAlert, useTitle } from "../hooks/customHooks";
 
 export default function History() {
     const { user } = useContext(AuthContext);
@@ -17,12 +19,13 @@ export default function History() {
     const [actionId, setActionId] = useState(null);
     const [copiedId, setCopiedId] = useState(null);
     const [toast, setToast] = useState("");
+    const navigate = useNavigate();
     const clearError = (sec) => {
         setTimeout(() => {
             setErrors("");
         }, sec * 1000);
     }
-    
+    useTitle("History");
     useEffect(() => {
         fetchHistory();
     }, []);
@@ -55,6 +58,15 @@ export default function History() {
         finally {
             setLoading(false);
         }
+    };
+
+    const handleLoad = (item) => {
+        navigate("/visualize", {
+            state: {
+                config: item,
+                forceLoad: true
+            }
+        });
     };
 
     const handleToggleStatus = async (id) => {
@@ -281,7 +293,7 @@ export default function History() {
                             Your saved visualizations will appear here once you create them.
                         </p>
                         <Link
-                            to="/dashboard"
+                            to="/visualize"
                             className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-lg shadow-indigo-500/20"
                         >
                             Create Visualization
@@ -290,15 +302,9 @@ export default function History() {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {history.map((item) => (
-                            <div
-                                key={item._id}
-                                className="group bg-white dark:bg-[#111827] rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-900 transition-all duration-300 shadow-sm hover:shadow-xl overflow-hidden flex flex-col"
-                            >
-                                <div
-                                    className={`p-5 border-b border-gray-50 dark:border-gray-800/50 flex-grow transition-colors ${item.isDeleted ? "bg-red-50/50 dark:bg-red-900/10" : ""
-                                        }`}
-                                    title={item.isDeleted ? "Click on recover button to recover your visualization" : undefined}
-                                >
+                            <div key={item._id} className="group bg-white dark:bg-[#111827] rounded-2xl border border-gray-100 dark:border-gray-800 hover:border-indigo-200 dark:hover:border-indigo-900 transition-all duration-300 shadow-sm hover:shadow-xl overflow-hidden flex flex-col" >
+                                <div className={`p-5 border-b border-gray-50 dark:border-gray-800/50 flex-grow transition-colors ${item.isDeleted ? "bg-red-50/50 dark:bg-red-900/10" : ""
+                                    }`} title={item.isDeleted ? "Click on recover button to recover your visualization" : undefined} >
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-center gap-3 overflow-hidden">
                                             <div className={`p-2.5 rounded-lg ${item.isDeleted
@@ -307,7 +313,6 @@ export default function History() {
                                                 }`}>
                                                 {item.isDeleted ? <FiTrash2 size={20} /> : <FiActivity size={20} />}
                                             </div>
-
                                             <div className="overflow-hidden">
                                                 <h3 className={`font-bold truncate transition-all ${item.isDeleted
                                                     ? "text-red-700 dark:text-red-400 line-through opacity-70"
@@ -325,20 +330,14 @@ export default function History() {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="px-5 py-3.5 bg-gray-50/50 dark:bg-gray-900/30 flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                                    <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500 truncate">
                                         <FiClock />
-                                        <span>{formatDate(item.createdAt)}</span>
+                                        <span className="truncate min-w-0">{formatDate(item.createdAt)}</span>
                                     </div>
-
                                     <div className="flex items-center gap-2">
                                         {item.isDeleted ? (
-                                            <button
-                                                onClick={() => handleDelete(item._id)}
-                                                disabled={actionId === item._id}
-                                                className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-medium transition-all"
-                                            >
+                                            <button onClick={() => handleDelete(item._id)} disabled={actionId === item._id} className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:text-indigo-400 dark:hover:bg-indigo-900/40 rounded-lg text-xs font-medium transition-all" >
                                                 {actionId === item._id ? (
                                                     <FiLoader className="animate-spin" />
                                                 ) : (
@@ -352,32 +351,19 @@ export default function History() {
                                             <>
                                                 {item.isPublic && (
                                                     <>
-                                                        <button
-                                                            onClick={() => handleCopyLink(item.shareId)}
-                                                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all relative group"
-                                                            title="Copy Public Link"
-                                                        >
+                                                        <button onClick={() => handleCopyLink(item.shareId)} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all relative group" title="Copy Public Link" >
                                                             {copiedId === item.shareId ? <FiCheck className="text-green-500" /> : <FiLink size={16} />}
                                                         </button>
 
-                                                        <Link
-                                                            to={`/view/${item.shareId}`}
-                                                            className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all"
-                                                            title="Open Public Page"
-                                                        >
+                                                        <Link to={`/view/${item.shareId}`} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 dark:text-gray-400 dark:hover:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-all" title="Open Public Page" >
                                                             <FiExternalLink size={16} />
                                                         </Link>
                                                     </>
                                                 )}
-
-                                                <button
-                                                    onClick={() => handleToggleStatus(item._id)}
-                                                    disabled={actionId === item._id}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${item.isPublic
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/60"
-                                                        : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
-                                                        }`}
-                                                >
+                                                <button onClick={() => handleToggleStatus(item._id)} disabled={actionId === item._id} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${item.isPublic
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/60"
+                                                    : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                                    }`} title={item.isPublic ? `Switch to Private` : "Switch to Public"} >
                                                     {actionId === item._id ? (
                                                         <FiLoader className="animate-spin" />
                                                     ) : (
@@ -387,20 +373,16 @@ export default function History() {
                                                         </>
                                                     )}
                                                 </button>
-
-                                                <button
-                                                    onClick={() => handleDelete(item._id)}
-                                                    disabled={actionId === item._id}
-                                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all"
-                                                    title="Delete"
-                                                >
+                                                <button onClick={() => handleLoad(item)} className="p-2 bg-blue-100 text-blue-400 dark:bg-blue-800  hover:text-blue-500 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-all" title="Load this Visualization" >
+                                                    <FaRocket size={16} />
+                                                </button>
+                                                <button onClick={() => handleDelete(item._id)} disabled={actionId === item._id} className="p-2 text-red-700 bg-red-400 dark:text-red-800 dark:bg-red-400 hover:text-red-400 hover:bg-red-700 dark:hover:bg-red-900/50 rounded-lg transition-all" title="Delete" >
                                                     <FiTrash2 size={16} />
                                                 </button>
                                             </>
                                         )}
                                     </div>
                                 </div>
-
                             </div>
                         ))}
                     </div>

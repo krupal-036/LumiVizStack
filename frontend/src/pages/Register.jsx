@@ -3,7 +3,7 @@ import { FiArrowRight, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
 import { AuthContext } from "../context/AuthContext";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert, useTitle } from "../hooks/customHooks";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function SignUp() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-
+  useTitle("Register");
   const getFieldError = (name, value) => {
     const reservedWords = ["admin", "root", "support", "help", "official", "moderator", "krupal", "krupalfataniya", "user"];
     const usernameRegex = /^[a-z][a-z0-9]*$/;

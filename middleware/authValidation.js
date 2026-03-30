@@ -95,7 +95,7 @@ export const validateLogin = async (req, res, next) => {
     }
 
     if (user.isDeleted) {
-      return res.status(400).json({ message: "Account deactivated" });
+      return res.status(400).json({ message: "Your Account was deactivated" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);

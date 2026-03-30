@@ -9,7 +9,7 @@ import GraphView from "../components/visualizations/GraphView";
 import Loader from "../components/common/Loader.jsx"
 import { renderValue } from "../components/Features.jsx";
 import { FiAlertCircle, FiArrowLeft, FiBarChart2, FiCalendar, FiClock, FiCode, FiEye, FiGrid, FiHome, FiSearch, FiShare, FiShare2, FiTable, FiWatch } from "react-icons/fi";
-import { useAlert } from "../hooks/customHooks.jsx";
+import { useAlert, useTitle } from "../hooks/customHooks.jsx";
 
 const PublicView = () => {
   const { historyId } = useParams();
@@ -21,7 +21,7 @@ const PublicView = () => {
   const [viewMode, setViewMode] = useState("table");
   const [searchTerm, setSearchTerm] = useState("");
   const [forceImages, setForceImages] = useState({});
-
+  useTitle("Share & View");
   useEffect(() => {
     const fetchPublicData = async () => {
       try {

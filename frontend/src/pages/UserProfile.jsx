@@ -1,7 +1,7 @@
 import { useContext, useState, useEffect, useRef } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { FiUser, FiMail, FiSave, FiLoader, FiCheckCircle, FiAlertCircle, FiTrash2, FiRotateCcw, FiBarChart2, FiEye, FiEyeOff, FiHash, FiToggleRight, FiToggleLeft, FiTrash, FiKey, FiLock } from "react-icons/fi";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert, useTitle } from "../hooks/customHooks";
 
 export default function UserProfile() {
     const { user, setUser, logout } = useContext(AuthContext);
@@ -19,11 +19,10 @@ export default function UserProfile() {
 
     const [visualizations, setVisualizations] = useState([]);
     const [loadingVis, setLoadingVis] = useState(true);
-
     useEffect(() => {
         if (user?.name) setUsername(user.name);
     }, [user]);
-
+    useTitle(username);
     useEffect(() => {
         const fetchVisualizations = async () => {
             try {

@@ -4,13 +4,13 @@ import {
   FiCheck, FiLink, FiFileText, FiCode, FiCopy,
 } from "react-icons/fi";
 import VisualizeButton from "../components/common/Button";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert, useTitle } from "../hooks/customHooks";
 import { jsondata } from "../utils/mockData.js";
 
 export default function Dashboard() {
   const [isCopied, setIsCopied] = useState(false);
   const { showAlert } = useAlert();
-
+  useTitle("Home");
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(jsondata);

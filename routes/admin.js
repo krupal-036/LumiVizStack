@@ -97,7 +97,26 @@ router.get("/users", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
+// @route   PUT api/admin/user/:userid
+// @desc    Update User delete status
 
+router.put("/user/:id", verifyToken, isAdmin, async (req, res) => {
+  try {
+    const userItem = await User.findById(req.params.id);
+
+    if (!userItem) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    userItem.isDeleted = !userItem.isDeleted;
+    await userItem.save();
+
+    res.json(userItem);
+  } catch (err) {
+    console.error("User Soft delete Toggle error:", err.message);
+    res.status(500).json("Server error...");
+  }
+});
 
 // @route   DELETE api/admin/user/:userid
 // @desc    Delete User and all history of User

@@ -26,7 +26,7 @@ function App() {
       <AlertProvider>
         <AuthProvider>
           <Router>
-            <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors duration-200">
+            <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors">
               <Navbar />
               <main className="grow w-full">
                 <Routes>

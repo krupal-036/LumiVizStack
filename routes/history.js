@@ -98,6 +98,9 @@ router.post("/save", verifyToken, async (req, res) => {
 
         return res.status(403).json({ message: "Insufficient credits." });
       }
+      if (updatedUser.isDeleted) {
+        return res.status(404).json({ message: "Account was Disabled" });
+      }
     }
 
     const newHistory = new History({
@@ -171,11 +174,13 @@ router.get("/public/:shareId", async (req, res) => {
   const { shareId } = req.params;
   try {
     const historyItem = await History.findOne({ shareId });
-
+    const userItem = await User.findById(historyItem.userId).select("-password");
     if (!historyItem) {
       return res.status(404).json({ message: "History not found..." });
     }
-
+    if (userItem.isDeleted) {
+      return res.status(403).json({ message: "Access denied. The account associated with this visualization is currently disabled" });
+    }
     if (historyItem.isDeleted) {
       return res.status(403).json({ message: "This visualization has been deleted by the user..." });
     }
