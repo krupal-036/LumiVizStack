@@ -22,6 +22,8 @@ router.post("/register", validateRegister, async (req, res) => {
 
     const payload = {
       userId: user.id,
+      name: user.username,
+      email: user.email,
       role: user.role,
       credits: user.credits,
     };
@@ -30,16 +32,7 @@ router.post("/register", validateRegister, async (req, res) => {
       expiresIn: "30d",
     });
 
-    res.status(201).json({
-      token,
-      user: {
-        id: user.id,
-        name: user.username,
-        email: user.email,
-        role: user.role,
-        credits: user.credits,
-      },
-    });
+    res.status(201).json({ token });
   } catch (err) {
     handleErrors(err, res);
   }
@@ -52,13 +45,16 @@ router.post("/login", validateLogin, async (req, res) => {
   const user = req.user;
 
   try {
-    const payload = { userId: user.id, role: user.role, credits: user.credits };
+    const payload = {
+      userId: user.id,
+      role: user.role,
+      name: user.username,
+      email: user.email,
+      credits: user.credits
+    };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "30d" });
 
-    res.json({
-      token,
-      user: { id: user.id, name: user.username, email: user.email, role: user.role, credits: user.credits },
-    });
+    res.json({ token });
   } catch (err) {
     handleErrors(err, res);
   }

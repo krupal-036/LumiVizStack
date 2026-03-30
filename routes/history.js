@@ -1,7 +1,7 @@
 import express from "express";
 import History from "../models/History.js";
 import verifyToken from "../middleware/verifyToken.js";
-
+import User from "../models/User.js";
 const router = express.Router();
 
 
@@ -12,7 +12,7 @@ router.post("/save", verifyToken, async (req, res) => {
   try {
     const { title, type, data, rawInput, urlInput, inputType, isPublic, isDeleted } = req.body;
     const userId = req.user.id;
-
+    let updatedUser;
     if (rawInput) {
       const rawLines = rawInput.trim().split('\n').length;
       if (rawLines > 500) {
@@ -85,6 +85,21 @@ router.post("/save", verifyToken, async (req, res) => {
       }
     }
 
+    if (req.user.role !== "admin") {
+      updatedUser = await User.findOneAndUpdate(
+        { _id: userId, credits: { $gt: 0 } },
+        { $inc: { credits: -1 } },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        const userCheck = await User.findById(userId);
+        if (!userCheck) return res.status(404).json({ message: "User not found" });
+
+        return res.status(403).json({ message: "Insufficient credits." });
+      }
+    }
+
     const newHistory = new History({
       userId, title, type, data, rawInput: trimmedInput, urlInput, inputType, isPublic: !!isPublic || false, isDeleted: !!isDeleted || false,
     });
@@ -97,7 +112,8 @@ router.post("/save", verifyToken, async (req, res) => {
       await History.deleteMany({ _id: { $in: idsToDelete } });
     }
 
-    res.status(201).json(savedItem);
+    res.status(201).json({ savedItem, credits: updatedUser?.credits });
+
   } catch (err) {
     console.error("Save error:", err.message);
     res.status(500).json({ message: "Server Unavailable..." });
@@ -136,6 +152,7 @@ router.put("/:id/toggle", verifyToken, async (req, res) => {
 
 // @route   GET api/history/user
 // @desc    Get logged-in user's history
+
 router.get("/user", verifyToken, async (req, res) => {
   try {
     const histories = await History.find({ userId: req.user.id }).sort({ createdAt: -1 });

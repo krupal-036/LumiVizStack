@@ -65,23 +65,12 @@ router.get("/stats", verifyToken, isAdmin, async (req, res) => {
 // @route   GET api/admin/users
 // @desc    Get every users
 
-// router.get("/users", verifyToken, isAdmin, async (req, res) => {
-//   try {
-//     const users = await User.find().select("-password");
-//     res.json(users);
-//   } catch (err) {
-//     res.status(500).json({ message: "Failed to get All Users data..." });
-//   }
-// });
-
-
-
 router.get("/users", verifyToken, isAdmin, async (req, res) => {
   try {
     const usersWithStats = await User.aggregate([
       {
         $lookup: {
-          from: "histories",       
+          from: "histories",
           localField: "_id",
           foreignField: "userId",
           as: "userHistory"
@@ -93,7 +82,7 @@ router.get("/users", verifyToken, isAdmin, async (req, res) => {
         }
       },
       {
-        
+
         $project: {
           password: 0,
           userHistory: 0

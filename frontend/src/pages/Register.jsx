@@ -100,7 +100,7 @@ export default function SignUp() {
         showAlert(text || text?.message || "Server returned an invalid response", "Server Error", 1);
       }
       if (!response.ok) {
-        
+
         const backendErrors = {};
         if (Array.isArray(data.message)) {
           data.message?.forEach((msg) => {
@@ -109,7 +109,7 @@ export default function SignUp() {
             if (lowerMsg.includes("email")) backendErrors.email = msg;
             if (lowerMsg.includes("password")) backendErrors.password = msg;
           });
-          
+
         } else if (data?.message || data?.error) {
           if (data.message?.toLowerCase().includes("email")) {
             backendErrors.email = data.message;
@@ -123,8 +123,7 @@ export default function SignUp() {
         clearError(3);
         return;
       }
-
-      login(data.user, data.token);
+      login(data.token);
       navigate("/");
     } catch (error) {
       showAlert("Connection failed. Check if the server is running.", "Server Error", 1);

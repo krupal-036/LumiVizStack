@@ -113,13 +113,7 @@ export default function Login() {
         }
         return;
       }
-
-      const userWithRole = {
-        ...data.user,
-        role: data.user.role,
-      };
-
-      login(userWithRole, data.token);
+      login(data.token);
       const from = location.state?.from || "/";
       navigate(from, { replace: true });
 

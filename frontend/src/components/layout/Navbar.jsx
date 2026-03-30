@@ -19,7 +19,7 @@ const navLinks = [
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, logout } = useContext(AuthContext);
+  const { user, logout, credits } = useContext(AuthContext);
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
@@ -90,21 +90,31 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-1 z-70 sm:gap-3">
-            {user && (
-              <div className="flex flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500 text-indigo-600 dark:text-indigo-400 text-xs font-bold"
-                title={`You've got ${user.credits} credits left to use today!`}
+            {(credits !== null && user.role !== "admin") && (
+              <div
+                className={`flex flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-1.5 rounded-full border text-xs font-bold transition-all duration-300 ${credits === 0
+                  ? "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-500 animate-pulse"
+                  : "bg-indigo-50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                  }`}
+                title={credits === 0 ? "You're out of credits!" : `You've got ${credits || 0} credits left to use today!`}
               >
-                <FiZap size={14} className="fill-current shrink-0 animate-bounce duration-2000 delay-500" />
-                <span className={`flex items-center gap-1 transition-colors duration-300 ${user.credits > 5
-                  ? "text-emerald-500 dark:text-emerald-400"
-                  : user.credits > 2
-                    ? "text-amber-500 dark:text-amber-400"
-                    : "text-rose-500 dark:text-rose-400"
+                <FiZap
+                  size={14}
+                  className={`shrink-0 ${credits > 0 ? "fill-current animate-bounce duration-2000 delay-500" : "text-slate-400"}`}
+                />
+                <span className={`flex items-center gap-1 transition-colors duration-300 ${credits === 0
+                  ? "text-slate-500"
+                  : credits > 5
+                    ? "text-emerald-500 dark:text-emerald-400"
+                    : credits > 2
+                      ? "text-amber-500 dark:text-amber-400"
+                      : "text-rose-500 dark:text-rose-400"
                   }`}>
-                  {user.credits}
-                  <span className="hidden sm:inline ml-0.5 text-indigo-300">Credits</span>
+                  {credits ?? 0}
+                  <span className={`hidden sm:inline ml-0.5 ${credits === 0 ? "text-slate-400" : "text-indigo-500"}`}>
+                    {credits === null ? "No Credits" : "Credits"}
+                  </span>
                 </span>
-
               </div>
             )}
             <button

@@ -17,7 +17,7 @@ const VISUALIZER_STORAGE_KEY = "visualizerState";
 const Visualizer = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user } = useContext(AuthContext);
+  const { user, setCredits } = useContext(AuthContext);
   const { showAlert } = useAlert();
   const reportRef = useRef(null);
   const panelref = useRef(null);
@@ -193,7 +193,7 @@ const Visualizer = () => {
         setSaveState("idle");
         return;
       }
-
+      setCredits(result?.credits);
       setSaveState("saved");
       showAlert("History saved successfully", "Success", 2)
       setViztitle("")
