@@ -84,16 +84,16 @@ export default function ApiDocs() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white pt-14">
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    
-    <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[400px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[80px] md:blur-[130px] rounded-full" />
 
-    <div className="absolute top-[20%] right-[-5%] w-[200px] h-[200px] md:w-[500px] md:h-[500px] bg-blue-500/10 dark:bg-blue-600/10 blur-[70px] md:blur-[110px] rounded-full" />
+        <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[400px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[80px] md:blur-[130px] rounded-full" />
 
-    <div className="absolute top-[50%] left-[-10%] w-[180px] h-[180px] md:w-[450px] md:h-[450px] bg-emerald-500/5 dark:bg-emerald-600/5 blur-[60px] md:blur-[100px] rounded-full" />
+        <div className="absolute top-[20%] right-[-5%] w-[200px] h-[200px] md:w-[500px] md:h-[500px] bg-blue-500/10 dark:bg-blue-600/10 blur-[70px] md:blur-[110px] rounded-full" />
 
-    <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[90px] md:blur-[140px] rounded-full" />
+        <div className="absolute top-[50%] left-[-10%] w-[180px] h-[180px] md:w-[450px] md:h-[450px] bg-emerald-500/5 dark:bg-emerald-600/5 blur-[60px] md:blur-[100px] rounded-full" />
 
-  </div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[90px] md:blur-[140px] rounded-full" />
+
+      </div>
       <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
 
         <div className="flex flex-col items-center justify-center mb-10 sm:mb-12 lg:mb-16 text-center px-4">
@@ -273,3 +273,164 @@ export default function ApiDocs() {
     </div>
   );
 }
+
+
+{/*
+  
+import React from "react";
+import {
+  FiCode,
+  FiKey,
+  FiServer,
+  FiLock,
+  FiCheckCircle,
+  FiAlertCircle,
+} from "react-icons/fi";
+import { useTitle } from "../hooks/customHooks";
+
+const MethodBadge = ({ method }) => {
+  const colors = {
+    GET: "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 border-green-200 dark:border-green-700",
+    POST: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-700",
+    PUT: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200 dark:border-amber-700",
+    DELETE:
+      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 border-red-200 dark:border-red-700",
+    PATCH: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border-purple-200 dark:border-purple-700",
+  };
+
+  return (
+    <span
+      className={`px-2.5 py-1 text-xs font-bold rounded-md border ${colors[method]}`}
+    >
+      {method}
+    </span>
+  );
+};
+
+const EndpointRow = ({ method, path, description }) => (
+  <div className="group flex flex-col md:flex-row md:items-center gap-4 p-3 mb-2 bg-white dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-lg hover:border-indigo-500/50 transition-all">
+    <div className="flex items-center gap-3 min-w-[300px]">
+      <MethodBadge method={method} />
+      <code className="text-sm font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+        {path}
+      </code>
+    </div>
+    <div className="flex-1 text-sm text-gray-600 dark:text-gray-400 border-l border-gray-100 dark:border-gray-800 md:pl-4">
+      {description}
+    </div>
+  </div>
+);
+
+export default function ApiDocs() {
+  const apiData = {
+    auth: [
+      { method: "POST", path: "/auth/register", description: "Registers a new user and returns a JWT access token." },
+      { method: "POST", path: "/auth/login", description: "Authenticates credentials and returns a secure session token." }
+    ],
+    history: [
+      { method: "POST", path: "/history/save", description: "Save visualization history (Max 10 per user)" },
+      { method: "PUT", path: "/history/:id/toggle", description: "Toggle Visualization Private or Public" },
+      { method: "GET", path: "/history/user", description: "" },
+      { method: "POST", path: "/history/", description: "" },
+    ],
+    admin: [
+      { method: "", path: "", description: "" },
+      { method: "", path: "", description: "" },
+      { method: "", path: "", description: "" },
+      { method: "", path: "", description: "" },
+      { method: "", path: "", description: "" },
+    ],
+    user: [{
+
+    }]
+  };
+  useTitle("API Docs");
+  return (
+    <div className="min-h-screen bg-gray-100 dark:bg-[#0B0F19] text-gray-900 dark:text-gray-100 selection:bg-indigo-500 selection:text-white pt-14">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+
+        <div className="absolute top-[-5%] left-1/2 -translate-x-1/2 w-[300px] h-[300px] md:w-[800px] md:h-[400px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[80px] md:blur-[130px] rounded-full" />
+
+        <div className="absolute top-[20%] right-[-5%] w-[200px] h-[200px] md:w-[500px] md:h-[500px] bg-blue-500/10 dark:bg-blue-600/10 blur-[70px] md:blur-[110px] rounded-full" />
+
+        <div className="absolute top-[50%] left-[-10%] w-[180px] h-[180px] md:w-[450px] md:h-[450px] bg-emerald-500/5 dark:bg-emerald-600/5 blur-[60px] md:blur-[100px] rounded-full" />
+
+        <div className="absolute bottom-[-10%] right-[-10%] w-[250px] h-[250px] md:w-[600px] md:h-[600px] bg-indigo-500/10 dark:bg-indigo-600/10 blur-[90px] md:blur-[140px] rounded-full" />
+
+      </div>
+      <div className="max-w-7xl mx-auto px-4 pt-10 sm:px-6 lg:px-8 pb-10">
+
+        <div className="flex flex-col items-center justify-center mb-10 sm:mb-12 lg:mb-16 text-center px-4">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-indigo-100 dark:bg-indigo-900/30 border border-indigo-400 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-6">
+            <FiServer className="w-4 h-4" />
+            API Reference
+          </div>
+
+          <h1 className="flex flex-wrap items-center justify-center text-center text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-5 sm:mb-6">
+
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400">
+              LumiVizStack&nbsp;
+            </span>
+
+            <span className="text-gray-900 dark:text-white">
+              API Docs
+            </span>
+
+          </h1>
+
+          <p className="max-w-xl sm:max-w-2xl mx-auto text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+            This document provides detailed information about the REST API
+            endpoints available in LumiVizStack. The API allows you to manage
+            authentication, history, and data visualization configurations
+            programmatically.
+          </p>
+
+        </div>
+
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-10 text-sm text-blue-700 dark:text-blue-300 flex gap-3 items-start">
+          <FiAlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+          <div>
+            <strong>Information Only:</strong> This page is for reference
+            purposes. To interact with the API, use tools like Postman, cURL, or
+            integrate with your frontend application using the Base URL:{" "}
+            <code className="px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 font-mono text-xs">
+              /api
+            </code>
+            .
+          </div>
+        </div>
+
+        <section className="mb-12">
+          <h2 className="flex items-center gap-2 text-lg font-bold mb-6 text-gray-800 dark:text-white">
+            <FiLock className="text-indigo-500" /> Authentication
+          </h2>
+          {apiData.auth.map((item, index) => (
+            <EndpointRow
+              key={index + 11}
+              method={item.method}
+              path={item.path}
+              description={item.description}
+            />
+          ))}
+        </section>
+        <section className="mb-12">
+          <h2 className="flex items-center gap-2 text-lg font-bold mb-6 text-gray-800 dark:text-white">
+            <FiCode className="text-indigo-500" /> Visualization History
+          </h2>
+          {apiData.history.map((item, index) => (
+            <EndpointRow
+              key={index + 12}
+              method={item.method}
+              path={item.path}
+              description={item.description}
+            />
+          ))}
+        </section>
+        <section>Admin</section> <section>Profile</section>
+      </div>
+    </div>
+  );
+}
+
+*/}

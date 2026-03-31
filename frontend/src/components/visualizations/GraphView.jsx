@@ -81,7 +81,6 @@ const GraphView = ({ data }) => {
             <div className="space-y-2">
               <div className="text-lg font-bold text-gray-900 dark:text-white truncate">{selectedNode.name}</div>
               <div className="text-xs text-gray-500 dark:text-gray-400">{selectedNode.type}</div>
-              {selectedNode.fullName && <div className="text-xs font-mono bg-gray-100 dark:bg-gray-900 p-2 rounded break-all">{selectedNode.fullName}</div>}
             </div>
           ) : (
             <p className="text-xs text-gray-400 italic">Click a node to inspect.</p>

@@ -2,44 +2,47 @@ import React from "react";
 import { Link } from "react-router-dom";
 import {
   FiCode, FiUploadCloud, FiLink, FiPlay, FiTable, FiGrid, FiBarChart2, FiShare2, FiSave, FiEye, FiEyeOff, FiBookOpen, FiCheckCircle,
+  FiUser,
+  FiDownload,
+  FiFileText,
+  FiLock,
+  FiSettings,
+  FiFile,
+  FiDatabase,
+  FiPieChart,
+  FiShield,
+  FiZap,
+  FiLayout,
 } from "react-icons/fi";
 import VisualizeButton from "../components/common/Button";
 import { useTitle } from "../hooks/customHooks";
 const guideSteps = [
   {
     step: "01",
-    title: "Connect Your Data",
-    icon: FiCode,
+    title: "Multiple Data Sources",
+    icon: FiDatabase,
     description:
       "LumiVizStack offers three flexible ways to ingest data. Choose the method that best fits your workflow.",
     options: [
       {
         icon: FiCode,
-        title: "Paste JSON",
-        desc: "Copy raw JSON data and paste it directly into the editor.",
+        title: "Raw JSON Paste",
+        desc: "Copy raw JSON data and paste it directly into the editor for instant parsing.",
       },
       {
         icon: FiUploadCloud,
-        title: "File Upload",
-        desc: "Upload a .json file from your computer.",
+        title: "File Uploads",
+        desc: "Upload .json files directly from your local machine.",
       },
       {
         icon: FiLink,
-        title: "API URL",
-        desc: "Fetch live data from a public API endpoint.",
+        title: "Public API URLs",
+        desc: "Connect directly to external endpoints to fetch live data.",
       },
     ],
   },
   {
     step: "02",
-    title: "Visualize",
-    icon: FiPlay,
-    description:
-      "Click the 'Visualize Data' button. Our engine parses your structure and prepares it for interactive viewing.",
-    options: null,
-  },
-  {
-    step: "03",
     title: "Choose Your View",
     icon: FiBarChart2,
     description:
@@ -68,12 +71,60 @@ const guideSteps = [
     ],
   },
   {
-    step: "04",
-    title: "Save & Share",
-    icon: FiSave,
+    step: "03",
+    title: "Secure Your Work",
+    icon: FiShield,
     description:
-      "Save your session to your history. Toggle visibility to generate a public link you can share with anyone.",
+      "Create an account to unlock robust user features and protect your visualization configurations.",
     options: [
+      {
+        icon: FiLock,
+        title: "Role-Based Access",
+        desc: "Secure login and registration with controlled data access.",
+      },
+      {
+        icon: FiZap,
+        title: "Credit System",
+        desc: "Get 10 free credits on sign-up to save visualizations to your history.",
+      },
+    ],
+  },
+  {
+    step: "04",
+    title: "History Management",
+    icon: FiLayout,
+    description:
+      "Leverage our MongoDB backend to ensure your complex data structures are saved reliably.",
+    options: [
+      {
+        icon: FiSave,
+        title: "Powerful Persistence",
+        desc: "Your configurations are safely stored in our high-performance database.",
+      },
+      {
+        icon: FiSettings,
+        title: "Session Control",
+        desc: "Reload, edit, or delete your previous sessions at any time.",
+      },
+    ],
+  },
+  {
+    step: "05",
+    title: "Export & Instant Sharing",
+    icon: FiShare2,
+    description:
+      "Take your insights with you or showcase them to the world with generated URLs.",
+    options: [
+      {
+        icon: FiFileText,
+        title: "PDF & JSON Export",
+        desc: "Download visual reports or export raw data for external use.",
+      },
+      {
+        icon: FiLink,
+        title: "Public/Private Links",
+        desc: "Generate shareable URLs with restricted or public access.",
+      },
       {
         icon: FiEyeOff,
         title: "Private",

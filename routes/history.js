@@ -154,7 +154,7 @@ router.put("/:id/toggle", verifyToken, async (req, res) => {
 
 
 // @route   GET api/history/user
-// @desc    Get logged-in user's history
+// @desc    Get All History (User Specific)
 
 router.get("/user", verifyToken, async (req, res) => {
   try {

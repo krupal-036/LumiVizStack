@@ -1,6 +1,8 @@
 import React from "react";
 import {
   FiDatabase, FiShield, FiPieChart, FiDownload, FiCode, FiLayout, FiCpu, FiServer, FiCheck,
+  FiShare2,
+  FiZap,
 } from "react-icons/fi";
 import { useTitle } from "../hooks/customHooks";
 const features = [
@@ -11,8 +13,8 @@ const features = [
   },
   {
     icon: FiPieChart,
-    title: "Smart Visualization",
-    desc: "Auto-detects data structures to suggest and render Charts, Tables, or Cards dynamically.",
+    title: "Data Visualization",
+    desc: "Based on data structures you can render data into the best-fitting Charts, Tables, or Cards.",
   },
   {
     icon: FiShield,
@@ -27,13 +29,29 @@ const features = [
   {
     icon: FiDownload,
     title: "Export Capabilities",
-    desc: "Download your visualizations as images or export the raw JSON data for external use.",
+    desc: "Download your visualizations as PDFs or export the raw JSON data for external use.",
+  },
+    {
+    icon: FiShare2,
+    title: "Instant Sharing",
+    desc: "Generate shareable URLs to showcase your visualizations publicly or keep them private with restricted access.",
+  },
+    {
+    icon: FiServer,
+    title: "Powerful Persistence",
+    desc: "Leverages MongoDB for high-performance data storage, ensuring your complex JSON structures are saved reliably.",
+  },
+  {
+    icon: FiZap,
+    title: "Credit-Based Saving",
+    desc: "Get 10 free credits upon sign-up. Use one credit each time you save a new visualization to your permanent history.",
   },
   {
     icon: FiCode,
-    title: "Clean Architecture",
-    desc: "Built with a modular React frontend and a scalable Node.js/Express backend.",
+    title: "Full-Stack Architecture",
+    desc: "Built with a modular React frontend and a scalable Node.js, Express, and MongoDB backend.",
   },
+
 ];
 
 export default function About() {
@@ -72,7 +90,7 @@ export default function About() {
                   Project Architecture
                 </h2>
                 <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed text-lg">
-                  LumiVizStack allows users to visualize JSON data interactively. The system data, handles errors gracefully, and automatically detects structures to choose suitable formats.
+                  Effortlessly convert raw JSON into actionable insights. LumiVizStack handles the heavy lifting—from graceful error handling to intelligent data parsing—letting you switch between dynamic charts, tables, and trees in a single click.
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
@@ -114,7 +132,7 @@ export default function About() {
                   Tech Stack
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {["React", "Node.js", "Express", "Tailwind", "Chart.js", "JSON",
+                  {["React.js", "Node.js", "Express", "MongoDB", "JWT", "Tailwind",
                   ].map((tech) => (
                     <span
                       key={tech}

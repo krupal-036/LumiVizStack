@@ -12,13 +12,13 @@ const TableView = ({ data, forceImages, setForceImages }) => {
           <table className="w-full text-left border-separate border-spacing-0">
             <thead>
               <tr className="bg-slate-50/50 dark:bg-slate-800/50">
-                <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 p-4 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800 w-12 text-center">
+                <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-800 p-2 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest w-12 text-center border border-gray-200 dark:border-gray-700">
                   <div className="flex justify-center"><FiHash size={14} /></div>
                 </th>
                 {headers.map((key) => (
                   <th
                     key={key}
-                    className="px-6 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest border-b border-slate-200 dark:border-slate-800 whitespace-nowrap"
+                    className="px-2 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap border border-gray-200 dark:border-gray-700"
                   >
                     {key.replace(/_/g, ' ')}
                   </th>
@@ -29,13 +29,13 @@ const TableView = ({ data, forceImages, setForceImages }) => {
               {data.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="group hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors duration-150"
+                  className="group hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors duration-150"
                 >
-                  <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-blue-50/30 dark:group-hover:bg-blue-900/10 p-4 text-xs font-medium text-slate-400 dark:text-slate-600 font-mono text-center border-r border-slate-100 dark:border-slate-800">
+                  <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10 p-1 text-xs font-medium text-slate-400 dark:text-slate-600 font-mono text-center border border-gray-200 dark:border-gray-700">
                     {rowIndex + 1}
                   </td>
                   {headers.map((key) => (
-                    <td key={`${rowIndex}-${key}`} className="px-6 py-4 align-middle">
+                    <td key={`${rowIndex}-${key}`} className="px-2 py-4 text-center align-middle border border-gray-200 dark:border-gray-700">
                       <SmartCell value={row[key]} forceImages={forceImages} setForceImages={setForceImages} />
                     </td>
                   ))}

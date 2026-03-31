@@ -1,7 +1,7 @@
 import React from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas-pro';
-import { Download, Search, XCircle, Image as ImageIcon, ExternalLink } from 'lucide-react';
+import { Download, Search, Image as ImageIcon, ExternalLink } from 'lucide-react';
 
 export const renderValue = (val, path, forceImages, setForceImages) => {
   if (val === null || val === undefined) return <span className="text-gray-400">null</span>;
@@ -20,7 +20,12 @@ export const renderValue = (val, path, forceImages, setForceImages) => {
     if (isImage || (isForced && !isVideo && !isAudio)) {
       return (
         <div className="mt-2 group relative inline-block">
-          <img src={val} alt="Preview" className="max-w-[150px] rounded border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-105" />
+          <img
+            src={val}
+            alt="Preview"
+            crossOrigin="anonymous"
+            className="max-w-[150px] rounded border border-gray-200 dark:border-gray-700 shadow-sm transition-transform hover:scale-105"
+          />
           <a href={val} target="_blank" rel="noreferrer" className="absolute top-1 right-1 p-1 bg-white dark:bg-gray-800 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
             <ExternalLink size={10} className="text-gray-600 dark:text-gray-300" />
           </a>
@@ -57,24 +62,36 @@ export const Features = ({ searchTerm, setSearchTerm, targetRef }) => {
         useCORS: true,
         scale: 2,
         logging: false,
-        backgroundColor: null
+        backgroundColor: "#ffffff",
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
       });
 
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/jpeg', 1.0);
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      if (pdfHeight > pdf.internal.pageSize.getHeight()) {
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      } else {
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgProps = pdf.getImageProperties(imgData);
+      const contentHeightInPdf = (imgProps.height * pdfWidth) / imgProps.width;
+
+      let heightLeft = contentHeightInPdf;
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, contentHeightInPdf, undefined, 'FAST');
+      heightLeft -= pdfHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - contentHeightInPdf;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, contentHeightInPdf, undefined, 'FAST');
+        heightLeft -= pdfHeight;
       }
 
-      pdf.save('visualization-report.pdf');
+      pdf.save(`report-${new Date().getTime()}.pdf`);
     } catch (err) {
       console.error("PDF Export Error:", err);
-      alert("Export failed.");
+      alert("Export failed. Check console for details.");
     }
   };
 
@@ -94,7 +111,10 @@ export const Features = ({ searchTerm, setSearchTerm, targetRef }) => {
         />
       </div>
       <div className="flex gap-2 w-auto md:w-auto">
-        <button onClick={downloadPDF} className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2 bg-gray-900 dark:bg-indigo-600 text-white rounded-lg font-bold hover:opacity-90 transition-all shadow-lg text-sm">
+        <button
+          onClick={downloadPDF}
+          className="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2 bg-gray-900 dark:bg-indigo-600 text-white rounded-lg font-bold hover:opacity-90 transition-all shadow-lg text-sm"
+        >
           <Download size={18} /> PDF
         </button>
       </div>
