@@ -136,10 +136,10 @@ router.delete("/user/:id", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
-// @route   DELETE api/admin/history/all
+// @route   DELETE api/admin/history
 // @desc    DELETE all history of History Collection at Admin Side
 
-router.delete("/history/all", verifyToken, isAdmin, async (req, res) => {
+router.delete("/history", verifyToken, isAdmin, async (req, res) => {
   try {
     const result = await History.deleteMany({});
 
@@ -153,10 +153,10 @@ router.delete("/history/all", verifyToken, isAdmin, async (req, res) => {
 });
 
 
-// @route   DELETE api/admin/users/allhistory/id
+// @route   DELETE api/admin/users/history/id
 // @desc    DELETE all history of User at Admin Side
 
-router.delete("/users/allhistory/:id", verifyToken, isAdmin, async (req, res) => {
+router.delete("/users/history/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const userId = req.params.id;
 
@@ -179,10 +179,10 @@ router.delete("/users/allhistory/:id", verifyToken, isAdmin, async (req, res) =>
   }
 });
 
-// @route   GET api/admin/allhistory
+// @route   GET api/admin/history
 // @desc    Get all history of User at Admin Side
 
-router.get("/allhistory", verifyToken, isAdmin, async (req, res) => {
+router.get("/history", verifyToken, isAdmin, async (req, res) => {
   try {
     const allHistory = await History.find().populate(
       "userId",

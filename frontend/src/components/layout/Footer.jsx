@@ -36,7 +36,7 @@ const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-12 mb-16">
           <div className="col-span-2 md:col-span-3">
             <Link to="/" className="flex items-center gap-3 group mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-indigo-500 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
                 <FiBarChart2 className="text-white" size={20} />
               </div>
               <span className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -48,7 +48,7 @@ const Footer = () => {
               beautiful, interactive visual architectures.
             </p>
             <div className="flex items-center gap-3">
-              <Link to="https://github.com/lumivizStack" target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-3 p-3 rounded-xl 
+              <Link to="https://github.com/krupal-036/LumiVizStack" target="_blank" rel="noopener noreferrer" className="group flex items-center justify-center gap-3 p-3 rounded-xl 
              bg-gray-50 dark:bg-white/5 
              hover:bg-indigo-600 dark:hover:bg-indigo-600 
              border border-gray-200 dark:border-white/10 
@@ -111,10 +111,10 @@ const Footer = () => {
           </div>
         </div>
         <div className="py-4 border-t border-gray-200 dark:border-gray-800/60 flex flex-col md:flex-row justify-center items-center gap-2">
-          <p className="text-sm text-gray-700 dark:text-gray-400 font-medium">
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
             © {currentYear} LumiVizStack.
           </p>
-          <p className="text-sm text-gray-700 dark:text-gray-400 font-medium"> Built with precision for developers. </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 font-medium"> Built with precision for developers. </p>
         </div>
       </div>
     </footer>

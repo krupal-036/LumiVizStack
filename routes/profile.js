@@ -94,6 +94,7 @@ router.put("/update", verifyToken, async (req, res) => {
 
 
 // @route   PUT api/profile/delete
+
 router.put("/delete", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-
 import TableView from "../components/visualizations/TableView";
 import CardView from "../components/visualizations/CardView";
 import ChartView from "../components/visualizations/ChartView";
@@ -26,10 +25,10 @@ const PublicView = () => {
     const fetchPublicData = async () => {
       try {
         const res = await fetch(`/api/history/public/${historyId}`);
-
         const data = await res.json();
         if (res.ok) {
           setHistoryData(data);
+          setViewMode(data.type);
         } else {
           showAlert(data?.message || "Failed to load visualization");
           setError(data.message || "Visualization not available");
@@ -41,10 +40,8 @@ const PublicView = () => {
         setLoading(false);
       }
     };
-
     fetchPublicData();
   }, [historyId]);
-
   const filteredData = useMemo(() => {
     if (!historyData?.data || !searchTerm) return historyData?.data || [];
     return historyData.data.filter(item =>
@@ -57,7 +54,6 @@ const PublicView = () => {
       <Loader data={"Loading Visualization..."} />
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gray-100 dark:bg-black flex items-center justify-center p-4">
@@ -77,7 +73,6 @@ const PublicView = () => {
       </div>
     );
   }
-
   const { type, title, createdAt } = historyData;
   const viewModes = [
     { id: 'table', icon: FiTable, label: 'Table' },
@@ -89,13 +84,11 @@ const PublicView = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100  p-4 pt-20 md:pt-24">
       <div className="max-w-screen-2xl mx-auto">
-
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/20 shadow-sm">
               <FiClock className="w-6 h-6 stroke-[2.5px]" />
             </div>
-
             <div>
               <h1 className="text-xl md:text-2xl font-extrabold tracking-tight">
                 <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
@@ -115,32 +108,23 @@ const PublicView = () => {
               </div>
             </div>
           </div>
-
-
           <div className="flex p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto max-w-full">
             {viewModes.map(v => (
-              <button
-                key={v.id}
-                onClick={() => setViewMode(v.id)}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-2 mr-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap
+              <button key={v.id} onClick={() => setViewMode(v.id)} className={`flex items-center gap-2 px-3 sm:px-4 py-2 mr-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap
             ${viewMode === v.id
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  }`}
+                  ? "bg-indigo-600 text-white shadow-md"
+                  : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                }`}
               >
                 <v.icon size={16} />
                 <span className="hidden sm:inline">{v.label}</span>
               </button>
             ))}
-            <button
-              onClick={() => navigate("/")}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
-            >
+            <button onClick={() => navigate("/")} className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm">
               <FiArrowLeft /> <span className="hidden sm:inline">Back to Home</span> <FiHome />
             </button>
           </div>
         </div>
-
         <div className="mb-4 relative">
           {viewMode !== 'tree' && viewMode !== 'graph' && (
             <>
@@ -150,13 +134,10 @@ const PublicView = () => {
                 placeholder="Search data..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none text-sm"
-              />
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none text-sm" />
             </>
           )}
         </div>
-
-
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden p-4">
           {viewMode === 'table' && (
             <TableView

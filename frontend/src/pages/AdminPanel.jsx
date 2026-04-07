@@ -34,7 +34,7 @@ const AdminPanel = () => {
       const [statsRes, usersRes, historyRes] = await Promise.all([
         axios.get("/api/admin/stats", config),
         axios.get("/api/admin/users", config),
-        axios.get("/api/admin/allhistory", config),
+        axios.get("/api/admin/history", config),
       ]);
       setStats(statsRes.data);
       setUsers(usersRes.data);
@@ -134,7 +134,7 @@ const AdminPanel = () => {
   const handleDeleteAllHistoryOfUser = async (id) => {
     if (!window.confirm("Are you sure you want to delete all History of this user?")) return;
     try {
-      await axios.delete(`/api/admin/users/allhistory/${id}`, {
+      await axios.delete(`/api/admin/users/history/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (err) {
@@ -223,7 +223,7 @@ const AdminPanel = () => {
   const handleDeleteAllHistory = async () => {
     if (!window.confirm("WARNING: This will permanently delete ALL visualization history for EVERY user. This cannot be undone.")) return;
     try {
-      const res = await fetch("/api/admin/history/all", {
+      const res = await fetch("/api/admin/history", {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
