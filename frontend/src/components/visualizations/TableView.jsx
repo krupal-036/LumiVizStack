@@ -18,7 +18,7 @@ const TableView = ({ data, forceImages, setForceImages }) => {
                 {headers.map((key) => (
                   <th
                     key={key}
-                    className="px-2 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap border border-gray-200 dark:border-gray-700"
+                    className="px-2 py-4 text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap text-center border border-gray-200 dark:border-gray-700"
                   >
                     {key.replace(/_/g, ' ')}
                   </th>
