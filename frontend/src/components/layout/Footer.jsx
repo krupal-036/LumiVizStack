@@ -99,11 +99,11 @@ const Footer = () => {
               Support
             </h3>
             <div className="space-y-4">
-              <Link href="mailto:krupalfataniya007@gmail.com" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/50 transition-colors group w-30 mx-2 font-bold">
+              <Link to="mailto:krupalfataniya007@gmail.com" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/50 transition-colors group w-30 mx-2 font-bold">
                 <FiMail className="text-indigo-500 group-hover:scale-110 transition-transform" />
                 <span className="text-sm text-gray-600 dark:text-gray-400">Email</span>
               </Link>
-              <Link href="https://krupal.vercel.app" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/50 transition-colors group w-30 mx-2 font-bold">
+              <Link to="https://krupal.vercel.app" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50 hover:border-indigo-500/50 transition-colors group w-30 mx-2 font-bold">
                 <FiExternalLink className="text-indigo-500 group-hover:scale-110 transition-transform" />
                 <span className="text-sm text-gray-600 dark:text-gray-400">Portfolio</span>
               </Link>
