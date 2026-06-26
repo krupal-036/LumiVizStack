@@ -1,31 +1,46 @@
 {
-  "name": "lumivizstack",
-  "version": "1.0.1",
+  "name": "lumivizstack_ts",
+  "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "dev:backend": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
     "frontend-build": "cd frontend && npm run build",
     "clean": "shx rm -rf public && shx mkdir public",
     "copy": "shx cp -r frontend/dist/* public/",
-    "build": "npm run clean && npm run frontend-build && npm run copy",
-    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"nodemon index.js\" \"cd frontend && npm run dev\""
+    "build": "npm run clean && npm run frontend-build && npm run copy && tsc",
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+    "body-parser": "^2.3.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "express-rate-limit": "^8.2.1",
+    "express-rate-limit": "^8.5.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.3.0"
+    "mongoose": "^9.7.0",
+    "multer": "^2.2.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
-    "shx": "^0.4.0"
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.9.3",
+    "concurrently": "^10.0.3",
+    "nodemon": "^3.1.14",
+    "shx": "^0.4.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }
