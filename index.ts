@@ -44,7 +44,7 @@ app.get('/api/health', rateLimiter, healthCheck);
 
 startDevServer(app);
 
-app.use(serveApp);
+
 app.get('/', serveApp);
 app.get('/api/*splat', serveApp);
 app.get('*splat', serveApp);
