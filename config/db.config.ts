@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { seedAdmin } from '../utils/seedAdmin';
 
-const MONGO_URI = process.env.MONGO_URI_2 as string;
+const MONGO_URI = process.env.MONGO_URI as string;
 const DB_NAME = process.env.DB_NAME as string;
 
 if (!MONGO_URI) {
