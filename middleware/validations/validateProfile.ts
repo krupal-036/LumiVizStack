@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
-import { countUserByField, getUserByField } from '../../repositories/user.repo';
-import { usernameRegex } from '../../utils/regex';
+import { countUserByField, getUserByField } from '../../repositories/user.repo.js';
+import { usernameRegex } from '../../utils/regex.js';
 
 export const validateProfile = async (
     req: any,

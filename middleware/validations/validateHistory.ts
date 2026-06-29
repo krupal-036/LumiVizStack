@@ -1,14 +1,8 @@
-/**
- * Validates the history input data and checks for duplicates.
- * @param {Object} dataObj - The request data and user ID.
- * @returns {Promise<{isValid: boolean, status: number, message: string, trimmedInput?: string}>}
- */
-
 import { NextFunction, Response } from 'express';
 import {
     getHistoriesByField,
     getHistoryByField,
-} from '../../repositories/history.repo';
+} from '../../repositories/history.repo.js';
 
 export const validateHistory = async (
     req: any,

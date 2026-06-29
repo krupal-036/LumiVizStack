@@ -1,4 +1,4 @@
-import * as service from '../services/user.service';
+import * as service from '../services/user.service.js';
 
 export const register = async (req: any, res: any) => {
     const result: any = await service.register(req.body);

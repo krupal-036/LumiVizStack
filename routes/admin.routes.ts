@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import * as c from '../controllers/admin.controller';
-import { authenticate, authorizeRoles } from '../middleware/auth.middleware';
+import * as c from '../controllers/admin.controller.js';
+import { authenticate, authorizeRoles } from '../middleware/auth.middleware.js';
 const r = Router();
 
 r.use(authenticate, authorizeRoles('admin'));

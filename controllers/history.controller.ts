@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import * as service from '../services/history.service';
+import * as service from '../services/history.service.js';
 
 export const createHistory = async (req: any, res: Response) => {
     const result = await service.createHistory(req);

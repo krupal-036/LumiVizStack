@@ -12,6 +12,7 @@
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
   },
+  "type": "module",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",

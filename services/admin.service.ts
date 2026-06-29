@@ -1,7 +1,7 @@
-import * as userRepo from '../repositories/user.repo';
-import * as ssRepo from '../repositories/systemSettings.repo';
-import * as historyRepo from '../repositories/history.repo';
-import { responseHandler } from '../utils/responseHandler';
+import * as userRepo from '../repositories/user.repo.js';
+import * as ssRepo from '../repositories/systemSettings.repo.js';
+import * as historyRepo from '../repositories/history.repo.js';
+import { responseHandler } from '../utils/responseHandler.js';
 
 export const getSettings = async () => {
     try {

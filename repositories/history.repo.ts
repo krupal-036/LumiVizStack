@@ -1,4 +1,4 @@
-import History from '../models/History.model';
+import History from '../models/History.model.js';
 
 export const getAllHistoryAdmin = async () => {
     return await History.find().populate('userId', 'username email');

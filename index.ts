@@ -4,19 +4,19 @@ import express, { RequestHandler } from 'express';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
 
-import userRoutes from './routes/user.routes';
-import adminRoutes from './routes/admin.routes';
-import profileRoutes from './routes/profile.routes';
-import historyRoutes from './routes/history.routes';
+import userRoutes from './routes/user.routes.js';
+import adminRoutes from './routes/admin.routes.js';
+import profileRoutes from './routes/profile.routes.js';
+import historyRoutes from './routes/history.routes.js';
 
-import { siteGuard } from './middleware/siteGuard.middleware';
-import { startDevServer } from './utils/startDevServer';
-import { errorHandler } from './middleware/errorHandler.middleware';
-import { serveFrontend } from './middleware/serveFrontend.middleware';
-import { corsConfig, databaseConfig } from './config/config';
-import { requestLogger } from './middleware/requestLogger.middleware';
-import { apiLimiter, authLimiter, rateLimiter } from './middleware/apiLimiter';
-import { healthCheck } from './middleware/healthCheck.middleware';
+import { siteGuard } from './middleware/siteGuard.middleware.js';
+import { startDevServer } from './utils/startDevServer.js';
+import { errorHandler } from './middleware/errorHandler.middleware.js';
+import { serveFrontend } from './middleware/serveFrontend.middleware.js';
+import { corsConfig, databaseConfig } from './config/config.js';
+import { requestLogger } from './middleware/requestLogger.middleware.js';
+import { apiLimiter, authLimiter, rateLimiter } from './middleware/apiLimiter.js';
+import { healthCheck } from './middleware/healthCheck.middleware.js';
 
 const app = express();
 const DIST_PATH: string = path.join(process.cwd(), 'public');

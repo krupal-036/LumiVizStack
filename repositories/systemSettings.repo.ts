@@ -1,4 +1,4 @@
-import SystemSettings from '../models/SystemSettings.model';
+import SystemSettings from '../models/SystemSettings.model.js';
 
 export const getSystemConfig = async () => {
     return await SystemSettings.findOne({ configName: 'global_config' });

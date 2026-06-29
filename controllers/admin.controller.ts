@@ -1,4 +1,4 @@
-import * as service from '../services/admin.service';
+import * as service from '../services/admin.service.js';
 
 export const getSettings = async (req: any, res: any) => {
     const result = await service.getSettings();

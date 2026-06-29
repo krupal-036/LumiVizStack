@@ -1,4 +1,4 @@
-import User, { IUser } from '../models/User.model';
+import User, { IUser } from '../models/User.model.js';
 
 export const createUser = async (
     user: Pick<IUser, 'username' | 'email' | 'password'>,

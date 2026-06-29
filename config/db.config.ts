@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { seedAdmin } from '../utils/seedAdmin';
+import { seedAdmin } from '../utils/seedAdmin.js';
 
 const MONGO_URI = process.env.MONGO_URI as string;
 const DB_NAME = process.env.DB_NAME as string;

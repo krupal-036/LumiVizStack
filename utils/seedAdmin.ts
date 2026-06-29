@@ -1,5 +1,5 @@
-import User from '../models/User.model';
-import { getUserByField } from '../repositories/user.repo';
+import User from '../models/User.model.js';
+import { getUserByField } from '../repositories/user.repo.js';
 
 export const seedAdmin = async () => {
     const adminEmail = process.env.ADMIN_EMAIL as string;
