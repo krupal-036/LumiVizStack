@@ -1,7 +1,15 @@
 import { Request, Response, NextFunction } from 'express';
 
-export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
+export const requestLogger = (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+) => {
     const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
+    if ((process.env.NODE_ENV as string) !== 'production') {
+        console.log(
+            `[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`,
+        );
+    }
     next();
-}
+};

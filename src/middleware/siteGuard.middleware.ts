@@ -1,5 +1,8 @@
-import { NextFunction } from "express";
-import { createSystemConfig, getSystemConfig } from "../repositories/systemSettings.repo";
+import { NextFunction } from 'express';
+import {
+    createSystemConfig,
+    getSystemConfig,
+} from '../repositories/systemSettings.repo';
 
 export const siteGuard = async (req: any, res: any, next: NextFunction) => {
     try {
@@ -9,8 +12,8 @@ export const siteGuard = async (req: any, res: any, next: NextFunction) => {
             settings = await createSystemConfig();
         }
 
-        const isSignupPath = req.path === "/register";
-        const isLoginPath = req.path === "/login";
+        const isSignupPath = req.path === '/register';
+        const isLoginPath = req.path === '/login';
 
         if (isSignupPath && !settings.isSignupEnabled) {
             req.siteSignupDisabled = true;
@@ -23,7 +26,7 @@ export const siteGuard = async (req: any, res: any, next: NextFunction) => {
         next();
     } catch (err: any) {
         if (err) {
-            return err.message
+            return err.message;
         }
         req.siteLoginDisabled = false;
         req.siteSignupDisabled = false;

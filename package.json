@@ -1,6 +1,6 @@
 {
-  "name": "lumivizstack_ts",
-  "version": "1.0.0",
+  "name": "lumivizstack",
+  "version": "1.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,9 @@
     "clean": "shx rm -rf public && shx mkdir public",
     "copy": "shx cp -r frontend/dist/* public/",
     "build": "npm run clean && npm run frontend-build && npm run copy && tsc",
-    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\""
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\"",
+    "format": "prettier --write \"src/**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js,json,md}\""
   },
   "keywords": [],
   "author": "",
@@ -38,6 +40,7 @@
     "@types/node": "^25.9.3",
     "concurrently": "^10.0.3",
     "nodemon": "^3.1.14",
+    "prettier": "3.9.3",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.22.4",

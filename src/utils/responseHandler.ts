@@ -5,12 +5,12 @@ export interface ApiResponse<T = any> {
 }
 
 export const responseHandler = <T>(
-    code: number, 
-    data: T | null = null
+    code: number,
+    data: T | null = null,
 ): ApiResponse<T> => {
     return {
         success: code >= 200 && code < 300,
         code,
-        data
+        data,
     };
 };

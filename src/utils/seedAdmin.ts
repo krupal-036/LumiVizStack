@@ -1,5 +1,5 @@
-import User from "../models/User.model";
-import { getUserByField } from "../repositories/user.repo";
+import User from '../models/User.model';
+import { getUserByField } from '../repositories/user.repo';
 
 export const seedAdmin = async () => {
     const adminEmail = process.env.ADMIN_EMAIL as string;
@@ -8,20 +8,20 @@ export const seedAdmin = async () => {
     const existing = await getUserByField({ email: adminEmail });
 
     if (existing) {
-        if (process.env.NODE_ENV as string !== "production") {
+        if ((process.env.NODE_ENV as string) !== 'production') {
             console.log('Default admin user already exists. Skipping seed.');
         }
         return;
     }
 
     await User.create({
-        username: "admin",
+        username: 'admin',
         email: adminEmail,
         password: adminPassword,
-        role: 'admin'
+        role: 'admin',
     });
 
-    if (process.env.NODE_ENV as string !== "production") {
+    if ((process.env.NODE_ENV as string) !== 'production') {
         console.log('Default admin user seeded successfully.');
     }
-}
+};

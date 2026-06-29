@@ -1,11 +1,11 @@
-import mongoose from "mongoose";
-import { seedAdmin } from "../utils/seedAdmin";
+import mongoose from 'mongoose';
+import { seedAdmin } from '../utils/seedAdmin';
 
 const MONGO_URI = process.env.MONGO_URI_2 as string;
 const DB_NAME = process.env.DB_NAME as string;
 
 if (!MONGO_URI) {
-    throw new Error("Please define the MONGO_URI environment variable");
+    throw new Error('Please define the MONGO_URI environment variable');
 }
 
 let cached = (global as any).mongoose;
@@ -24,14 +24,16 @@ const connectDB = async () => {
             maxPoolSize: 10,
         };
 
-        cached.promise = mongoose.connect(`${MONGO_URI}/${DB_NAME}`, opts).then((mongoose) => {
-            if (process.env.NODE_ENV as string !== "production") {
-                console.log(`Connected to MongoDB: ${DB_NAME}`);
-            }
-            return mongoose;
-        });
+        cached.promise = mongoose
+            .connect(`${MONGO_URI}/${DB_NAME}`, opts)
+            .then((mongoose) => {
+                if ((process.env.NODE_ENV as string) !== 'production') {
+                    console.log(`Connected to MongoDB: ${DB_NAME}`);
+                }
+                return mongoose;
+            });
     }
-    
+
     try {
         cached.conn = await cached.promise;
         await seedAdmin();
