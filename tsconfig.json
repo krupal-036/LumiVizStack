@@ -1,13 +1,10 @@
 {
     "compilerOptions": {
-        "target": "ES2020",
-        "module": "ESNext",
-        "moduleResolution": "bundler",
-        "lib": [
-            "ES2020"
-        ],
-        "outDir": "./dist",
+        "target": "ES2022",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
         "rootDir": "./",
+        "outDir": "./dist",
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
@@ -15,15 +12,14 @@
         "resolveJsonModule": true,
         "declaration": true,
         "sourceMap": true,
-        "allowImportingTsExtensions": false,
-        "noEmit": false
+        "noUncheckedIndexedAccess": true,
+        "types": ["node"]
     },
-    "include": [
-        "**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "frontend"
-    ]
+    "include": ["src/**/*", "**/*.ts"],
+    "exclude": ["node_modules", "dist", "frontend"],
+
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "verbose": false
+    }
 }
