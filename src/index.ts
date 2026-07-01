@@ -35,7 +35,7 @@ app.use(express.static(DIST_PATH));
 
 app.use(corsConfig);
 app.use(databaseConfig);
-
+app.use((req: any, res: any) =>  res.sendFile(path.join(DIST_PATH, 'index.html')));
 app.use('/api/auth', siteGuard, authLimiter, userRoutes);
 app.use('/api/admin', apiLimiter, adminRoutes);
 app.use('/api/profile', apiLimiter, profileRoutes);
