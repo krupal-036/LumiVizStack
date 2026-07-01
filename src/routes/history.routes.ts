@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import * as c from '../controllers/history.controller';
-import { validateHistory } from '../middleware/validations/validateHistory';
-import { authenticate, authorizeRoles } from '../middleware/auth.middleware';
+import * as c from '../controllers/history.controller.js';
+import { validateHistory } from '../middleware/validations/validateHistory.js';
+import { authenticate, authorizeRoles } from '../middleware/auth.middleware.js';
 
 const r = Router();
 

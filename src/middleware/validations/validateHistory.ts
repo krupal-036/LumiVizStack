@@ -2,7 +2,7 @@ import { NextFunction, Response } from 'express';
 import {
     getHistoriesByField,
     getHistoryByField,
-} from '../../repositories/history.repo';
+} from '../../repositories/history.repo.js';
 
 export const validateHistory = async (
     req: any,

@@ -1,6 +1,6 @@
 import cors from 'cors';
 import { NextFunction } from 'express';
-import connectDB from './db.config';
+import connectDB from './db.config.js';
 
 const allowedOrigins = (process.env.ALLOWED_ORIGINS as string).split(',');
 

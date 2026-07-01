@@ -1,6 +1,6 @@
-import * as userRepo from '../repositories/user.repo';
-import * as historyRepo from '../repositories/history.repo';
-import { responseHandler } from '../utils/responseHandler';
+import * as userRepo from '../repositories/user.repo.js';
+import * as historyRepo from '../repositories/history.repo.js';
+import { responseHandler } from '../utils/responseHandler.js';
 
 export const createHistory = async (historyData: any) => {
     try {

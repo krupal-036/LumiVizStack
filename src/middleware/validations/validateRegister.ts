@@ -1,5 +1,5 @@
 import { NextFunction } from 'express';
-import { emailRegex, passwordRegex, usernameRegex } from '../../utils/regex';
+import { emailRegex, passwordRegex, usernameRegex } from '../../utils/regex.js';
 import { getUserByField } from '../../repositories/user.repo.js';
 
 export const validateRegister = async (

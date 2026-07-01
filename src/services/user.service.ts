@@ -1,8 +1,8 @@
-import { IUser } from '../models/User.model';
-import { signToken } from '../utils/tokenHandler';
-import { responseHandler } from '../utils/responseHandler';
-import * as userRepo from '../repositories/user.repo';
-import * as historyRepo from '../repositories/history.repo';
+import { IUser } from '../models/User.model.js';
+import { signToken } from '../utils/tokenHandler.js';
+import { responseHandler } from '../utils/responseHandler.js';
+import * as userRepo from '../repositories/user.repo.js';
+import * as historyRepo from '../repositories/history.repo.js';
 
 export const register = async (
     userData: Pick<IUser, 'username' | 'email' | 'password'>,

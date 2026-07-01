@@ -1,5 +1,5 @@
 import mongoose, { Document, Model, Schema } from 'mongoose';
-import { hashPassword } from '../utils/passwordHandler';
+import { hashPassword } from '../utils/passwordHandler.js';
 
 export interface IUser extends Document {
     username: string;

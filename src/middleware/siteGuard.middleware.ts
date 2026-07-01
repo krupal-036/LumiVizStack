@@ -2,7 +2,7 @@ import { NextFunction } from 'express';
 import {
     createSystemConfig,
     getSystemConfig,
-} from '../repositories/systemSettings.repo';
+} from '../repositories/systemSettings.repo.js';
 
 export const siteGuard = async (req: any, res: any, next: NextFunction) => {
     try {

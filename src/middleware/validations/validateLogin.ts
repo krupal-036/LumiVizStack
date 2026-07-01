@@ -1,7 +1,7 @@
 import { NextFunction } from 'express';
-import { comparePassword } from '../../utils/passwordHandler';
-import { emailRegex, passwordRegex } from '../../utils/regex';
-import { getUserByField } from '../../repositories/user.repo';
+import { comparePassword } from '../../utils/passwordHandler.js';
+import { emailRegex, passwordRegex } from '../../utils/regex.js';
+import { getUserByField } from '../../repositories/user.repo.js';
 
 export const validateLogin = async (req: any, res: any, next: NextFunction) => {
     const { password } = req.body;
