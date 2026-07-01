@@ -2,6 +2,9 @@
     "name": "lumivizstack",
     "version": "1.0.1",
     "main": "index.js",
+    "workspaces": [
+        "frontend"
+    ],
     "scripts": {
         "dev:backend": "tsx watch src/index.ts",
         "start": "node dist/src/index.js",
