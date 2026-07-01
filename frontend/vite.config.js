@@ -16,22 +16,22 @@ export default defineConfig(({ mode }) => {
         },
       } : {},
     },
-    build: {
-      rollupOptions: {
-        output: {
-          entryFileNames: `assets/js/[name].js`,
-          chunkFileNames: `assets/js/[name].js`,
-          assetFileNames: (assetInfo) => {
-            const name = assetInfo.name || 'assets';
-            const info = name.split('.');
-            const ext = info[info.length - 1];
-            if (ext === 'css') {
-              return `assets/css/[name].[ext]`;
-            }
-            return `assets/[name].[ext]`;
-          }
-        }
-      }
-    }
+    // build: {
+    //   rollupOptions: {
+    //     output: {
+    //       entryFileNames: `assets/js/[name].js`,
+    //       chunkFileNames: `assets/js/[name].js`,
+    //       assetFileNames: (assetInfo) => {
+    //         const name = assetInfo.name || 'assets';
+    //         const info = name.split('.');
+    //         const ext = info[info.length - 1];
+    //         if (ext === 'css') {
+    //           return `assets/css/[name].[ext]`;
+    //         }
+    //         return `assets/[name].[ext]`;
+    //       }
+    //     }
+    //   }
+    // }
   }
 })
