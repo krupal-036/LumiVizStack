@@ -5,6 +5,10 @@ import { authenticate, authorizeRoles } from '../middleware/auth.middleware.js';
 
 const r = Router();
 
+// @route   GET api/history/public/:shareId
+// @desc    Get public history by Share ID (accessible by anyone)
+r.get('/public/:shareId', c.getPublicHistory);
+
 r.use(authenticate, authorizeRoles('admin', 'user'));
 
 // @route   POST api/history/save
@@ -20,11 +24,6 @@ r.put('/:id/toggle', c.toggleHistoryStatus);
 // @route   GET api/history/user
 // @desc    Get All History (User Specific)
 r.get('/user', c.getAllHistoryForUser);
-
-
-// @route   GET api/history/public/:shareId
-// @desc    Get public history by Share ID (accessible by anyone)
-r.get('/public/:shareId', c.getPublicHistory);
 
 
 // @route   PUT api/history/delete-all
