@@ -241,9 +241,6 @@ LumiVizStack/
 ├── README.md
 ```
 
-
-```
-
 ---
 
 ## 🔌 API Endpoints (Summary)
