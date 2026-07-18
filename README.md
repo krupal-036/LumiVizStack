@@ -47,15 +47,15 @@ No configuration needed - just paste, connect, or upload your data.
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend** | React.js, Tailwind CSS, React Router DOM, Recharts |
-| **Backend** | Node.js, Express.js |
-| **Database** | MongoDB, Mongoose ODM |
-| **Authentication** | JSON Web Token (JWT), bcrypt |
-| **Build Tool** | Vite |
-| **Deployment** | Vercel |
-| **Dev Tools** | Postman, ESLint, VS Code, Git & GitHub |
+| Layer              | Technology                                         |
+| ------------------ | -------------------------------------------------- |
+| **Frontend**       | React, Tailwind CSS, React Router DOM, Recharts |
+| **Backend**        | Node.js, Express.js                                |
+| **Database**       | MongoDB, Mongoose ODM                              |
+| **Authentication** | JSON Web Token (JWT), bcrypt                       |
+| **Build Tool**     | Vite                                               |
+| **Deployment**     | Vercel                                             |
+| **Dev Tools**      | Postman, ESLint, VS Code, Git & GitHub             |
 
 ## 🚀 Getting Started
 
@@ -84,12 +84,10 @@ Create a `.env` file in the `backend/` directory:
 ```env
 PORT=3000
 MONGO_URI=mongodb_url
-
-DB_USERS=lumiviz_users_db_example
-DB_ADMIN=lumiviz_admin_db_example
-DB_VIZ_CONTEXT=lumiviz_viz_public_db_example
-DB_VIZ_HISTORY=lumiviz_viz_history_db_example
-
+DB_NAME=your_database_name
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=choose_a_strong_password_here
 JWT_SECRET=your_jwt_secret_key
 NODE_ENV=development
 ```
@@ -97,7 +95,7 @@ NODE_ENV=development
 Start the backend server:
 
 ```bash
-npm start
+npm run dev:backend
 ```
 
 ### 3. Frontend Setup
@@ -133,104 +131,115 @@ LumiVizStack/
 ├── frontend/
 │   ├── public/
 │   ├── src/
-│   │   │
-│   │   ├── components/
-│   │   │   ├── common/
-│   │   │   │   ├── AdminRoute.jsx
-│   │   │   │   ├── BackToTop.jsx
-│   │   │   │   ├── Button.jsx
-│   │   │   │   ├── Loader.jsx
-│   │   │   │   ├── Modal.jsx
-│   │   │   │   ├── ProtectedRoute.jsx
-│   │   │   │   └── SmartCell.jsx
-│   │   │   │
-│   │   │   ├── layout/
-│   │   │   │   ├── Footer.jsx
-│   │   │   │   └── Navbar.jsx
-│   │   │   │
-│   │   │   ├── visualizations/
-│   │   │   │   ├── CardView.jsx
-│   │   │   │   ├── ChartView.jsx
-│   │   │   │   ├── FlowChart.jsx
-│   │   │   │   ├── GraphView.jsx
-│   │   │   │   ├── TableView.jsx
-│   │   │   │   ├── TreeView.jsx
-│   │   │   └── Features.jsx
-│   │   │
-│   │   ├── context/
-│   │   │   ├── AlertContext.jsx
-│   │   │   ├── AuthContext.jsx
-│   │   │   ├── ThemeContext.jsx
-│   │   │   └── VizContext.jsx
-│   │   │
-│   │   ├── hooks/
-│   │   │   ├── customHooks.jsx
-│   │   │   ├── useFetch.js
-│   │   │   └── useTheme.js
-│   │   │
-│   │   ├── pages/
-│   │   │   ├── About.jsx
-│   │   │   ├── AdminPanel.jsx
-│   │   │   ├── ApiDocs.jsx
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── Guide.jsx
-│   │   │   ├── History.jsx
-│   │   │   ├── Login.jsx
-│   │   │   ├── NotFound.jsx
-│   │   │   ├── PublicView.jsx
-│   │   │   ├── Register.jsx
-│   │   │   ├── UserProfile.jsx
-│   │   │   └── Visualizer.jsx
-│   │   │
-│   │   ├── utils/
-│   │   │   ├── dataParser.js
-│   │   │   └── mockData.js
-│   │   │
 │   │   ├── App.css
-│   │   ├── App.jsx
+│   │   ├── App.tsx
 │   │   ├── index.css
-│   │   └── main.jsx
-│   │
-│   ├── .env
-│   ├── .env_EXAMPLE
+│   │   ├── main.tsx
+│   │   ├── components/
+│   │   │   ├── Features.tsx
+│   │   │   ├── common/
+│   │   │   │   ├── AdminRoute.tsx
+│   │   │   │   ├── BackToTop.tsx
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Loader.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── ProtectedRoute.tsx
+│   │   │   │   └── SmartCell.tsx
+│   │   │   ├── layout/
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   └── Navbar.tsx
+│   │   │   └── visualizations/
+│   │   │       ├── CardView.tsx
+│   │   │       ├── ChartView.tsx
+│   │   │       ├── FlowChart.tsx
+│   │   │       ├── GraphView.tsx
+│   │   │       ├── TableView.tsx
+│   │   │       └── TreeView.tsx
+│   │   ├── context/
+│   │   │   ├── AlertContext.tsx
+│   │   │   ├── AuthContext.tsx
+│   │   │   └── ThemeContext.tsx
+│   │   ├── hooks/
+│   │   │   ├── customHooks.tsx
+│   │   │   ├── useFetch.ts
+│   │   │   └── useTheme.ts
+│   │   ├── pages/
+│   │   │   ├── About.tsx
+│   │   │   ├── AdminPanel.tsx
+│   │   │   ├── ApiDocs.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Guide.tsx
+│   │   │   ├── History.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── NotFound.tsx
+│   │   │   ├── PublicView.tsx
+│   │   │   ├── Register.tsx
+│   │   │   ├── UserProfile.tsx
+│   │   │   └── Visualizer.tsx
+│   │   └── utils/
+│   │       ├── dataParser.ts
+│   │       └── mockData.ts
 │   ├── eslint.config.js
 │   ├── index.html
-│   ├── package-lock.json
 │   ├── package.json
-│   └── vite.config.js
-│
-├── middleware/
-│   ├── adminAuth.js
-│   ├── apiLimiter.js
-│   ├── authValidation.js
-│   ├── config.js
-│   ├── serveFrontend.js
-│   ├── siteGuard.js
-│   └── verifyToken.js
-│
-├── models/
-│   ├── History.js
-│   ├── SystemSettings.js
-│   └── User.js
-│
-├── routes/
-│   ├── admin.js
-│   ├── auth.js
-│   ├── history.js
-│   └── profile.js
-│
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   └── vite.config.ts
 ├── public/
-│
-├── .env
+├── src/                    # Backend source
+│   ├── index.ts
+│   ├── config/
+│   │   ├── config.ts
+│   │   └── db.config.ts
+│   ├── controllers/
+│   │   ├── admin.controller.ts
+│   │   ├── history.controller.ts
+│   │   └── user.controller.ts
+│   ├── middleware/
+│   │   ├── apiLimiter.ts
+│   │   ├── auth.middleware.ts
+│   │   ├── errorHandler.middleware.ts
+│   │   ├── healthCheck.middleware.ts
+│   │   ├── requestLogger.middleware.ts
+│   │   ├── serveFrontend.middleware.ts
+│   │   ├── siteGuard.middleware.ts
+│   │   └── validations/
+│   │       ├── validateHistory.ts
+│   │       ├── validateLogin.ts
+│   │       ├── validateProfile.ts
+│   │       └── validateRegister.ts
+│   ├── models/
+│   │   ├── History.model.ts
+│   │   ├── SystemSettings.model.ts
+│   │   └── User.model.ts
+│   ├── repositories/
+│   │   ├── history.repo.ts
+│   │   ├── systemSettings.repo.ts
+│   │   └── user.repo.ts
+│   ├── routes/
+│   │   ├── admin.routes.ts
+│   │   ├── history.routes.ts
+│   │   ├── profile.routes.ts
+│   │   └── user.routes.ts
+│   ├── services/
+│   │   ├── admin.service.ts
+│   │   ├── history.service.ts
+│   │   └── user.service.ts
+│   └── utils/
+│       ├── passwordHandler.ts
+│       ├── regex.ts
+│       ├── responseHandler.ts
+│       ├── seedAdmin.ts
+│       ├── startDevServer.ts
+│       └── tokenHandler.ts
 ├── .env_EXAMPLE
-├── .gitignore
 ├── data.json
-├── db.js
-├── index.js
-├── package-lock.json
 ├── package.json
+├── tsconfig.json
+├── vercel.json
 ├── README.md
-└── vercel.json
+```
 
 
 ```
@@ -239,16 +248,16 @@ LumiVizStack/
 
 ## 🔌 API Endpoints (Summary)
 
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| POST | `/api/auth/register` | Register new user | ❌ |
-| POST | `/api/auth/login` | Login & receive JWT | ❌ |
-| GET | `/api/history` | Get user's saved visualizations | ✅ |
-| POST | `/api/history` | Save a new visualization | ✅ |
-| DELETE | `/api/history/:id` | Soft-delete a visualization | ✅ |
-| GET | `/api/history/share/:shareId` | Access public visualization | ❌ |
-| GET | `/api/admin/users` | List all users | ✅ Admin |
-| PATCH | `/api/admin/settings` | Toggle login/signup access | ✅ Admin |
+| Method | Endpoint                      | Description                     | Auth Required |
+| ------ | ----------------------------- | ------------------------------- | ------------- |
+| POST   | `/api/auth/register`          | Register new user               | ❌            |
+| POST   | `/api/auth/login`             | Login & receive JWT             | ❌            |
+| GET    | `/api/history`                | Get user's saved visualizations | ✅            |
+| POST   | `/api/history`                | Save a new visualization        | ✅            |
+| DELETE | `/api/history/:id`            | Soft-delete a visualization     | ✅            |
+| GET    | `/api/history/share/:shareId` | Access public visualization     | ❌            |
+| GET    | `/api/admin/users`            | List all users                  | ✅ Admin      |
+| PATCH  | `/api/admin/settings`         | Toggle login/signup access      | ✅ Admin      |
 
 > Rate limits: **5 requests/window** on auth routes, **100 requests/window** on all other routes.
 
