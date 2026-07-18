@@ -1,49 +1,45 @@
 {
-    "name": "lumivizstack",
-    "version": "1.0.1",
-    "main": "index.js",
-    "workspaces": [
-        "frontend"
-    ],
-    "scripts": {
-        "dev:backend": "tsx watch src/index.ts",
-        "start": "node dist/src/index.js",
-        "frontend-build": "cd frontend && npm run build",
-        "clean": "shx rm -rf public && shx mkdir public",
-        "copy": "shx cp -r frontend/dist/* public/",
-        "build": "npm run clean && npm run frontend-build && npm run copy && tsc && tsc-alias",
-        "vercel-build": "npm run build",
-        "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\"",
-        "format": "prettier --write \"**/*.{ts,json,md}\"",
-        "format:check": "prettier --check \"**/*.{ts,json,md}\""
-    },
-    "type": "module",
-    "license": "ISC",
-    "dependencies": {
-        "bcrypt": "^6.0.0",
-        "body-parser": "^2.3.0",
-        "cookie-parser": "^1.4.7",
-        "cors": "^2.8.6",
-        "dotenv": "^17.4.2",
-        "express": "^5.2.1",
-        "express-rate-limit": "^8.5.2",
-        "jsonwebtoken": "^9.0.3",
-        "mongoose": "^9.7.0",
-        "multer": "^2.2.0"
-    },
-    "devDependencies": {
-        "@types/bcrypt": "^6.0.0",
-        "@types/cookie-parser": "^1.4.10",
-        "@types/cors": "^2.8.19",
-        "@types/express": "^5.0.6",
-        "@types/jsonwebtoken": "^9.0.10",
-        "@types/multer": "^2.1.0",
-        "@types/node": "^25.9.3",
-        "concurrently": "^10.0.3",
-        "prettier": "3.9.3",
-        "shx": "^0.4.0",
-        "tsc-alias": "^1.8.17",
-        "tsx": "^4.22.4",
-        "typescript": "^6.0.3"
-    }
+  "name": "lumivizstack",
+  "version": "1.0.1",
+  "main": "index.js",
+  "description": "A full-stack MERN web app that transforms JSON data into interactive charts and visualizations with JWT auth, history, and shareable links.",
+  "scripts": {
+    "dev:backend": "tsx watch src/index.ts",
+    "start": "node dist/src/index.js",
+    "frontend:build": "cd frontend && npm run build",
+    "clean": "shx rm -rf public && shx mkdir public",
+    "copy": "shx cp -r frontend/dist/* public/",
+    "prod:build": "npm run clean && npm run frontend:build && npm run copy && tsc && tsc-alias",
+    "build": "tsc",
+    "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\"",
+    "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,json,md}\""
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "body-parser": "^2.3.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.0",
+    "multer": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.9.3",
+    "concurrently": "^10.0.3",
+    "prettier": "3.9.3",
+    "shx": "^0.4.0",
+    "tsc-alias": "^1.8.17",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
 }
