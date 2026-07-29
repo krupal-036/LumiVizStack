@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { seedAdmin } from "../utils/seedAdmin";
+import { AppConfig } from "./app.config";
+import { NextFunction } from "express";
 
-const MONGO_URI = process.env.MONGO_URI as string;
-const DB_NAME = process.env.DB_NAME as string;
+const MONGO_URI = AppConfig.MONGO_URI;
+const DB_NAME = AppConfig.DB_NAME;
 
 if (!MONGO_URI) {
   throw new Error("Please define the MONGO_URI environment variable");
@@ -26,7 +28,7 @@ const connectDB = async () => {
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
-      if ((process.env.NODE_ENV as string) !== "production") {
+      if (AppConfig.NODE_ENV !== "production") {
         console.log(`Connected to MongoDB: ${DB_NAME}`);
       }
       return mongoose;
@@ -44,4 +46,13 @@ const connectDB = async () => {
   return cached.conn;
 };
 
-export default connectDB;
+export const databaseConfig = async (req: any, res: any, next: NextFunction) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err: any) {
+    res.status(500).json({
+      message: err.message || "Database connection failed",
+    });
+  }
+};

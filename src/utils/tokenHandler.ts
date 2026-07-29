@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import { AppConfig } from "../config/app.config";
 
-const secret = process.env.JWT_SECRET as string;
+const secret = AppConfig.JWT_SECRET;
 
 export const signToken = (payload: any) => jwt.sign(payload, secret, { expiresIn: "30d" });
 

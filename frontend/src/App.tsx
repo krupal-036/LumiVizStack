@@ -20,7 +20,7 @@ import UserProfile from "./pages/UserProfile";
 import BackToTop from "./components/common/BackToTop";
 import { AlertProvider } from './context/AlertContext';
 
-function App() {
+const App = () => {
   return (
     <ThemeProvider>
       <AlertProvider>

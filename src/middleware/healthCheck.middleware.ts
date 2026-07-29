@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import os from "os";
+import { AppConfig } from "../config/app.config";
 
 export const healthCheck = (req: Request, res: Response): void => {
   res.status(200).json({
@@ -7,7 +8,7 @@ export const healthCheck = (req: Request, res: Response): void => {
     code: 200,
     message: "API is successfully working!",
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || "development",
+    environment: AppConfig.NODE_ENV,
     version: process.env.npm_package_version || "1.0.0",
     system: {
       platform: os.platform(),

@@ -1,9 +1,9 @@
 import "dotenv/config";
 import path from "path";
+import { AppConfig } from "./config/app.config";
 import express, { RequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
-
 import userRoutes from "./routes/user.routes";
 import adminRoutes from "./routes/admin.routes";
 import profileRoutes from "./routes/profile.routes";
@@ -13,10 +13,11 @@ import { siteGuard } from "./middleware/siteGuard.middleware";
 import { startDevServer } from "./utils/startDevServer";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 import { serveFrontend } from "./middleware/serveFrontend.middleware";
-import { corsConfig, databaseConfig } from "./config/config";
+import { corsConfig } from "./config/cors.config";
 import { requestLogger } from "./middleware/requestLogger.middleware";
 import { apiLimiter, authLimiter, rateLimiter } from "./middleware/apiLimiter";
 import { healthCheck } from "./middleware/healthCheck.middleware";
+import { databaseConfig } from "./config/db.config";
 
 const app = express();
 const DIST_PATH: string = path.join(process.cwd(), "public");

@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { AppConfig } from "../config/app.config";
 
 export function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
   console.error("--- Global Error Handler ---");
@@ -41,7 +42,7 @@ export function errorHandler(err: any, req: Request, res: Response, next: NextFu
       success: false,
       message,
       errors,
-      stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
+      stack: AppConfig.NODE_ENV === "production" ? undefined : err.stack,
     },
   });
 }
