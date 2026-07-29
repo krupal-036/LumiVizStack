@@ -112,12 +112,8 @@ export const removeAllHistoryOfUserById = async (userId: any) => {
 
     const result = await historyRepo.deleteManyByField({ userId });
     const count = result.deletedCount;
-    const message =
-      count === 0
-        ? `User ${user.username} had no associated history records to delete.`
-        : `Successfully deleted ${count} associated history ${count === 1 ? "document" : "documents"} for user ${user.username}.`;
-
-    return responseHandler(200, { message });
+    if (count === 0) { return responseHandler(204, { message: `User ${user.username} had no associated history records to delete.` }); }
+    return responseHandler(200, { message: `Successfully deleted ${count} associated history ${count === 1 ? "document" : "documents"} for user ${user.username}.` });
   } catch (err) {
     return responseHandler(500, {
       message: "Error Occured during Deletion of User's History",

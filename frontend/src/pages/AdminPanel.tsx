@@ -169,9 +169,14 @@ const AdminPanel = () => {
   const handleDeleteAllHistoryOfUser = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete all History of this user?")) return;
     try {
-      await axios.delete(`/api/admin/users/history/${id}`, {
+      const res: any = await axios.delete(`/api/admin/users/history/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if(res.status === 204){
+        showAlert(`User had no associated history records to delete.`, "No Changes made", 3);
+        return
+      }
+      showAlert(res.messege, "success", 2);
     } catch (err) {
       console.error(err);
       showAlert("Failed to delete All History.", "Error", 1);

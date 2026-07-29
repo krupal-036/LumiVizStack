@@ -2,6 +2,7 @@ import { Router } from "express";
 import * as c from "../controllers/history.controller";
 import { validateHistory } from "../middleware/validations/validateHistory";
 import { authenticate, authorizeRoles } from "../middleware/auth.middleware";
+import { validateUser } from "../middleware/validations/validateUser";
 
 const r = Router();
 
@@ -9,7 +10,7 @@ const r = Router();
 // @desc    Get public history by Share ID (accessible by anyone)
 r.get("/public/:shareId", c.getPublicHistory);
 
-r.use(authenticate, authorizeRoles("admin", "user"));
+r.use(authenticate, authorizeRoles("admin", "user"), validateUser);
 
 // @route   POST api/history/save
 // @desc    Save visualization history (Max 10 per user)
