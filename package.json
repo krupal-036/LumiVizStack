@@ -6,10 +6,10 @@
   "scripts": {
     "dev:backend": "tsx watch src/index.ts",
     "start": "node dist/src/index.js",
-    "frontend:build": "cd frontend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
     "clean": "shx rm -rf public && shx mkdir public",
     "copy": "shx cp -r frontend/dist/* public/",
-    "build:prod": "npm run clean && npm run frontend:build && npm run copy && tsc && tsc-alias",
+    "build:prod": "npm run clean && npm run build:frontend && npm run copy && tsc && tsc-alias",
     "build": "tsc",
     "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,magenta\" \"tsx watch src/index.ts\" \"cd frontend && npm run dev\"",
     "format": "prettier --write \"**/*.{ts,json,md}\"",

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="lvBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="lvBars" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#A78BFA"/>
+    </linearGradient>
+    <radialGradient id="lvGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FDE68A" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#FDE68A" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#lvBg)"/>
+
+  <!-- Bar chart -->
+  <rect x="14" y="34" width="8" height="18" rx="2" fill="url(#lvBars)"/>
+  <rect x="26" y="26" width="8" height="26" rx="2" fill="url(#lvBars)"/>
+  <rect x="38" y="18" width="8" height="34" rx="2" fill="url(#lvBars)"/>
+
+  <!-- Glow spark above tallest bar -->
+  <circle cx="42" cy="14" r="9" fill="url(#lvGlow)"/>
+  <circle cx="42" cy="14" r="3" fill="#FDE68A"/>
+</svg>

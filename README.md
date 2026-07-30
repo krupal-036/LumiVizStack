@@ -238,7 +238,7 @@ LumiVizStack/
 ├── package.json
 ├── tsconfig.json
 ├── vercel.json
-├── README.md
+└── README.md
 ```
 
 ---
@@ -302,7 +302,9 @@ configName, isLoginEnabled, isSignupEnabled, createdAt
 - [ ] Real-time data streaming and live updates
 - [ ] Collaborative visualization editing
 - [ ] CSV / XML support in addition to JSON
-- [ ] Pagination and data limiting for large datasets
+- [x] Data limiting for large datasets
+- [x] Conversion of code using TypeScript-based type safety
+
 
 ---
 
@@ -313,10 +315,14 @@ B.E. Computer Engineering — Enrollment No. `231263107010`
 Sal Engineering and Technical Institute, Ahmedabad  
 Gujarat Technological University | Academic Year 2025–26
 
+<div align="center">
+
 [![GitHub](https://img.shields.io/badge/GitHub-krupal--036-181717?style=for-the-badge&logo=github)](https://github.com/krupal-036)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/krupal-fataniya)
 [![Portfolio](https://img.shields.io/badge/Portfolio-Visit-000000?style=for-the-badge&logo=vercel)](https://krupal.vercel.app)
 [![Email](https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail)](mailto:krupalfataniya007@gmail.com)
+
+</div>
 
 ---
 
