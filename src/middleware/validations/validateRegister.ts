@@ -1,10 +1,11 @@
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 import { emailRegex, passwordRegex, usernameRegex } from "../../utils/regex";
 import { getUserByField } from "../../repositories/user.repo";
+import { HttpStatus } from "../../constants/http-status.enum";
 
-export const validateRegister = async (req: any, res: any, next: NextFunction) => {
+export const validateRegister = async (req: Request, res: Response, next: NextFunction) => {
   if (req.siteSignupDisabled) {
-    return res.status(403).json({
+    return res.status(HttpStatus.FORBIDDEN).json({
       message: "New sign-ups are currently disabled by the administrator.",
     });
   }
@@ -13,19 +14,21 @@ export const validateRegister = async (req: any, res: any, next: NextFunction) =
   const email = req.body.email?.trim()?.toLowerCase();
 
   if (!email || !password || !username || !req.body) {
-    return res.status(400).json({ message: "All fields are required" });
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "All fields are required" });
   }
 
   const trimmedName = username.trim().toLowerCase();
 
   if (!usernameRegex.test(trimmedName)) {
-    return res.status(400).json({
+    return res.status(HttpStatus.BAD_REQUEST).json({
       message: "Username must start with a letter and contain only lowercase letters/numbers.",
     });
   }
 
   if (trimmedName.length < 3 || trimmedName.length > 20) {
-    return res.status(400).json({ message: "Username must be between 3 and 20 characters" });
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ message: "Username must be between 3 and 20 characters" });
   }
 
   const reservedWords = [
@@ -39,15 +42,17 @@ export const validateRegister = async (req: any, res: any, next: NextFunction) =
     "krupalfataniya",
   ];
   if (reservedWords.includes(trimmedName)) {
-    return res.status(400).json({ message: "This username is reserved and cannot be used." });
+    return res
+      .status(HttpStatus.BAD_REQUEST)
+      .json({ message: "This username is reserved and cannot be used." });
   }
 
   if (!emailRegex.test(email)) {
-    return res.status(400).json({ message: "Invalid Email Address" });
+    return res.status(HttpStatus.BAD_REQUEST).json({ message: "Invalid Email Address" });
   }
 
   if (!passwordRegex.test(password)) {
-    return res.status(400).json({
+    return res.status(HttpStatus.BAD_REQUEST).json({
       message:
         "Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.",
     });
@@ -58,18 +63,22 @@ export const validateRegister = async (req: any, res: any, next: NextFunction) =
       username: trimmedName,
     });
     if (existingUsername) {
-      return res.status(400).json({ message: "Username is already taken" });
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: "Username is already taken" });
     }
 
     const existingEmail = await getUserByField({ email: email });
     if (existingEmail) {
-      return res.status(400).json({ message: "User with this email already exists" });
+      return res
+        .status(HttpStatus.CONFLICT)
+        .json({ message: "User with this email already exists" });
     }
 
     req.user = { username: trimmedName, email, password };
 
     next();
   } catch (err) {
-    return res.status(500).json({ message: "Server validation failed during registration" });
+    return res
+      .status(HttpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server validation failed during registration" });
   }
 };

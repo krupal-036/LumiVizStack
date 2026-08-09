@@ -1,18 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { verifyToken } from "../utils/tokenHandler";
+import { HttpStatus } from "../constants/http-status.enum";
 
-export interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string | number;
-    role: string;
-  };
-}
-
-export const authenticate = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   let token = "";
 
   const authHeader = req.headers.authorization;
@@ -23,7 +13,7 @@ export const authenticate = async (
   }
 
   if (!token) {
-    return res.status(401).json({
+    return res.status(HttpStatus.UNAUTHORIZED).json({
       message: "Authentication required. Access token is missing.",
     });
   }
@@ -36,14 +26,14 @@ export const authenticate = async (
     };
     next();
   } catch (error: any) {
-    return res.status(401).json({ message: "Invalid or expired access token" });
+    return res.status(HttpStatus.UNAUTHORIZED).json({ message: "Invalid or expired access token" });
   }
 };
 
 export const authorizeRoles = (...roles: string[]) => {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
-      return res.status(401).json({
+      return res.status(HttpStatus.UNAUTHORIZED).json({
         data: {
           success: false,
           message: "Authentication required.",
@@ -52,7 +42,7 @@ export const authorizeRoles = (...roles: string[]) => {
     }
 
     if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
+      return res.status(HttpStatus.FORBIDDEN).json({
         data: {
           message: "You are not authorized to perform this action.",
         },

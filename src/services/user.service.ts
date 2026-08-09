@@ -3,6 +3,8 @@ import { signToken } from "../utils/tokenHandler";
 import { responseHandler } from "../utils/responseHandler";
 import * as userRepo from "../repositories/user.repo";
 import * as historyRepo from "../repositories/history.repo";
+import { UserRequest } from "../types/types";
+import { HttpStatus } from "../constants/http-status.enum";
 
 export const register = async (userData: Pick<IUser, "username" | "email" | "password">) => {
   try {
@@ -14,13 +16,13 @@ export const register = async (userData: Pick<IUser, "username" | "email" | "pas
       role: user.role,
       credits: user.credits,
     });
-    return responseHandler(201, { token });
+    return responseHandler(HttpStatus.CREATED, { token });
   } catch (err: any) {
-    return responseHandler(400, { message: "Server not Available" });
+    return responseHandler(HttpStatus.BAD_REQUEST, { message: "Server not Available" });
   }
 };
 
-export const login = async (user: any) => {
+export const login = async (user: UserRequest) => {
   try {
     const token = signToken({
       userId: user.id,
@@ -29,9 +31,9 @@ export const login = async (user: any) => {
       email: user.email,
       credits: user.credits,
     });
-    return responseHandler(200, { token });
+    return responseHandler(HttpStatus.OK, { token });
   } catch (err: any) {
-    return responseHandler(400, { message: "Server not Available" });
+    return responseHandler(HttpStatus.BAD_REQUEST, { message: "Server not Available" });
   }
 };
 
@@ -42,7 +44,7 @@ export const updateUserData = async (req: any) => {
     if (username) user.username = username;
     if (password) user.password = password;
     await user.save();
-    return responseHandler(200, {
+    return responseHandler(HttpStatus.CREATED, {
       message: "Profile updated successfully",
       user: {
         id: user._id,
@@ -52,26 +54,26 @@ export const updateUserData = async (req: any) => {
       },
     });
   } catch (err) {
-    return responseHandler(500, { message: "Profile Update failed." });
+    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, { message: "Profile Update failed." });
   }
 };
 
 export const toggleProfileStatus = async (data: any) => {
   try {
     if (data.role === "admin")
-      return responseHandler(400, {
+      return responseHandler(HttpStatus.BAD_REQUEST, {
         message: "Admin role is restricted here.",
       });
     const user = await userRepo.getUserByField({ _id: data.id });
-    if (!user) return responseHandler(404, { message: "User not found" });
+    if (!user) return responseHandler(HttpStatus.NOT_FOUND, { message: "User not found" });
     user.isDeleted = true;
     await user?.save();
     await historyRepo.deleteManyByField({ userId: data.id });
-    return responseHandler(200, {
+    return responseHandler(HttpStatus.CREATED, {
       message: "Profile deactivated and history cleared successfully",
     });
   } catch (err) {
-    return responseHandler(500, {
+    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Server error during account deactivation",
     });
   }

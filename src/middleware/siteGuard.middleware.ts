@@ -1,7 +1,12 @@
-import { NextFunction } from "express";
+import { NextFunction, Request, RequestHandler } from "express";
 import { createSystemConfig, getSystemConfig } from "../repositories/systemSettings.repo";
 
-export const siteGuard = async (req: any, res: any, next: NextFunction) => {
+export interface SiteGuardRequest extends Request {
+  siteSignupDisabled: boolean;
+  siteLoginDisabled: boolean;
+}
+
+export const siteGuard: RequestHandler = async (req, res, next) => {
   try {
     let settings = await getSystemConfig();
 
@@ -21,12 +26,9 @@ export const siteGuard = async (req: any, res: any, next: NextFunction) => {
     }
 
     next();
-  } catch (err: any) {
-    if (err) {
-      return err.message;
-    }
+  } catch (err) {
     req.siteLoginDisabled = false;
     req.siteSignupDisabled = false;
-    next();
+    next(err);
   }
 };

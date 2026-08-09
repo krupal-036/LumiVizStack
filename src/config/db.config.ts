@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import { seedAdmin } from "../utils/seedAdmin";
 import { AppConfig } from "./app.config";
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
+import { HttpStatus } from "../constants/http-status.enum";
 
 const MONGO_URI = AppConfig.MONGO_URI;
 const DB_NAME = AppConfig.DB_NAME;
@@ -46,13 +47,14 @@ const connectDB = async () => {
   return cached.conn;
 };
 
-export const databaseConfig = async (req: any, res: any, next: NextFunction) => {
+export const databaseConfig = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await connectDB();
     next();
-  } catch (err: any) {
-    res.status(500).json({
-      message: err.message || "Database connection failed",
+  } catch (err) {
+    const error = err as Error;
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: error.message || "Database connection failed",
     });
   }
 };

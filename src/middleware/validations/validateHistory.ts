@@ -1,5 +1,6 @@
 import { NextFunction, Response } from "express";
 import { getHistoriesByField, getHistoryByField } from "../../repositories/history.repo";
+import { HttpStatus } from "../../constants/http-status.enum";
 
 export const validateHistory = async (req: any, res: Response, next: NextFunction) => {
   try {
@@ -9,7 +10,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
     if (rawInput) {
       const rawLines = rawInput.trim().split("\n").length;
       if (rawLines > 500) {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           message: `Input text is too long (${rawLines} lines). Max 500.`,
         });
       }
@@ -18,7 +19,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
     if (data) {
       const dataLines = JSON.stringify(data, null, 2).split("\n").length;
       if (dataLines > 500) {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           message: `JSON data structure is too large (${dataLines} lines). Max 500.`,
         });
       }
@@ -31,7 +32,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
       });
 
       if (existingTitle) {
-        return res.status(400).json({
+        return res.status(HttpStatus.BAD_REQUEST).json({
           message: "You already have a visualization with this title. Please choose a unique name.",
         });
       }
@@ -43,7 +44,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
         data: data,
       });
       if (duplicate) {
-        return res.status(400).json({
+        return res.status(HttpStatus.CONFLICT).json({
           message: "A visualization with this exact data already exists in your history.",
         });
       }
@@ -72,7 +73,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
       });
 
       if (isDuplicate) {
-        return res.status(400).json({
+        return res.status(HttpStatus.CONFLICT).json({
           message: "A visualization with this exact data input already exists.",
         });
       }
@@ -84,7 +85,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
         rawInput: trimmedInput,
       });
       if (duplicate) {
-        return res.status(400).json({
+        return res.status(HttpStatus.CONFLICT).json({
           message: "A visualization with this exact data already exists in your history.",
         });
       }
@@ -94,7 +95,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
 
     next();
   } catch (err) {
-    return res.status(500).json({
+    return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
       message: "Server validation failed during validate history",
     });
   }

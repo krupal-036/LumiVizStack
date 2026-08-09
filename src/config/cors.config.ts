@@ -7,5 +7,3 @@ export const corsConfig = cors({
   origin: allowedOrigins,
   credentials: true,
 });
-
-

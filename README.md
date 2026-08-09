@@ -47,15 +47,15 @@ No configuration needed - just paste, connect, or upload your data.
 
 ## 🛠️ Tech Stack
 
-| Layer              | Technology                                         |
-| ------------------ | -------------------------------------------------- |
+| Layer              | Technology                                      |
+| ------------------ | ----------------------------------------------- |
 | **Frontend**       | React, Tailwind CSS, React Router DOM, Recharts |
-| **Backend**        | Node.js, Express.js                                |
-| **Database**       | MongoDB, Mongoose ODM                              |
-| **Authentication** | JSON Web Token (JWT), bcrypt                       |
-| **Build Tool**     | Vite                                               |
-| **Deployment**     | Vercel                                             |
-| **Dev Tools**      | Postman, ESLint, VS Code, Git & GitHub             |
+| **Backend**        | Node.js, Express.js                             |
+| **Database**       | MongoDB, Mongoose ODM                           |
+| **Authentication** | JSON Web Token (JWT), bcrypt                    |
+| **Build Tool**     | Vite                                            |
+| **Deployment**     | Vercel                                          |
+| **Dev Tools**      | Postman, ESLint, VS Code, Git & GitHub          |
 
 ## 🚀 Getting Started
 
@@ -263,17 +263,20 @@ LumiVizStack/
 ## 🗃️ Database Schema
 
 ### `User`
+
 ```
 username, email, password (hashed), credits, role (user/admin), isDeleted, createdAt
 ```
 
 ### `History`
+
 ```
 userId (ref: User), title, type, data, rawInput, urlInput, inputType,
 isPublic, shareId, isDeleted, createdAt
 ```
 
 ### `SystemSettings`
+
 ```
 configName, isLoginEnabled, isSignupEnabled, createdAt
 ```
@@ -304,7 +307,6 @@ configName, isLoginEnabled, isSignupEnabled, createdAt
 - [ ] CSV / XML support in addition to JSON
 - [x] Data limiting for large datasets
 - [x] Conversion of code using TypeScript-based type safety
-
 
 ---
 

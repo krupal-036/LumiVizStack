@@ -1,5 +1,6 @@
 import "dotenv/config";
 import path from "path";
+
 import { AppConfig } from "./config/app.config";
 import express, { RequestHandler } from "express";
 import cookieParser from "cookie-parser";

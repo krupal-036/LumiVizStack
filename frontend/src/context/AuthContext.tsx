@@ -2,16 +2,14 @@ import { createContext, useState, useEffect, Dispatch, SetStateAction, type Reac
 import { jwtDecode, JwtPayload } from "jwt-decode"; 
 import { useAlert } from "../hooks/customHooks";
 
-// 1. Explicitly define what your JWT payload contains
 export interface CustomJwtPayload extends JwtPayload {
   id?: string;
   name?: string;
   role?: string;
   credits?: number;
-  [key: string]: any; // Fallback for other custom claims
+  [key: string]: any; 
 }
 
-// 2. Align type definition with all variables passed into your Provider
 export type AuthContextType = { 
   user: CustomJwtPayload | null; 
   setUser: Dispatch<SetStateAction<CustomJwtPayload | null>>;
@@ -39,7 +37,6 @@ const DefaultAuthContext: AuthContextType = {
 export const AuthContext = createContext<AuthContextType>(DefaultAuthContext);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  // Give generic state arguments to handle both the data type and the initial null state
   const [user, setUser] = useState<CustomJwtPayload | null>(null);
   const [credits, setCredits] = useState<number | null>(null);
   const [role, setRole] = useState<string | null>(null);
@@ -54,7 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     if (storedToken) {
       try {
-        // Enforce the expected shape of the token values via type assertion
         const decoded = jwtDecode<CustomJwtPayload>(storedToken);
         setUser(decoded);
         setRole(decoded.role ?? null);
@@ -77,7 +73,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [credits]);
 
-  // Typed parameter explicitly and decoupled decoding process
   const login = (tokenval: string) => {
     if (tokenval) {
       localStorage.setItem("token", tokenval);
@@ -99,7 +94,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     localStorage.removeItem("token");
     localStorage.removeItem("credits");
     sessionStorage.clear();
-    
     showAlert(`See you later, ${userName}! You've been logged out.`, "Logged Out", 2);
     setUser(null);
     setRole(null);

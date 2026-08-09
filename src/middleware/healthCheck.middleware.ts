@@ -1,11 +1,12 @@
 import { Request, Response } from "express";
 import os from "os";
 import { AppConfig } from "../config/app.config";
+import { HttpStatus } from "../constants/http-status.enum";
 
 export const healthCheck = (req: Request, res: Response): void => {
-  res.status(200).json({
+  res.status(HttpStatus.CREATED).json({
     status: "ok",
-    code: 200,
+    code: HttpStatus.CREATED,
     message: "API is successfully working!",
     timestamp: new Date().toISOString(),
     environment: AppConfig.NODE_ENV,

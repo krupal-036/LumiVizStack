@@ -1,3 +1,4 @@
+import { QueryFilter } from "mongoose";
 import User, { IUser } from "../models/User.model";
 
 export const createUser = async (user: Pick<IUser, "username" | "email" | "password">) => {
@@ -8,8 +9,12 @@ export const createUser = async (user: Pick<IUser, "username" | "email" | "passw
   });
 };
 
-export const getUserByField = async (field: any) => {
-  return await User.findOne(field);
+export const getUserByField = async (field: QueryFilter<IUser>, isPassword = false) => {
+  const query = User.findOne(field);
+  if (!isPassword) {
+    query.select("-password");
+  }
+  return await query;
 };
 
 export const getUsersStats = async () => {
