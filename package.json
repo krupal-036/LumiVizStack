@@ -5,8 +5,9 @@
   "description": "A full-stack MERN web app that transforms JSON data into interactive charts and visualizations with JWT auth, history, and shareable links.",
   "scripts": {
     "dev:backend": "tsx watch src/index.ts",
+    "postbuild": "node scripts/generate-sitemap.js",
     "start": "node dist/src/index.js",
-    "build:frontend": "cd frontend && npm run build",
+    "build:frontend": "npm run postbuild && cd frontend && npm run build",
     "clean": "shx rm -rf public && shx mkdir public",
     "copy": "shx cp -r frontend/dist/* public/",
     "build:prod": "npm run clean && npm run build:frontend && npm run copy && tsc && tsc-alias",

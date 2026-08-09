@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /visualize
+Disallow: /history
+Disallow: /profile
+Disallow: /admin
+Disallow: /view/
+
+Sitemap: https://lumivizstack.vercel.app/sitemap.xml
