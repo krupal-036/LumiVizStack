@@ -1,53 +1,3 @@
-/**
- * generate-sitemap.mjs
- * ---------------------------------------------------------
- * Sitemap generator for LumiVizStack (https://lumivizstack.vercel.app)
- *
- * Usage:
- *   node scripts/generate-sitemap.mjs
- *
- * Add to frontend/package.json:
- *   "scripts": { "generate:sitemap": "node ../scripts/generate-sitemap.mjs" }
- *
- * Output:
- *   frontend/public/sitemap.xml
- *   frontend/public/robots.txt
- * ---------------------------------------------------------
- *
- * ROUTE AUDIT (from Navbar.tsx baseNavLinks + pages/ folder):
- *
- *   PUBLIC / crawlable  (included in sitemap)
- *     "/"            Home
- *     "/about"       About
- *     "/guide"       Guide
- *     "/docs/api"    ApiDocs
- *     "/login"       Login      (low priority — indexed so people can
- *                                find it directly, but it's a form,
- *                                not content worth ranking on its own)
- *     "/register"    Register   (slightly higher priority — it's the
- *                                conversion entry point for new users)
- *
- *   PROTECTED  (link.protected: true in Navbar → requires a logged-in
- *   user, blocked by ProtectedRoute — excluded from sitemap AND should
- *   be noindex, since Google can't render content behind auth anyway)
- *     "/visualize"   Visualizer
- *     "/history"     History
- *     "/profile"     UserProfile
- *
- *   ADMIN-ONLY  (link.protected + role === "admin" check in Navbar —
- *   excluded from sitemap, should be noindex)
- *     "/admin"       AdminPanel
- *
- *   DYNAMIC / user-generated  (excluded — no fixed URL to list; each
- *   shareId is unique and typically not something you want indexed,
- *   since it's someone's personal saved visualization)
- *     "/view/:shareId"  PublicView
- *
- *   UTILITY (excluded)
- *     "*"            NotFound
- * ---------------------------------------------------------
- */
-
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -56,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SITE_URL = "https://lumivizstack.vercel.app";
-const OUTPUT_DIR = path.resolve(__dirname, "frontend/public");
+const OUTPUT_DIR = path.resolve(__dirname, "../frontend/public");
 
 const routes = [
   { path: "/", priority: 1.0, changefreq: "weekly" },
