@@ -1,6 +1,6 @@
 import * as userRepo from "../repositories/user.repo";
 import * as historyRepo from "../repositories/history.repo";
-import { responseHandler } from "../utils/responseHandler";
+import { ResponseHandler } from "../utils/responseHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
 export const createHistory = async (historyData: any) => {
@@ -19,13 +19,13 @@ export const createHistory = async (historyData: any) => {
         const userCheck = await userRepo.getUserByField({
           _id: userId,
         });
-        if (!userCheck) return responseHandler(HttpStatus.NOT_FOUND, { message: "User not found" });
+        if (!userCheck) return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "User not found" });
         if (userCheck.isDeleted)
-          return responseHandler(HttpStatus.NOT_FOUND, {
+          return ResponseHandler.send(HttpStatus.NOT_FOUND, {
             message: "Account was Disabled",
           });
         if (userCheck.credits <= 0)
-          return responseHandler(HttpStatus.FORBIDDEN, {
+          return ResponseHandler.send(HttpStatus.FORBIDDEN, {
             message: "Insufficient credits.",
           });
       }
@@ -56,12 +56,12 @@ export const createHistory = async (historyData: any) => {
       await historyRepo.deleteManyByField({ _id: { $in: idsToDelete } });
     }
 
-    return responseHandler(HttpStatus.CREATED, {
+    return ResponseHandler.send(HttpStatus.CREATED, {
       newHistory,
       credits: updatedUser?.credits,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Error while saving History.",
     });
   }
@@ -72,20 +72,20 @@ export const toggleHistoryStatus = async (user: any, id: any) => {
     const historyItem = await historyRepo.getHistoryByField({ _id: id });
 
     if (!historyItem)
-      return responseHandler(HttpStatus.NOT_FOUND, { message: "History not found." });
+      return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "History not found." });
 
     const isOwner = historyItem.userId.toString() === user.id;
     const isAdmin = user.role === "admin";
 
     if (!isOwner && !isAdmin)
-      return responseHandler(HttpStatus.UNAUTHORIZED, { message: "User not authorized." });
+      return ResponseHandler.send(HttpStatus.UNAUTHORIZED, { message: "User not authorized." });
     historyItem.isPublic = !historyItem.isPublic;
 
     await historyItem.save();
 
-    return responseHandler(HttpStatus.CREATED, historyItem);
+    return ResponseHandler.send(HttpStatus.CREATED, historyItem);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, { message: "History toggle error." });
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, { message: "History toggle error." });
   }
 };
 
@@ -93,9 +93,9 @@ export const getAllHistoryForUser = async (userId: any) => {
   try {
     let histories: any = await historyRepo.getHistoriesByField({ userId });
     histories.sort((a: any, b: any) => b.createdAt - a.createdAt);
-    return responseHandler(HttpStatus.CREATED, histories);
+    return ResponseHandler.send(HttpStatus.CREATED, histories);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Server error while fetching all history for user.",
     });
   }
@@ -106,7 +106,7 @@ export const getPublicHistory = async (shareId: any) => {
     const historyItem = await historyRepo.getHistoryByField({ shareId });
 
     if (!historyItem) {
-      return responseHandler(HttpStatus.NOT_FOUND, { message: "History not found..." });
+      return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "History not found..." });
     }
 
     const userItem: any = await userRepo.getUserByField({
@@ -114,26 +114,26 @@ export const getPublicHistory = async (shareId: any) => {
     });
 
     if (userItem.isDeleted) {
-      return responseHandler(HttpStatus.FORBIDDEN, {
+      return ResponseHandler.send(HttpStatus.FORBIDDEN, {
         message:
           "Access denied. The account associated with this visualization is currently disabled",
       });
     }
     if (historyItem.isDeleted) {
-      return responseHandler(HttpStatus.FORBIDDEN, {
+      return ResponseHandler.send(HttpStatus.FORBIDDEN, {
         message: "This visualization has been deleted by the user...",
       });
     }
 
     if (!historyItem.isPublic) {
-      return responseHandler(HttpStatus.FORBIDDEN, {
+      return ResponseHandler.send(HttpStatus.FORBIDDEN, {
         message: "This visualization is private...",
       });
     }
 
-    return responseHandler(HttpStatus.CREATED, historyItem);
+    return ResponseHandler.send(HttpStatus.CREATED, historyItem);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Server error while fetching public history by share id",
     });
   }
@@ -153,12 +153,12 @@ export const toggleDeleteAllHistory = async (userId: any) => {
 
     await Promise.all(savePromises);
 
-    return responseHandler(HttpStatus.CREATED, {
+    return ResponseHandler.send(HttpStatus.CREATED, {
       message: `Total ${results.length} History cleared successfully`,
       modifiedCount: results.length,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to clear history",
     });
   }
@@ -167,12 +167,12 @@ export const toggleDeleteAllHistory = async (userId: any) => {
 export const deleteAllHistoryUser = async (userId: any) => {
   try {
     const result = await historyRepo.deleteManyByField({ userId });
-    return responseHandler(HttpStatus.CREATED, {
+    return ResponseHandler.send(HttpStatus.CREATED, {
       message: "History permanently deleted",
       deletedCount: result.deletedCount,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to delete history",
     });
   }
@@ -183,22 +183,22 @@ export const deleteOneHistoryItem = async (data: any, id: any) => {
     const historyItem = await historyRepo.getHistoryByField({ _id: id });
 
     if (!historyItem) {
-      return responseHandler(HttpStatus.NOT_FOUND, { message: "History not found" });
+      return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "History not found" });
     }
 
     const isOwner = historyItem.userId.toString() === data.id;
     const isAdmin = data.role === "admin";
 
     if (!isOwner && !isAdmin) {
-      return responseHandler(HttpStatus.UNAUTHORIZED, { message: "User not authorized" });
+      return ResponseHandler.send(HttpStatus.UNAUTHORIZED, { message: "User not authorized" });
     }
 
     await historyRepo.deleteManyByField({ _id: id });
-    return responseHandler(HttpStatus.CREATED, {
+    return ResponseHandler.send(HttpStatus.CREATED, {
       message: "History successfully deleted",
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Server error while deleting a history",
     });
   }
@@ -209,22 +209,22 @@ export const toggleDeleteHistory = async (data: any, id: any) => {
     const historyItem = await historyRepo.getHistoryByField({ _id: id });
 
     if (!historyItem) {
-      return responseHandler(HttpStatus.NOT_FOUND, { message: "History not found" });
+      return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "History not found" });
     }
 
     const isOwner = historyItem.userId.toString() === data.id;
     const isAdmin = data.role === "admin";
 
     if (!isOwner && !isAdmin) {
-      return responseHandler(HttpStatus.UNAUTHORIZED, { message: "User not authorized" });
+      return ResponseHandler.send(HttpStatus.UNAUTHORIZED, { message: "User not authorized" });
     }
 
     historyItem.isDeleted = !historyItem.isDeleted;
     await historyItem.save();
 
-    return responseHandler(HttpStatus.CREATED, historyItem);
+    return ResponseHandler.send(HttpStatus.CREATED, historyItem);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Server error while deleting a history",
     });
   }
