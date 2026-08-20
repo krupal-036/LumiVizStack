@@ -1,16 +1,16 @@
 import * as userRepo from "../repositories/user.repo";
 import * as ssRepo from "../repositories/systemSettings.repo";
 import * as historyRepo from "../repositories/history.repo";
-import { responseHandler } from "../utils/responseHandler";
+import { ResponseHandler } from "../utils/responseHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
 export const getSettings = async () => {
   try {
     let settings = await ssRepo.getSystemConfig();
     if (!settings) settings = await ssRepo.createSystemConfig();
-    return responseHandler(HttpStatus.OK, settings);
+    return ResponseHandler.send(HttpStatus.OK, settings);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to load system settings.",
     });
   }
@@ -24,9 +24,9 @@ export const updateSettings = async (data: any) => {
     settings.isSignupEnabled = data?.isSignupEnabled ?? settings.isSignupEnabled;
 
     await settings.save();
-    return responseHandler(HttpStatus.OK, settings);
+    return ResponseHandler.send(HttpStatus.OK, settings);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to update system settings.",
     });
   }
@@ -40,14 +40,14 @@ export const getStats = async () => {
       historyRepo.countHistoryByField({ isPublic: true }),
       historyRepo.countHistoryByField({ isDeleted: true }),
     ]);
-    return responseHandler(HttpStatus.OK, {
+    return ResponseHandler.send(HttpStatus.OK, {
       users: userCount,
       records: historyCount,
       isPublic: publicCount,
       isDeleted: deletedCount,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to load dashboard statistics.",
     });
   }
@@ -56,9 +56,9 @@ export const getStats = async () => {
 export const getUsersStats = async () => {
   try {
     const usersWithStats = await userRepo.getUsersStats();
-    return responseHandler(HttpStatus.OK, usersWithStats);
+    return ResponseHandler.send(HttpStatus.OK, usersWithStats);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to get users with history counts.",
     });
   }
@@ -67,12 +67,12 @@ export const getUsersStats = async () => {
 export const toggleUserStatus = async (userId: any) => {
   try {
     const userItem = await userRepo.getUserByField({ _id: userId });
-    if (!userItem) return responseHandler(HttpStatus.NOT_FOUND, { message: "User not found" });
+    if (!userItem) return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "User not found" });
     userItem.isDeleted = !userItem.isDeleted;
     await userItem.save();
-    return responseHandler(HttpStatus.OK, userItem);
+    return ResponseHandler.send(HttpStatus.OK, userItem);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to toggle user status.",
     });
   }
@@ -81,15 +81,15 @@ export const toggleUserStatus = async (userId: any) => {
 export const removeUserAndHistory = async (userId: any) => {
   try {
     const user = await userRepo.deleteUserById(userId);
-    if (!user) return responseHandler(HttpStatus.OK, { message: "User not found" });
+    if (!user) return ResponseHandler.send(HttpStatus.OK, { message: "User not found" });
     const delHistory = await historyRepo.deleteManyByField({
       userId: userId,
     });
-    return responseHandler(HttpStatus.OK, {
+    return ResponseHandler.send(HttpStatus.OK, {
       message: `${user.username} and its associated ${delHistory.deletedCount} history document deleted successfully`,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Error occured during Deletion of User & its all History",
     });
   }
@@ -98,11 +98,11 @@ export const removeUserAndHistory = async (userId: any) => {
 export const removeHistoryCollection = async () => {
   try {
     const result = await historyRepo.deleteManyByField({});
-    return responseHandler(HttpStatus.OK, {
+    return ResponseHandler.send(HttpStatus.OK, {
       message: `Total ${result.deletedCount} history records have been permanently deleted`,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Failed to delete history",
     });
   }
@@ -111,20 +111,20 @@ export const removeHistoryCollection = async () => {
 export const removeAllHistoryOfUserById = async (userId: any) => {
   try {
     const user = await userRepo.getUserByField({ _id: userId });
-    if (!user) return responseHandler(HttpStatus.NOT_FOUND, { message: "User not found" });
+    if (!user) return ResponseHandler.send(HttpStatus.NOT_FOUND, { message: "User not found" });
 
     const result = await historyRepo.deleteManyByField({ userId });
     const count = result.deletedCount;
     if (count === 0) {
-      return responseHandler(HttpStatus.NO_CONTENT, {
+      return ResponseHandler.send(HttpStatus.NO_CONTENT, {
         message: `User ${user.username} had no associated history records to delete.`,
       });
     }
-    return responseHandler(HttpStatus.OK, {
+    return ResponseHandler.send(HttpStatus.OK, {
       message: `Successfully deleted ${count} associated history ${count === 1 ? "document" : "documents"} for user ${user.username}.`,
     });
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, {
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
       message: "Error Occured during Deletion of User's History",
     });
   }
@@ -133,8 +133,8 @@ export const removeAllHistoryOfUserById = async (userId: any) => {
 export const getAllHistoryAdmin = async () => {
   try {
     const allHistory = await historyRepo.getAllHistoryAdmin();
-    return responseHandler(HttpStatus.OK, allHistory);
+    return ResponseHandler.send(HttpStatus.OK, allHistory);
   } catch (err) {
-    return responseHandler(HttpStatus.INTERNAL_SERVER_ERROR, { message: "Can't Get All History" });
+    return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, { message: "Can't Get All History" });
   }
 };
