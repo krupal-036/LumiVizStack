@@ -1,6 +1,7 @@
 import { AppConfig } from "../config/app.config";
 import User from "../models/User.model";
 import { getUserByField } from "../repositories/user.repo";
+import { Logger } from "./logger";
 
 export const seedAdmin = async () => {
   const adminEmail = AppConfig.ADMIN_EMAIL;
@@ -9,9 +10,7 @@ export const seedAdmin = async () => {
   const existing = await getUserByField({ email: adminEmail });
 
   if (existing) {
-    if (AppConfig.NODE_ENV !== "production") {
-      console.log("Default admin user already exists. Skipping seed.");
-    }
+    Logger.log("Default admin user already exists. Skipping seed.");
     return;
   }
 
@@ -21,8 +20,5 @@ export const seedAdmin = async () => {
     password: adminPassword,
     role: "admin",
   });
-
-  if (AppConfig.NODE_ENV !== "production") {
-    console.log("Default admin user seeded successfully.");
-  }
+  Logger.log("Default admin user seeded successfully.");
 };

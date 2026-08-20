@@ -1,10 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { AppConfig } from "../config/app.config";
+import { Logger } from "../utils/logger";
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
   const timestamp = new Date().toISOString();
-  if (AppConfig.NODE_ENV !== "production") {
-    console.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
-  }
+  Logger.log(`[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip}`);
   next();
 };

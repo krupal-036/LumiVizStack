@@ -3,6 +3,7 @@ import { seedAdmin } from "../utils/seedAdmin";
 import { AppConfig } from "./app.config";
 import { NextFunction, Request, Response } from "express";
 import { HttpStatus } from "../constants/http-status.enum";
+import { Logger } from "../utils/logger";
 
 const MONGO_URI = AppConfig.MONGO_URI;
 const DB_NAME = AppConfig.DB_NAME;
@@ -29,9 +30,7 @@ const connectDB = async () => {
     };
 
     cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
-      if (AppConfig.NODE_ENV !== "production") {
-        console.log(`Connected to MongoDB: ${DB_NAME}`);
-      }
+      Logger.log(`Connected to MongoDB: ${DB_NAME}`);
       return mongoose;
     });
   }
