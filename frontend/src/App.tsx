@@ -19,6 +19,7 @@ import ApiDocs from "./pages/ApiDocs";
 import UserProfile from "./pages/UserProfile";
 import BackToTop from "./components/common/BackToTop";
 import { AlertProvider } from './context/AlertContext';
+import ScrollToTop from "./components/common/ScrollToTop";
 
 const App = () => {
   return (
@@ -27,6 +28,7 @@ const App = () => {
         <AuthProvider>
           <Router>
             <div className="flex flex-col min-h-screen bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-100 transition-colors">
+              <ScrollToTop />
               <Navbar />
               <main className="grow w-full">
                 <Routes>
