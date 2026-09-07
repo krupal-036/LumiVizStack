@@ -1,6 +1,22 @@
 import { useContext, useState, useEffect, useRef, type FormEvent } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { FiUser, FiMail, FiSave, FiLoader, FiCheckCircle, FiAlertCircle, FiTrash2, FiRotateCcw, FiBarChart2, FiEye, FiEyeOff, FiHash, FiToggleRight, FiToggleLeft, FiLock } from "react-icons/fi";
+import {
+    FiUser,
+    FiMail,
+    FiSave,
+    FiLoader,
+    FiCheckCircle,
+    FiAlertCircle,
+    FiTrash2,
+    FiRotateCcw,
+    FiBarChart2,
+    FiEye,
+    FiEyeOff,
+    FiHash,
+    FiToggleRight,
+    FiToggleLeft,
+    FiLock,
+} from "react-icons/fi";
 import { useAlert, useTitle } from "../hooks/customHooks";
 
 export default function UserProfile() {
@@ -27,14 +43,13 @@ export default function UserProfile() {
         const fetchVisualizations = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch('/api/history/user', {
-                    headers: { "Authorization": `Bearer ${token}` }
+                const res = await fetch("/api/history/user", {
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
                 if (res.ok) {
                     setVisualizations(data);
-                }
-                else {
+                } else {
                     showAlert(data.message || "Fail to fetch Visualizations");
                 }
             } catch (err) {
@@ -97,11 +112,11 @@ export default function UserProfile() {
             const token = localStorage.getItem("token");
             const payload: { username: string; password?: string } = { username };
             if (password) payload.password = password;
-            const response = await fetch('/api/profile/update', {
+            const response = await fetch("/api/profile/update", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(payload),
             });
@@ -130,16 +145,13 @@ export default function UserProfile() {
             const token = localStorage.getItem("token");
             const res = await fetch(`/api/history/${id}/toggle`, {
                 method: "PUT",
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
             const updatedItem = await res.json();
 
             if (res.ok) {
-                setVisualizations(prev =>
-                    prev.map(v => v._id === id ? updatedItem : v)
-                );
-            }
-            else {
+                setVisualizations((prev) => prev.map((v) => (v._id === id ? updatedItem : v)));
+            } else {
                 showAlert(updatedItem.message || "Failed to update Profile");
             }
         } catch (err) {
@@ -172,15 +184,14 @@ export default function UserProfile() {
 
     const confirmDelete = async () => {
         try {
-            const res = await fetch('/api/profile/delete', {
+            const res = await fetch("/api/profile/delete", {
                 method: "PUT",
-                headers: { "Authorization": `Bearer ${localStorage.getItem("token")}` }
+                headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
             });
             if (res.ok) {
                 alert("Account deactivated.");
                 logout();
-            }
-            else {
+            } else {
                 const data = await res.json();
                 showAlert(data.message || "Failed to update Profile");
             }
@@ -201,7 +212,7 @@ export default function UserProfile() {
             const token = localStorage.getItem("token");
             const res = await fetch("/api/history/delete-all", {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.ok) {
@@ -227,11 +238,11 @@ export default function UserProfile() {
             const token = localStorage.getItem("token");
             const res = await fetch(`/api/history/${id}`, {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.ok) {
-                setVisualizations(prev => prev.filter(item => item._id !== id));
+                setVisualizations((prev) => prev.filter((item) => item._id !== id));
             } else {
                 const data = await res.json();
                 showAlert(data.message || "Delete failed");
@@ -246,12 +257,14 @@ export default function UserProfile() {
     return (
         <div className="min-h-screen pt-20 sm:pt-24 px-4 bg-gray-100 dark:bg-[#0B0F19] transition-colors duration-300">
             <div className="max-w-5xl mx-auto">
-
                 {message.text && (
-                    <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${message.type === "success"
-                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
-                        : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
-                        }`}>
+                    <div
+                        className={`mb-6 p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
+                            message.type === "success"
+                                ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                                : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                        }`}
+                    >
                         {message.type === "success" ? <FiCheckCircle /> : <FiAlertCircle />}
                         <span className="text-sm font-medium">{message.text}</span>
                     </div>
@@ -260,7 +273,6 @@ export default function UserProfile() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
                     <div className="bg-white dark:bg-[#111827] rounded-2xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col">
                         <div className="h-24 bg-linear-to-r from-indigo-600 to-violet-600 flex items-center justify-around space-x-auto gap-4">
-
                             <div className="w-20 h-20 rounded-2xl bg-white dark:bg-gray-900 flex items-center justify-center text-indigo-600 border-4 border-white dark:border-gray-800 shadow-xl">
                                 <FiUser size={32} />
                             </div>
@@ -271,10 +283,7 @@ export default function UserProfile() {
                             </div>
                         </div>
 
-
                         <div className="p-8 flex-grow">
-
-
                             <form onSubmit={handleUpdate} className="space-y-5">
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
@@ -282,7 +291,15 @@ export default function UserProfile() {
                                     </label>
                                     <div className="relative">
                                         <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition" placeholder="Enter your name" required disabled={isDeleting} />
+                                        <input
+                                            type="text"
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-transparent dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                                            placeholder="Enter your name"
+                                            required
+                                            disabled={isDeleting}
+                                        />
                                     </div>
                                 </div>
 
@@ -301,9 +318,10 @@ export default function UserProfile() {
                                             disabled={isDeleting}
                                         />
                                     </div>
-                                    <p className="mt-1 text-[12px] text-gray-500 italic">Leave blank to keep current password</p>
+                                    <p className="mt-1 text-[12px] text-gray-500 italic">
+                                        Leave blank to keep current password
+                                    </p>
                                 </div>
-
 
                                 <div>
                                     <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
@@ -311,12 +329,24 @@ export default function UserProfile() {
                                     </label>
                                     <div className="relative border border-gray-300 dark:border-gray-700 rounded-xl">
                                         <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                        <input type="email" value={email} disabled className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-500 cursor-not-allowed italic" />
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            disabled
+                                            className="w-full pl-12 pr-4 py-3 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-500 cursor-not-allowed italic"
+                                        />
                                     </div>
                                 </div>
 
-
-                                <button type="submit" disabled={loading || isDeleting || (username === user?.name && !password)} className="relative w-full flex items-center justify-center gap-2 px-6 py-3  bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 text-white disabled:text-slate-500 font-semibold rounded-xl transition-all duration-200 ease-in-out active:scale-95 disabled:scale-100 disabled:shadow-none" >
+                                <button
+                                    type="submit"
+                                    disabled={
+                                        loading ||
+                                        isDeleting ||
+                                        (username === user?.name && !password)
+                                    }
+                                    className="relative w-full flex items-center justify-center gap-2 px-6 py-3  bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-200 dark:disabled:bg-slate-800 text-white disabled:text-slate-500 font-semibold rounded-xl transition-all duration-200 ease-in-out active:scale-95 disabled:scale-100 disabled:shadow-none"
+                                >
                                     {loading ? (
                                         <FiLoader className="animate-spin" size={18} />
                                     ) : (
@@ -328,14 +358,23 @@ export default function UserProfile() {
                                 </button>
                                 <div>
                                     {!isDeleting ? (
-                                        <button type="button" onClick={startDeletionProcess} className="group w-full flex items-center justify-center gap-2 px-4 py-3.5  rounded-xl text-sm font-semibold transition-all duration-200 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-400 dark:hover:border-red-900/30" >
-                                            <FiTrash2 size={16} className="transition-transform group-hover:scale-110" />
+                                        <button
+                                            type="button"
+                                            onClick={startDeletionProcess}
+                                            className="group w-full flex items-center justify-center gap-2 px-4 py-3.5  rounded-xl text-sm font-semibold transition-all duration-200 text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-red-200 dark:border-red-400 dark:hover:border-red-900/30"
+                                        >
+                                            <FiTrash2
+                                                size={16}
+                                                className="transition-transform group-hover:scale-110"
+                                            />
                                             <span>Delete My Profile</span>
                                         </button>
                                     ) : (
                                         <div className="relative overflow-hidden rounded-2xl border border-red-200 dark:border-red-900/40 bg-slate-50 dark:bg-slate-900/20 p-4 sm:p-5">
-
-                                            <div className="absolute inset-0 bg-red-100 dark:bg-red-950/30 transition-all duration-1000 ease-linear origin-left" style={{ width: `${(countdown / 30) * 100}%` }} />
+                                            <div
+                                                className="absolute inset-0 bg-red-100 dark:bg-red-950/30 transition-all duration-1000 ease-linear origin-left"
+                                                style={{ width: `${(countdown / 30) * 100}%` }}
+                                            />
 
                                             <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
                                                 <div className="text-center sm:text-left">
@@ -346,23 +385,35 @@ export default function UserProfile() {
                                                         </p>
                                                     </div>
                                                     <p className="text-slate-600 dark:text-slate-300 text-xs font-medium">
-                                                        Permanent removal in <span className="font-bold tabular-nums text-red-600">{countdown}s</span>
+                                                        Permanent removal in{" "}
+                                                        <span className="font-bold tabular-nums text-red-600">
+                                                            {countdown}s
+                                                        </span>
                                                     </p>
                                                 </div>
 
-                                                <button type="button" onClick={cancelDeletion} className="w-full sm:w-auto flex items-center justify-center gap-2  bg-white dark:bg-slate-900 text-slate-900 dark:text-white  px-6 py-2.5 rounded-xl shadow-sm border border-slate-200  dark:border-slate-700 hover:shadow-md hover:border-slate-300 active:scale-95 transition-all font-bold text-xs tracking-tight" >
-                                                    <FiRotateCcw size={14} className="text-red-500" />
+                                                <button
+                                                    type="button"
+                                                    onClick={cancelDeletion}
+                                                    className="w-full sm:w-auto flex items-center justify-center gap-2  bg-white dark:bg-slate-900 text-slate-900 dark:text-white  px-6 py-2.5 rounded-xl shadow-sm border border-slate-200  dark:border-slate-700 hover:shadow-md hover:border-slate-300 active:scale-95 transition-all font-bold text-xs tracking-tight"
+                                                >
+                                                    <FiRotateCcw
+                                                        size={14}
+                                                        className="text-red-500"
+                                                    />
                                                     STOP DELETION
                                                 </button>
                                             </div>
 
                                             <div className="absolute bottom-0 left-0 h-0.5 bg-red-500/20 w-full">
-                                                <div className="h-full bg-red-500 transition-all duration-1000 ease-linear" style={{ width: `${(countdown / 30) * 100}%` }} />
+                                                <div
+                                                    className="h-full bg-red-500 transition-all duration-1000 ease-linear"
+                                                    style={{ width: `${(countdown / 30) * 100}%` }}
+                                                />
                                             </div>
                                         </div>
                                     )}
                                 </div>
-
                             </form>
                         </div>
                     </div>
@@ -391,14 +442,22 @@ export default function UserProfile() {
                                             disabled={isDeletingHistory}
                                             className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-red-200 text-red-600 hover:bg-red-400 hover:text-red-800 rounded-lg transition-all border border-red-400 disabled:opacity-50 text-xs font-medium"
                                         >
-                                            {isDeletingHistory ? <FiLoader className="animate-spin" /> : <FiTrash2 />}
-                                            Delete All <span className=" sm:hidden">Visualization</span>
+                                            {isDeletingHistory ? (
+                                                <FiLoader className="animate-spin" />
+                                            ) : (
+                                                <FiTrash2 />
+                                            )}
+                                            Delete All{" "}
+                                            <span className=" sm:hidden">Visualization</span>
                                         </button>
                                     )}
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-grow p-6 overflow-y-auto custom-scrollbar" style={{ maxHeight: '500px' }}>
+                        <div
+                            className="flex-grow p-6 overflow-y-auto custom-scrollbar"
+                            style={{ maxHeight: "500px" }}
+                        >
                             {loadingVis ? (
                                 <div className="flex justify-center items-center h-full py-10">
                                     <FiLoader className="animate-spin text-indigo-500" size={32} />
@@ -411,50 +470,81 @@ export default function UserProfile() {
                             ) : (
                                 <ul className="space-y-3">
                                     {visualizations.map((viz) => (
-                                        <li key={viz._id} className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-900 transition-all group" >
+                                        <li
+                                            key={viz._id}
+                                            className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700/50 hover:border-indigo-200 dark:hover:border-indigo-900 transition-all group"
+                                        >
                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className={`p-2 rounded-lg shadow-sm border ${viz.isDeleted
-                                                    ? "bg-red-200 border-red-600 dark:bg-red-900/30 dark:border-red-700"
-                                                    : "bg-indigo-200 border-indigo-600 dark:bg-indigo-300 dark:border-indigo-700"
-                                                    }`}>
-                                                    <FiBarChart2 className={viz.isDeleted ? "text-red-600" : "text-indigo-600"} size={20} />
+                                                <div
+                                                    className={`p-2 rounded-lg shadow-sm border ${
+                                                        viz.isDeleted
+                                                            ? "bg-red-200 border-red-600 dark:bg-red-900/30 dark:border-red-700"
+                                                            : "bg-indigo-200 border-indigo-600 dark:bg-indigo-300 dark:border-indigo-700"
+                                                    }`}
+                                                >
+                                                    <FiBarChart2
+                                                        className={
+                                                            viz.isDeleted
+                                                                ? "text-red-600"
+                                                                : "text-indigo-600"
+                                                        }
+                                                        size={20}
+                                                    />
                                                 </div>
 
                                                 <div className="overflow-hidden">
-                                                    <h3 className={`font-semibold truncate ${viz.isDeleted
-                                                        ? "text-gray-400 line-through decoration-red-500"
-                                                        : "text-gray-800 dark:text-gray-200"
-                                                        }`}>
+                                                    <h3
+                                                        className={`font-semibold truncate ${
+                                                            viz.isDeleted
+                                                                ? "text-gray-400 line-through decoration-red-500"
+                                                                : "text-gray-800 dark:text-gray-200"
+                                                        }`}
+                                                    >
                                                         {viz.title}
                                                     </h3>
                                                     <p className="text-xs text-gray-500 dark:text-gray-500 capitalize">
-                                                        {viz.type} • {new Date(viz.createdAt).toLocaleDateString()}
+                                                        {viz.type} •{" "}
+                                                        {new Date(
+                                                            viz.createdAt,
+                                                        ).toLocaleDateString()}
                                                     </p>
                                                 </div>
-
                                             </div>
 
                                             <div className="flex items-center gap-2">
-
-
                                                 {viz.isDeleted ? (
-                                                    <button title="Click to Delete Permenantly" disabled={actionId === viz._id} onClick={() => handleDelete(viz._id)} className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                                                    <button
+                                                        title="Click to Delete Permenantly"
+                                                        disabled={actionId === viz._id}
+                                                        onClick={() => handleDelete(viz._id)}
+                                                        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-red-200 bg-red-50 text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400"
+                                                    >
                                                         <FiTrash2 size={14} />
-                                                        <span className="text-xs font-semibold uppercase tracking-wide">Deleted</span>
+                                                        <span className="text-xs font-semibold uppercase tracking-wide">
+                                                            Deleted
+                                                        </span>
                                                     </button>
                                                 ) : (
                                                     <button
                                                         onClick={() => handleToggleStatus(viz._id)}
-                                                        className={`group relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border transition-all duration-200 ${viz.isPublic
-                                                            ? "bg-emerald-50/50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-800 dark:text-emerald-400"
-                                                            : "bg-gray-50 border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
-                                                            } hover:shadow-sm`}
-                                                        title={viz.isPublic ? "Switch to Private" : "Switch to Public"}
+                                                        className={`group relative flex items-center gap-2 pl-3 pr-2 py-1.5 rounded-full border transition-all duration-200 ${
+                                                            viz.isPublic
+                                                                ? "bg-emerald-50/50 border-emerald-200 text-emerald-700 dark:bg-emerald-500/10 dark:border-emerald-800 dark:text-emerald-400"
+                                                                : "bg-gray-50 border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
+                                                        } hover:shadow-sm`}
+                                                        title={
+                                                            viz.isPublic
+                                                                ? "Switch to Private"
+                                                                : "Switch to Public"
+                                                        }
                                                     >
                                                         <span className="flex items-center gap-1.5 text-xs font-semibold tracking-wide uppercase">
                                                             {viz.isPublic ? (
                                                                 <>
-                                                                    <FiEye size={14} className="animate-pulse" />
+                                                                    <FiEye
+                                                                        size={14}
+                                                                        className="animate-pulse"
+                                                                    />
                                                                     Public
                                                                 </>
                                                             ) : (
@@ -466,15 +556,19 @@ export default function UserProfile() {
                                                         </span>
                                                         <div className="ml-1 border-l border-current/20 pl-2">
                                                             {viz.isPublic ? (
-                                                                <FiToggleRight size={20} className="text-emerald-500 dark:text-emerald-400" />
+                                                                <FiToggleRight
+                                                                    size={20}
+                                                                    className="text-emerald-500 dark:text-emerald-400"
+                                                                />
                                                             ) : (
-                                                                <FiToggleLeft size={20} className="text-gray-400" />
+                                                                <FiToggleLeft
+                                                                    size={20}
+                                                                    className="text-gray-400"
+                                                                />
                                                             )}
                                                         </div>
                                                     </button>
                                                 )}
-
-
                                             </div>
                                         </li>
                                     ))}

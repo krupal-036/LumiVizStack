@@ -9,9 +9,9 @@ export const useAlert = (): AlertContextType => useContext(AlertContext);
 export const useTitle = (title: string) => {
     useEffect(() => {
         const prevTitle = document.title;
-        title ? document.title = `${title} | LumiVizStack` : document.title = prevTitle
+        title ? (document.title = `${title} | LumiVizStack`) : (document.title = prevTitle);
         return () => {
             document.title = prevTitle;
-        }
+        };
     }, [title]);
 };
