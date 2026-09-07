@@ -5,16 +5,13 @@ import { FiArrowRight } from "react-icons/fi";
 import { useAlert } from "../../hooks/customHooks";
 import { AuthContext } from "../../context/AuthContext";
 
-const VisualizeButton = ({
-    text = "Start Visualizing",
-    className = "",
-}) => {
+const VisualizeButton = ({ text = "Start Visualizing", className = "" }) => {
     const { user } = useContext(AuthContext);
     const navigate = useNavigate();
     const { showAlert } = useAlert();
     const handleVisualizeClick = () => {
         if (!user) {
-            const authMessage = "You must be logged in to visualize your data."
+            const authMessage = "You must be logged in to visualize your data.";
             showAlert(authMessage, "Authentication Required", 1);
 
             setTimeout(() => {
@@ -24,7 +21,6 @@ const VisualizeButton = ({
         }
         navigate("/visualize");
     };
-
 
     return (
         <div className="flex items-center justify-center mt-8">

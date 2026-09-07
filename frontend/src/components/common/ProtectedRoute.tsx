@@ -4,42 +4,42 @@ import { AuthContext } from "../../context/AuthContext";
 import Loader from "./Loader";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useContext(AuthContext);
-  const location = useLocation();
-  const [shouldRedirect, setShouldRedirect] = useState(false);
+    const { user, loading } = useContext(AuthContext);
+    const location = useLocation();
+    const [shouldRedirect, setShouldRedirect] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !user) {
-      const timer = setTimeout(() => {
-        setShouldRedirect(true);
-      }, 2000);
+    useEffect(() => {
+        if (!loading && !user) {
+            const timer = setTimeout(() => {
+                setShouldRedirect(true);
+            }, 2000);
 
-      return () => clearTimeout(timer);
-    }
-  }, [loading, user]);
+            return () => clearTimeout(timer);
+        }
+    }, [loading, user]);
 
-  if (loading) {
-    return <Loader />;
-  }
-
-  if (!user) {
-    if (!shouldRedirect) {
-      return <Loader />;
+    if (loading) {
+        return <Loader />;
     }
 
-    return (
-      <Navigate
-        to="/login"
-        state={{
-          from: location.pathname,
-          error: "You must be logged in to access this page.",
-        }}
-        replace
-      />
-    );
-  }
+    if (!user) {
+        if (!shouldRedirect) {
+            return <Loader />;
+        }
 
-  return children;
+        return (
+            <Navigate
+                to="/login"
+                state={{
+                    from: location.pathname,
+                    error: "You must be logged in to access this page.",
+                }}
+                replace
+            />
+        );
+    }
+
+    return children;
 };
 
 export default ProtectedRoute;

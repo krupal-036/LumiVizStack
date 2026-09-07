@@ -1,8 +1,7 @@
 @import "tailwindcss";
 
-
 @custom-variant dark (&:where(.dark, .dark *));
 
 .nav-link {
-  @apply text-gray-600 dark:text-gray-300 hover:text-blue-500;
+    @apply text-gray-600 dark:text-gray-300 hover:text-blue-500;
 }
