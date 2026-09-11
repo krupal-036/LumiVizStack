@@ -1,3 +1,4 @@
+// frontend/src/utils/mockData.ts
 export const jsondata: string = JSON.stringify(
     {
         users: [

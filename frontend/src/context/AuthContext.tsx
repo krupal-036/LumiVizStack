@@ -1,3 +1,4 @@
+// frontend/src/context/AuthContext.tsx
 import {
     createContext,
     useState,

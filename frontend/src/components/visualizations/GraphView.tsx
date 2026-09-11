@@ -1,3 +1,4 @@
+// frontend/src/components/visualizations/GraphView.tsx
 import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import ForceGraph2D from "react-force-graph-2d";
 import { FiMaximize2, FiLayers } from "react-icons/fi";

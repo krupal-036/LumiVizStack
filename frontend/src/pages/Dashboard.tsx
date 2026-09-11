@@ -1,3 +1,4 @@
+// frontend/src/pages/Dashboard.tsx
 import { useState } from "react";
 
 import { FiCheck, FiLink, FiFileText, FiCode, FiCopy } from "react-icons/fi";

@@ -1,3 +1,4 @@
+// frontend/src/components/visualizations/TableView.tsx
 import SmartCell from "../common/SmartCell";
 import { FiHash } from "react-icons/fi";
 

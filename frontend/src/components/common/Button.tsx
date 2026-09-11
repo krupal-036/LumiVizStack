@@ -1,3 +1,4 @@
+// frontend/src/components/common/Button.tsx
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { HiSparkles } from "react-icons/hi";

@@ -1,3 +1,4 @@
+// frontend/src/pages/PublicView.tsx
 import { useState, useEffect, useMemo, type ComponentType } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import TableView from "../components/visualizations/TableView";

@@ -1,3 +1,4 @@
+// frontend/src/components/common/BackToTop.tsx
 import { useState, useEffect } from "react";
 import { FiArrowUp } from "react-icons/fi";
 

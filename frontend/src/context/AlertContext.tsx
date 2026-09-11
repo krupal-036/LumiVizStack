@@ -1,3 +1,4 @@
+// frontend/src/context/AlertContext.tsx
 import { createContext, useState, useCallback, useMemo, useEffect, CSSProperties } from "react";
 import { FiX, FiTrash2 } from "react-icons/fi";
 

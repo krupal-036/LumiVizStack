@@ -1,3 +1,4 @@
+// frontend/src/pages/Register.tsx
 import { ChangeEvent, FormEvent, useState, useContext } from "react";
 import { FiArrowRight, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";

@@ -1,3 +1,4 @@
+// frontend/src/context/ThemeContext.tsx
 import { createContext, useEffect, useState, type ReactNode } from "react";
 
 export const ThemeContext = createContext<{ theme: string; toggleTheme: () => void }>({

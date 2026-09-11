@@ -1,3 +1,4 @@
+// frontend/src/hooks/customHooks.tsx
 import { useContext, useEffect } from "react";
 import { ThemeContext } from "../context/ThemeContext";
 import { AlertContext, AlertContextType } from "../context/AlertContext";

@@ -1,3 +1,4 @@
+// frontend/src/components/layout/Footer.tsx
 import { Link } from "react-router-dom";
 import { FiBarChart2, FiGithub, FiMail, FiExternalLink, FiArrowRight } from "react-icons/fi";
 

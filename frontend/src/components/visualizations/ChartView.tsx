@@ -1,3 +1,4 @@
+// frontend/src/components/visualizations/ChartView.tsx
 import { useState, useMemo, useEffect, useRef } from "react";
 import {
     BarChart,

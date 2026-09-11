@@ -1,3 +1,4 @@
+// frontend/src/components/common/Modal.tsx
 import { FiAlertTriangle, FiX, FiLoader } from "react-icons/fi";
 
 export interface ConfirmModalProps {

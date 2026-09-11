@@ -1,3 +1,4 @@
+// frontend/src/utils/dataParser.ts
 export const isImageUrl = (url: string | any) => {
     if (typeof url !== "string") return false;
     return (

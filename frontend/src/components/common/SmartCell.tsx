@@ -1,3 +1,4 @@
+// frontend/src/components/common/SmartCell.tsx
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { FiImage, FiX, FiExternalLink, FiEye } from "react-icons/fi";

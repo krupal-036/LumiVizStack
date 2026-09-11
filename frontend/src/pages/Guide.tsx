@@ -1,3 +1,4 @@
+// frontend/src/pages/Guide.tsx
 import {
     FiCode,
     FiUploadCloud,

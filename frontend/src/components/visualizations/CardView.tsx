@@ -1,3 +1,4 @@
+// frontend/src/components/visualizations/CardView.tsx
 import { useState } from "react";
 import { FiLayers, FiMaximize2, FiX, FiExternalLink } from "react-icons/fi";
 import SmartCell from "../common/SmartCell";
