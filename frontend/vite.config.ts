@@ -1,3 +1,4 @@
+// frontend/vite.config.ts
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -6,10 +7,8 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
   return {
+    base: '/',
     plugins: [react(), tailwindcss()],
-    define: {
-      'import.meta': '{}'
-    },
     server: {
       proxy: (mode === 'development' || env.VITE_ENABLE_PROXY === 'true') ? {
         '/api': {
@@ -20,26 +19,28 @@ export default defineConfig(({ mode }) => {
       } : undefined,
     },
     build: {
-      target: 'node14', 
-      modulePreload: false, 
-      cssCodeSplit: false,
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
-          format: 'cjs', 
-          inlineDynamicImports: true, 
-          entryFileNames: `assets/js/[name].js`,
-          chunkFileNames: `assets/js/[name].js`,
-          assetFileNames: (assetInfo) => {
-            const name = assetInfo.name || 'assets';
-            const info = name.split('.');
-            const ext = info[info.length - 1];
-            if (ext === 'css') {
-              return `assets/css/[name].[ext]`;
+          entryFileNames: 'assets/[name].js',
+          chunkFileNames: 'assets/[name].js',
+          assetFileNames: 'assets/[name].[ext]',
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
+                return 'vendor-react';
+              }
+              if (id.includes('recharts') || id.includes('d3')) {
+                return 'vendor-charts';
+              }
+              if (id.includes('lucide-react')) {
+                return 'vendor-icons';
+              }
+              return 'vendor';
             }
-            return `assets/[name].[ext]`;
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   }
 })
