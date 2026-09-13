@@ -1,7 +1,7 @@
-// backend/src/utils/logger.ts
-import { AppConfig } from "../config/app.config";
+// backend/src/utils/handlers/logHandler.ts
+import { AppConfig } from "../../config/app.config";
 
-export class Logger {
+export class AppLogger {
     private static isDevelopment = AppConfig.NODE_ENV !== "production";
 
     static log(message: string, ...optionalParams: any[]): void {

@@ -1,6 +1,6 @@
 // backend/src/middleware/auth.middleware.ts
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "../utils/tokenHandler";
+import { verifyToken } from "../utils/handlers/tokenHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {

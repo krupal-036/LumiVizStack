@@ -13,7 +13,6 @@ import profileRoutes from "./routes/profile.routes";
 import historyRoutes from "./routes/history.routes";
 
 import { siteGuard } from "./middleware/siteGuard.middleware";
-import { startDevServer } from "./utils/startDevServer";
 import { errorHandler } from "./middleware/errorHandler.middleware";
 import { serveFrontend } from "./middleware/serveFrontend.middleware";
 import { corsConfig } from "./config/cors.config";
@@ -21,6 +20,7 @@ import { requestLogger } from "./middleware/requestLogger.middleware";
 import { apiLimiter, authLimiter, rateLimiter } from "./middleware/apiLimiter";
 import { healthCheck } from "./middleware/healthCheck.middleware";
 import { databaseConfig } from "./config/db.config";
+import { startDevServer } from "./utils/handlers/serverHandler";
 
 const app = express();
 const DIST_PATH: string = fs.existsSync(path.join(process.cwd(), "public"))

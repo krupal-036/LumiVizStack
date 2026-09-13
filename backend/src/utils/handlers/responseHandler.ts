@@ -1,4 +1,4 @@
-// backend/src/utils/responseHandler.ts
+// backend/src/utils/handlers/responseHandler.ts
 export interface ApiResponse<T = any> {
     code: number;
     data: T | null;

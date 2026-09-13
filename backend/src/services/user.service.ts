@@ -1,7 +1,7 @@
 // backend/src/services/user.service.ts
 import { IUser } from "../models/User.model";
-import { signToken } from "../utils/tokenHandler";
-import { ResponseHandler } from "../utils/responseHandler";
+import { signToken } from "../utils/handlers/tokenHandler";
+import { ResponseHandler } from "../utils/handlers/responseHandler";
 import * as userRepo from "../repositories/user.repo";
 import * as historyRepo from "../repositories/history.repo";
 import { UserRequest } from "../types/types";
