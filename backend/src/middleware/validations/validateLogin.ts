@@ -1,6 +1,6 @@
 // backend/src/middleware/validations/validateLogin.ts
 import { NextFunction, Request, Response } from "express";
-import { comparePassword } from "../../utils/passwordHandler";
+import { comparePassword } from "../../utils/handlers/passwordHandler";
 import { emailRegex, passwordRegex } from "../../utils/regex";
 import { getUserByField } from "../../repositories/user.repo";
 import { HttpStatus } from "../../constants/http-status.enum";

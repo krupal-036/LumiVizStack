@@ -1,7 +1,7 @@
 // backend/src/services/history.service.ts
 import * as userRepo from "../repositories/user.repo";
 import * as historyRepo from "../repositories/history.repo";
-import { ResponseHandler } from "../utils/responseHandler";
+import { ResponseHandler } from "../utils/handlers/responseHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
 export const createHistory = async (historyData: any) => {

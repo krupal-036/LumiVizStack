@@ -1,6 +1,6 @@
 // backend/src/models/User.model.ts
 import mongoose, { Document, Model, Schema } from "mongoose";
-import { hashPassword } from "../utils/passwordHandler";
+import { hashPassword } from "../utils/handlers/passwordHandler";
 
 export interface IUser extends Document {
     username: string;

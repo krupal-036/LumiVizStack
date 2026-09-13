@@ -2,7 +2,7 @@
 import * as userRepo from "../repositories/user.repo";
 import * as ssRepo from "../repositories/systemSettings.repo";
 import * as historyRepo from "../repositories/history.repo";
-import { ResponseHandler } from "../utils/responseHandler";
+import { ResponseHandler } from "../utils/handlers/responseHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
 export const getSettings = async () => {

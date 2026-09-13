@@ -1,6 +1,6 @@
-// backend/src/utils/tokenHandler.ts
+// backend/src/utils/handlers/tokenHandler.ts
 import jwt from "jsonwebtoken";
-import { AppConfig } from "../config/app.config";
+import { AppConfig } from "../../config/app.config";
 
 const secret = AppConfig.JWT_SECRET;
 

@@ -1,6 +1,6 @@
-// backend/src/utils/setCookie.ts
+// backend/src/utils/handlers/cookieHandler.ts
 import { Response } from "express";
-import { AppConfig } from "../config/app.config";
+import { AppConfig } from "../../config/app.config";
 
 export const setCookie = async (res: Response, token: string) => {
     res.cookie("token", token, {

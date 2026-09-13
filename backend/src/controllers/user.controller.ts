@@ -1,7 +1,7 @@
 // backend/src/controllers/user.controller.ts
 import { Request, Response } from "express";
 import * as service from "../services/user.service";
-import { setCookie } from "../utils/setCookie";
+import { setCookie } from "../utils/handlers/cookieHandler";
 
 export const register = async (req: Request, res: Response) => {
     const result = await service.register(req.body);
