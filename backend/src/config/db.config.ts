@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import { seedAdmin } from "../utils/seedAdmin";
 import { AppConfig } from "./app.config";
 import { NextFunction, Request, Response } from "express";
-import { HttpStatus } from "../constants/http-status.enum";
 import { AppLogger } from "../utils/handlers/logHandler";
 
 const MONGO_URI = AppConfig.MONGO_URI;
@@ -18,6 +17,9 @@ let cached = (global as any).mongoose;
 if (!cached) {
     cached = (global as any).mongoose = { conn: null, promise: null };
 }
+
+mongoose.set("sanitizeFilter", true);
+
 const connectDB = async () => {
     if (cached.conn) {
         return cached.conn;
@@ -27,18 +29,21 @@ const connectDB = async () => {
         const opts = {
             bufferCommands: false,
             maxPoolSize: 10,
+            serverSelectionTimeoutMS: 5000,
             dbName: DB_NAME,
         };
 
         cached.promise = mongoose.connect(MONGO_URI, opts).then((mongoose) => {
             AppLogger.log(`Connected to MongoDB: ${DB_NAME}`);
+            seedAdmin()
+                .then(() => {})
+                .catch(AppLogger.error);
             return mongoose;
         });
     }
 
     try {
         cached.conn = await cached.promise;
-        await seedAdmin();
     } catch (e) {
         cached.promise = null;
         throw e;
@@ -47,14 +52,11 @@ const connectDB = async () => {
     return cached.conn;
 };
 
-export const databaseConfig = async (req: Request, res: Response, next: NextFunction) => {
+export const databaseConfig = () => async (req: Request, res: Response, next: NextFunction) => {
     try {
         await connectDB();
         next();
     } catch (err) {
-        const error = err as Error;
-        res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-            message: error.message || "Database connection failed",
-        });
+        next(err);
     }
 };
