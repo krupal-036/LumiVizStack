@@ -8,5 +8,5 @@ export const corsConfig = () => {
     return cors({
         origin: allowedOrigins,
         credentials: true,
-    })
-}
+    });
+};
