@@ -13,5 +13,5 @@ export const healthCheck = () => {
             environment: AppConfig.NODE_ENV,
             version: process.env.npm_package_version || "1.0.0",
         });
-    }
-}
+    };
+};

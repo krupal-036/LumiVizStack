@@ -9,5 +9,5 @@ export const requestLogger = () => {
             `[${timestamp}] ${req.method} ${req.originalUrl} - IP: ${req.ip} REQ ID ${req.headers["x-request-id"]}`,
         );
         next();
-    }
-}
+    };
+};
