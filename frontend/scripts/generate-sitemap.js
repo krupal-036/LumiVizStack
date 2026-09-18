@@ -10,16 +10,16 @@ const SITE_URL = "https://lumivizstack.vercel.app";
 const OUTPUT_DIR = path.resolve(__dirname, "../public");
 
 const routes = [
-    { path: "/", priority: 1.0, changefreq: "weekly" },
-    { path: "/about", priority: 0.6, changefreq: "monthly" },
+    { path: "/", priority: 1, changefreq: "daily" },
+    { path: "/about", priority: 0.7, changefreq: "monthly" },
     { path: "/guide", priority: 0.7, changefreq: "monthly" },
-    { path: "/docs/api", priority: 0.6, changefreq: "monthly" },
-    { path: "/login", priority: 0.5, changefreq: "yearly" },
-    { path: "/register", priority: 0.5, changefreq: "yearly" },
+    { path: "/docs/api", priority: 0.7, changefreq: "monthly" },
+    { path: "/login", priority: 0.6, changefreq: "monthly" },
+    { path: "/register", priority: 0.6, changefreq: "monthly" },
 ];
 
 function buildSitemap(entries) {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toISOString();
 
     const urlEntries = entries
         .map(
