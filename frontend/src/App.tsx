@@ -1,30 +1,32 @@
 // frontend/src/App.tsx
 import { lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Guide from "./pages/Guide";
+import About from "./pages/About";
+import Login from "./pages/Login";
+import SignUp from "./pages/Register";
+import ApiDocs from "./pages/ApiDocs";
+import NotFound from "./pages/NotFound";
+import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel";
+import UserProfile from "./pages/UserProfile";
+
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AlertProvider } from "./context/AlertContext";
 
-import ProtectedRoute from "./components/common/ProtectedRoute";
-import AdminRoute from "./components/common/AdminRoute";
-import Navbar from "./components/layout/Navbar";
-import Footer from "./components/layout/Footer";
-import BackToTop from "./components/common/BackToTop";
-import ScrollToTop from "./components/common/ScrollToTop";
 import Loader from "./components/common/Loader";
+import Footer from "./components/layout/Footer";
+import Navbar from "./components/layout/Navbar";
+import BackToTop from "./components/common/BackToTop";
+import AdminRoute from "./components/common/AdminRoute";
+import ScrollToTop from "./components/common/ScrollToTop";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Login = lazy(() => import("./pages/Login"));
-const SignUp = lazy(() => import("./pages/Register"));
-const About = lazy(() => import("./pages/About"));
-const Guide = lazy(() => import("./pages/Guide"));
-const ApiDocs = lazy(() => import("./pages/ApiDocs"));
 const Visualizer = lazy(() => import("./pages/Visualizer"));
 const History = lazy(() => import("./pages/History"));
 const PublicView = lazy(() => import("./pages/PublicView"));
-const AdminPanel = lazy(() => import("./pages/AdminPanel"));
-const UserProfile = lazy(() => import("./pages/UserProfile"));
-const NotFound = lazy(() => import("./pages/NotFound"));
 
 const PageLoader = () => (
     <div className="flex items-center justify-center min-h-[60vh]">
