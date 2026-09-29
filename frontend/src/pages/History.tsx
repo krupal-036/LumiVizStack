@@ -17,7 +17,7 @@ import {
     FiRefreshCw,
 } from "react-icons/fi";
 import { FaRocket } from "react-icons/fa";
-import { useAlert, useTitle } from "../hooks/customHooks";
+import { useAlert, useTitle } from "@/hooks/customHooks";
 
 interface HistoryItem {
     _id: string;

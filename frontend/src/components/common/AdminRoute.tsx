@@ -1,9 +1,9 @@
 // frontend/src/components/common/AdminRoute.tsx
 import { useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import Loader from "./Loader";
-import { useAlert } from "../../hooks/customHooks";
+import { AuthContext } from "@/context/AuthContext";
+import { useAlert } from "@/hooks/customHooks";
+import Loader from "@/components/common/Loader";
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
     const { user, loading } = useContext(AuthContext);

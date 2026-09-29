@@ -2,8 +2,8 @@
 import { ChangeEvent, FormEvent, useState, useContext, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FiMail, FiLock, FiArrowRight, FiAlertCircle, FiLogIn, FiLoader } from "react-icons/fi";
-import { AuthContext } from "../context/AuthContext";
-import { useAlert, useTitle } from "../hooks/customHooks";
+import { AuthContext } from "@/context/AuthContext";
+import { useAlert, useTitle } from "@/hooks/customHooks";
 
 interface LoginFormData {
     email: string;

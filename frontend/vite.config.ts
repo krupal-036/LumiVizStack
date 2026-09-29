@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import preloadStyles from "./plugins/preloadStyles.js"
+import path from 'node:path'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -14,6 +15,11 @@ export default defineConfig(({ mode }) => {
       tailwindcss(),
       preloadStyles(),
     ],
+    resolve: {
+      alias: {
+        "@": path.resolve(import.meta.dirname, "./src"),
+      },
+    },
     server: {
       proxy: (mode === 'development' || env.VITE_ENABLE_PROXY === 'true') ? {
         '/api': {

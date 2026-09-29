@@ -20,8 +20,8 @@ import {
     FiZap,
     FiLayout,
 } from "react-icons/fi";
-import VisualizeButton from "../components/common/Button";
-import { useTitle } from "../hooks/customHooks";
+import VisualizeButton from "@/components/common/Button";
+import { useTitle } from "@/hooks/customHooks";
 const guideSteps = [
     {
         step: "01",

@@ -1,6 +1,6 @@
 // frontend/src/pages/UserProfile.tsx
 import { useContext, useState, useEffect, useRef, type FormEvent } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "@/context/AuthContext";
 import {
     FiUser,
     FiMail,
@@ -18,7 +18,7 @@ import {
     FiToggleLeft,
     FiLock,
 } from "react-icons/fi";
-import { useAlert, useTitle } from "../hooks/customHooks";
+import { useAlert, useTitle } from "@/hooks/customHooks";
 
 export default function UserProfile() {
     const { user, setUser, logout } = useContext(AuthContext);

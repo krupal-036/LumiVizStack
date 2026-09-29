@@ -3,7 +3,7 @@ import { useEffect, useState, useContext, type ReactNode } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import axios from "axios";
 import { Earth, Trash, Settings, UserCheck, UserPlus } from "lucide-react";
-import { AuthContext } from "../context/AuthContext";
+import { AuthContext } from "@/context/AuthContext";
 import {
     FiUsers,
     FiDatabase,
@@ -15,8 +15,8 @@ import {
     FiExternalLink,
 } from "react-icons/fi";
 import { HiOutlineChartBar, HiOutlineUserGroup } from "react-icons/hi";
-import Loader from "../components/common/Loader";
-import { useAlert, useTheme, useTitle } from "../hooks/customHooks";
+import Loader from "@/components/common/Loader";
+import { useAlert, useTheme, useTitle } from "@/hooks/customHooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { MdBlock } from "react-icons/md";
 import { FaRocket } from "react-icons/fa";

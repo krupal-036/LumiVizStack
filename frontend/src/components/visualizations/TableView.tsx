@@ -1,5 +1,6 @@
 // frontend/src/components/visualizations/TableView.tsx
-import SmartCell from "../common/SmartCell";
+
+import SmartCell from "@/components/common/SmartCell";
 import { FiHash } from "react-icons/fi";
 
 type TableViewProps = {

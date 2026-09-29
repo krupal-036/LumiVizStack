@@ -1,12 +1,12 @@
 // frontend/src/pages/PublicView.tsx
 import { useState, useEffect, useMemo, type ComponentType } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import TableView from "../components/visualizations/TableView";
-import CardView from "../components/visualizations/CardView";
-import ChartView from "../components/visualizations/ChartView";
-import TreeView from "../components/visualizations/TreeView";
-import GraphView from "../components/visualizations/GraphView";
-import Loader from "../components/common/Loader";
+import TableView from "@/components/visualizations/TableView";
+import CardView from "@/components/visualizations/CardView";
+import ChartView from "@/components/visualizations/ChartView";
+import TreeView from "@/components/visualizations/TreeView";
+import GraphView from "@/components/visualizations/GraphView";
+import Loader from "@/components/common/Loader";
 import {
     FiAlertCircle,
     FiArrowLeft,

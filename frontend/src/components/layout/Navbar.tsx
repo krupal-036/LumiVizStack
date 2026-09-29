@@ -1,8 +1,8 @@
 // frontend/src/components/layout/Navbar.tsx
 import { useState, useContext, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import { useTheme } from "../../hooks/customHooks";
+import { AuthContext } from "@/context/AuthContext";
+import { useTheme } from "@/hooks/customHooks";
 import type { IconType } from "react-icons";
 import {
     FiSun,

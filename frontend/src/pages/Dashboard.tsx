@@ -2,9 +2,9 @@
 import { useState } from "react";
 
 import { FiCheck, FiLink, FiFileText, FiCode, FiCopy } from "react-icons/fi";
-import VisualizeButton from "../components/common/Button.js";
-import { useAlert, useTitle } from "../hooks/customHooks.js";
-import { jsondata } from "../utils/mockData.js";
+import VisualizeButton from "@/components/common/Button.js";
+import { useAlert, useTitle } from "@/hooks/customHooks.js";
+import { jsondata } from "@/utils/mockData.js";
 
 export default function Dashboard() {
     const [isCopied, setIsCopied] = useState(false);

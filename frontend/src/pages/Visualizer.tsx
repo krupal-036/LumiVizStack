@@ -21,15 +21,15 @@ import {
     FiSearch,
     FiRefreshCw,
 } from "react-icons/fi";
-import { parseData } from "../utils/dataParser.js";
-import { AuthContext } from "../context/AuthContext.js";
-import { useAlert, useTitle } from "../hooks/customHooks.js";
-import TableView from "../components/visualizations/TableView.js";
-import CardView from "../components/visualizations/CardView.js";
-import ChartView from "../components/visualizations/ChartView.js";
-import TreeView from "../components/visualizations/TreeView.js";
-import GraphView from "../components/visualizations/GraphView.js";
-import { Features } from "../components/Features.js";
+import { parseData } from "@/utils/dataParser.js";
+import { AuthContext } from "@/context/AuthContext.js";
+import { useAlert, useTitle } from "@/hooks/customHooks.js";
+import TableView from "@/components/visualizations/TableView.js";
+import CardView from "@/components/visualizations/CardView.js";
+import ChartView from "@/components/visualizations/ChartView.js";
+import TreeView from "@/components/visualizations/TreeView.js";
+import GraphView from "@/components/visualizations/GraphView.js";
+import { Features } from "@/components/Features.js";
 import { HiOutlineDatabase, HiPlusCircle, HiSparkles } from "react-icons/hi";
 
 const VISUALIZER_STORAGE_KEY = "visualizerState";

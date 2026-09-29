@@ -12,7 +12,7 @@ import {
     FiShare2,
     FiZap,
 } from "react-icons/fi";
-import { useTitle } from "../hooks/customHooks";
+import { useTitle } from "@/hooks/customHooks";
 const features = [
     {
         icon: FiDatabase,
