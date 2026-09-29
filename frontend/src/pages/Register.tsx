@@ -3,8 +3,8 @@ import { ChangeEvent, FormEvent, useState, useContext } from "react";
 import { FiArrowRight, FiAlertCircle, FiLoader } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import { FiUser, FiMail, FiLock } from "react-icons/fi";
-import { AuthContext } from "../context/AuthContext";
-import { useAlert, useTitle } from "../hooks/customHooks";
+import { AuthContext } from "@/context/AuthContext";
+import { useAlert, useTitle } from "@/hooks/customHooks";
 
 interface RegisterFormData {
     username: string;

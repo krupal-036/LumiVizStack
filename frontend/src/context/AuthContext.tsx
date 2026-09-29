@@ -8,7 +8,7 @@ import {
     type ReactNode,
 } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
-import { useAlert } from "../hooks/customHooks";
+import { useAlert } from "@/hooks/customHooks";
 
 export interface CustomJwtPayload extends JwtPayload {
     id?: string;

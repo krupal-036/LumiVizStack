@@ -1,7 +1,7 @@
 // frontend/src/pages/NotFound.tsx
 import { Link, useNavigate } from "react-router-dom";
 import { FiHome, FiArrowLeft, FiAlertCircle } from "react-icons/fi";
-import { useTitle } from "../hooks/customHooks";
+import { useTitle } from "@/hooks/customHooks";
 
 const NotFound = () => {
     const navigate = useNavigate();

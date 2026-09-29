@@ -3,8 +3,8 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { HiSparkles } from "react-icons/hi";
 import { FiArrowRight } from "react-icons/fi";
-import { useAlert } from "../../hooks/customHooks";
-import { AuthContext } from "../../context/AuthContext";
+import { useAlert } from "@/hooks/customHooks";
+import { AuthContext } from "@/context/AuthContext";
 
 const VisualizeButton = ({ text = "Start Visualizing", className = "" }) => {
     const { user } = useContext(AuthContext);

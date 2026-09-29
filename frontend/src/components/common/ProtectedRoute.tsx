@@ -1,8 +1,8 @@
 // frontend/src/components/common/ProtectedRoute.tsx
 import { useContext, useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import Loader from "./Loader";
+import { AuthContext } from "@/context/AuthContext";
+import Loader from "@/components/common/Loader";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { user, loading } = useContext(AuthContext);
