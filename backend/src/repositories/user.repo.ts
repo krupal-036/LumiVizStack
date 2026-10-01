@@ -1,5 +1,4 @@
 // backend/src/repositories/user.repo.ts
-import { QueryFilter } from "mongoose";
 import User, { IUser } from "../models/User.model";
 
 export const createUser = async (user: Pick<IUser, "username" | "email" | "password">) => {
@@ -10,12 +9,13 @@ export const createUser = async (user: Pick<IUser, "username" | "email" | "passw
     });
 };
 
-export const getUserByField = async (field: QueryFilter<IUser>, isPassword = false) => {
+export const getUserByField = async (field: Record<any, any>, isPassword = false) => {
     const query = User.findOne(field);
     if (!isPassword) {
         query.select("-password");
     }
-    return await query;
+    const result = await query;
+    return result;
 };
 
 export const getUsersStats = async () => {
