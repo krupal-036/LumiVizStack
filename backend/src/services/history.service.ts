@@ -9,33 +9,27 @@ export const createHistory = async (historyData: any) => {
         const { title, type, data, urlInput, inputType, isPublic, isDeleted } = historyData.body;
         const userId = historyData.user.id;
         const trimmedInput = historyData.trimmedInput;
-        let updatedUser: any;
+        let userCheck: any;
 
         if (historyData.user.role !== "admin") {
-            updatedUser = await userRepo.getUserByField({
+            userCheck = await userRepo.getUserByField({
                 _id: userId,
-                credits: { $gte: 0 },
             });
-            if (!updatedUser) {
-                const userCheck = await userRepo.getUserByField({
-                    _id: userId,
+            if (!userCheck)
+                return ResponseHandler.send(HttpStatus.NOT_FOUND, {
+                    message: "User not found",
                 });
-                if (!userCheck)
-                    return ResponseHandler.send(HttpStatus.NOT_FOUND, {
-                        message: "User not found",
-                    });
-                if (userCheck.isDeleted)
-                    return ResponseHandler.send(HttpStatus.NOT_FOUND, {
-                        message: "Account was Disabled",
-                    });
-                if (userCheck.credits <= 0)
-                    return ResponseHandler.send(HttpStatus.FORBIDDEN, {
-                        message: "Insufficient credits.",
-                    });
-            }
-
-            updatedUser.credits -= 1;
-            await updatedUser.save();
+            if (userCheck.isDeleted)
+                return ResponseHandler.send(HttpStatus.NOT_FOUND, {
+                    message: "Account was Disabled",
+                });
+            if (userCheck.credits <= 0)
+                return ResponseHandler.send(HttpStatus.FORBIDDEN, {
+                    message: "Insufficient credits.",
+                });
+                
+            userCheck.credits -= 1;
+            await userCheck.save();
         }
 
         const newHistory = await historyRepo.createHistory({
@@ -62,7 +56,7 @@ export const createHistory = async (historyData: any) => {
 
         return ResponseHandler.send(HttpStatus.CREATED, {
             newHistory,
-            credits: updatedUser?.credits,
+            credits: userCheck?.credits,
         });
     } catch (err) {
         return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
