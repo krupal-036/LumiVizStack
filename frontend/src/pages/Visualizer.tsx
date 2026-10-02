@@ -21,16 +21,18 @@ import {
     FiSearch,
     FiRefreshCw,
 } from "react-icons/fi";
-import { parseData } from "@/utils/dataParser.js";
-import { AuthContext } from "@/context/AuthContext.js";
-import { useAlert, useTitle } from "@/hooks/customHooks.js";
-import TableView from "@/components/visualizations/TableView.js";
-import CardView from "@/components/visualizations/CardView.js";
-import ChartView from "@/components/visualizations/ChartView.js";
-import TreeView from "@/components/visualizations/TreeView.js";
-import GraphView from "@/components/visualizations/GraphView.js";
-import { Features } from "@/components/Features.js";
+import { parseData } from "@/utils/dataParser";
+import { AuthContext } from "@/context/AuthContext";
+import { useAlert, useTitle } from "@/hooks/customHooks";
+import TableView from "@/components/visualizations/TableView";
+import CardView from "@/components/visualizations/CardView";
+import ChartView from "@/components/visualizations/ChartView";
+import TreeView from "@/components/visualizations/TreeView";
+import GraphView from "@/components/visualizations/GraphView";
+import { Features } from "@/components/Features";
 import { HiOutlineDatabase, HiPlusCircle, HiSparkles } from "react-icons/hi";
+import MonacoCodeEditor from "@/components/common/MonacoCodeEditor";
+// import FlowChartView from "@/components/visualizations/FlowChart";
 
 const VISUALIZER_STORAGE_KEY = "visualizerState";
 
@@ -40,23 +42,35 @@ const Visualizer = () => {
     const { showAlert } = useAlert();
     const reportRef = useRef<HTMLDivElement | null>(null);
     const panelref = useRef<HTMLButtonElement | null>(null);
-    const [inputType, setInputType] = useState("paste");
-    const [rawInput, setRawInput] = useState("");
-    const [urlInput, setUrlInput] = useState("");
-    const [data, setData] = useState([]);
-    const [viewMode, setViewMode] = useState("table");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [isPanelOpen, setIsPanelOpen] = useState(false);
-    const [saveState, setSaveState] = useState("idle");
-    const [isPublic, setIsPublic] = useState(false);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [viztitle, setViztitle] = useState("");
-    const [searchTerm, setSearchTerm] = useState("");
+    const [inputType, setInputType] = useState<string>("paste");
+    const [rawInput, setRawInput] = useState<string>("");
+    const [urlInput, setUrlInput] = useState<string>("");
+    const [data, setData] = useState<any[]>([]);
+    const [viewMode, setViewMode] = useState<string>("table");
+    const [error, setError] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+    const [saveState, setSaveState] = useState<string>("idle");
+    const [isPublic, setIsPublic] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [viztitle, setViztitle] = useState<string>("");
+    const [searchTerm, setSearchTerm] = useState<string>("");
     const [forceImages, setForceImages] = useState<boolean>(false);
-    const [searchBar, setSearchBar] = useState(false);
+    const [searchBar, setSearchBar] = useState<boolean>(false);
 
     useTitle("Visualizer");
+
+    // Lock background scroll when drawer is open on mobile devices
+    useEffect(() => {
+        if (isPanelOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isPanelOpen]);
 
     useEffect(() => {
         const forceLoad = location.state?.forceLoad === true;
@@ -73,14 +87,18 @@ const Visualizer = () => {
 
         const saved = sessionStorage.getItem(VISUALIZER_STORAGE_KEY);
         if (saved) {
-            const parsed = JSON.parse(saved);
-            setData(parsed.data ?? []);
-            setViewMode(parsed.viewMode ?? "table");
-            setRawInput(parsed.rawInput ?? "");
-            setUrlInput(parsed.urlInput ?? "");
-            setInputType(parsed.inputType ?? "paste");
+            try {
+                const parsed = JSON.parse(saved);
+                setData(parsed.data ?? []);
+                setViewMode(parsed.viewMode ?? "table");
+                setRawInput(parsed.rawInput ?? "");
+                setUrlInput(parsed.urlInput ?? "");
+                setInputType(parsed.inputType ?? "paste");
+            } catch {
+                sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
+            }
         }
-    }, []);
+    }, [location.state]);
 
     useEffect(() => {
         if (data.length === 0) return;
@@ -114,22 +132,25 @@ const Visualizer = () => {
         setError("");
         try {
             let rawData = "";
-            if (inputType === "paste") rawData = rawInput;
-            else if (inputType === "url") {
-                if (!urlInput) throw new Error("URL missing");
+            if (inputType === "paste") {
+                rawData = rawInput;
+            } else if (inputType === "url") {
+                if (!urlInput.trim()) throw new Error("URL missing");
                 const res = await fetch(urlInput);
+                if (!res.ok) throw new Error(`HTTP Error: ${res.statusText}`);
                 rawData = await res.text();
             } else if (inputType === "file") {
                 rawData = rawInput;
             }
 
+            if (!rawData.trim()) throw new Error("Please enter or upload data to visualize");
+
             const parsed = parseData(rawData);
-            if (parsed.length === 0) throw new Error("No valid data found");
+            if (!parsed || parsed.length === 0) throw new Error("No valid records found in data");
             setData(parsed);
             setIsPanelOpen(false);
-        } catch (err) {
-            const errorObj = err as Error;
-            setError(errorObj.message || String(err));
+        } catch (err: any) {
+            setError(err?.message || "Failed to parse input data");
         } finally {
             setLoading(false);
         }
@@ -138,10 +159,10 @@ const Visualizer = () => {
     const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const maxSize = 2 * 1024 * 1024;
+        const maxSize = 5 * 1024 * 1024;
         if (file.size > maxSize) {
             showAlert(
-                "File is too large! Please upload a file smaller than 2MB.",
+                "File is too large! Please upload a file smaller than 5MB.",
                 "Upload Error",
                 2,
             );
@@ -170,30 +191,6 @@ const Visualizer = () => {
         if (!token) {
             setError("Authentication error. Please log in again.");
             return;
-        }
-
-        if (rawInput) {
-            const rawLines = rawInput.trim().split("\n").length;
-            if (rawLines > 500) {
-                showAlert(
-                    `Input text is too long (${rawLines} lines). Please limit to 500 lines.`,
-                    "Validation Error",
-                    1,
-                );
-                return;
-            }
-        }
-
-        if (data) {
-            const dataLines = JSON.stringify(data, null, 2).split("\n").length;
-            if (dataLines > 500) {
-                showAlert(
-                    `The data structure is too large (${dataLines} lines). Please reduce the amount of data.`,
-                    "Validation Error",
-                    1,
-                );
-                return;
-            }
         }
 
         setSaveState("saving");
@@ -231,16 +228,17 @@ const Visualizer = () => {
                 setSaveState("idle");
                 return;
             }
-            setCredits(result?.credits);
+            if (result?.credits !== undefined) {
+                setCredits(result.credits);
+            }
             setSaveState("saved");
             showAlert("History saved successfully", "Success", 2);
             setViztitle("");
             setTimeout(() => {
                 setSaveState("idle");
             }, 2000);
-        } catch (err) {
-            const errorObj = err as Error;
-            setError(errorObj.message || String(err));
+        } catch (err: any) {
+            setError(err?.message || "Failed to save");
             setSaveState("idle");
         }
     };
@@ -248,17 +246,18 @@ const Visualizer = () => {
     const togglePublic = () => {
         const nextState = !isPublic;
         setIsPublic(nextState);
-        const message = `Visualization will be saved as ${nextState ? "Public" : "Private"}`;
-        const alertType = nextState ? 2 : 3;
-        showAlert(message, "Visibility Updated", alertType);
+        showAlert(
+            `Visualization will be saved as ${nextState ? "Public" : "Private"}`,
+            "Visibility Updated",
+            nextState ? 2 : 3,
+        );
     };
 
     const filteredData = useMemo(() => {
-        if (!searchTerm) return data;
+        if (!searchTerm.trim()) return data;
+        const q = searchTerm.toLowerCase();
         return data.filter((item) =>
-            Object.values(item).some((val) =>
-                String(val).toLowerCase().includes(searchTerm.toLowerCase()),
-            ),
+            Object.values(item || {}).some((val) => String(val).toLowerCase().includes(q)),
         );
     }, [data, searchTerm]);
 
@@ -268,45 +267,47 @@ const Visualizer = () => {
         { id: "chart", icon: FiBarChart2, label: "Charts" },
         { id: "tree", icon: FiDatabase, label: "JSON" },
         { id: "graph", icon: FiGitBranch, label: "Graph" },
+        // { id: "flow", icon: FiGitCommit, label: "Flow" },
     ];
 
     return (
-        <div
-            className={`relative flex bg-gray-100 dark:bg-black text-gray-900 dark:text-gray-100 sm:h-full overflow-hidden w-full pt-10 sm:pt-16`}
-        >
-            <div className="inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="absolute top-[-10%] right-[-5%] w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-cyan-500/20 blur-[50px] md:blur-[80px] rounded-bl-full pointer-events-none" />
-                <div className="absolute bottom-[-5%] left-0 w-[180px] h-[180px] md:w-[300px] md:h-[300px] bg-fuchsia-500/20 blur-[50px] md:blur-[80px] rounded-tr-full pointer-events-none" />
+        <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full pt-16">
+            {/* Background Glows */}
+            <div className="inset-0 overflow-hidden pointer-events-none z-0 fixed">
+                <div className="absolute top-[-10%] right-[-5%] w-[350px] h-[350px] bg-cyan-500/10 blur-[100px] rounded-full" />
+                <div className="absolute bottom-[-5%] left-0 w-[350px] h-[350px] bg-fuchsia-500/10 blur-[100px] rounded-full" />
             </div>
 
+            {/* Mobile Drawer Backdrop */}
             {isPanelOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-30 md:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-2xs z-50 md:hidden"
                     onClick={() => setIsPanelOpen(false)}
                 />
             )}
 
+            {/* Side Input Drawer: Full height, isolates touch scroll events */}
             <div
-                className={`fixed inset-y-0 left-0 z-40 w-80 sm:w-[calc(100vw-75%)] max-w-full transform transition-transform duration-300 ease-in-out
-                    md:sticky md:top-0 md:translate-x-0 md:transform-none 
-                    ${isPanelOpen ? "translate-x-0" : "-translate-x-full md:w-0 md:opacity-0 md:pointer-events-none"}`}
+                className={`fixed inset-y-0 left-0 z-50 w-full sm:w-[420px] md:w-125 transform transition-transform duration-300 ease-in-out overscroll-contain
+                    ${isPanelOpen ? "translate-x-0" : "-translate-x-full"}`}
             >
-                <div className="min-h-screen sm:min-h-auto sm:h-[calc(100vh-64px)] bg-white dark:bg-gray-900 border-r border-b border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col shadow-xl md:shadow-none pt-10 sm:pt-0">
-                    <div className="hidden md:flex p-6 justify-between items-center border-b border-gray-200 dark:border-gray-800">
-                        <h2 className="font-bold text-gray-800 dark:text-white flex items-center gap-2">
-                            <FiSettings className="text-indigo-500" /> Input Source
+                <div className="h-[100dvh] bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col shadow-2xl">
+                    <div className="flex p-4 justify-between items-center border-b border-gray-200 dark:border-gray-800">
+                        <h2 className="font-bold text-sm text-gray-800 dark:text-white flex items-center gap-2">
+                            <FiSettings className="text-indigo-500" /> Data Source
                         </h2>
                         <button
+                            type="button"
                             onClick={() => setIsPanelOpen(false)}
-                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full"
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-slate-500 transition-colors"
                             ref={panelref}
                         >
-                            <FiX />
+                            <FiX size={18} />
                         </button>
                     </div>
 
-                    <div className="p-4 py-10 sm:py-4 flex-1 overflow-y-auto flex flex-col text-xs">
-                        <div className="flex gap-2 mb-4 z-100">
+                    <div className="p-4 flex-1 overflow-hidden flex flex-col gap-3">
+                        <div className="flex gap-2">
                             {[
                                 { id: "paste", icon: FiCode, label: "Paste" },
                                 { id: "file", icon: FiUploadCloud, label: "File" },
@@ -314,240 +315,226 @@ const Visualizer = () => {
                             ].map((t) => (
                                 <button
                                     key={t.id}
+                                    type="button"
                                     onClick={() => setInputType(t.id)}
-                                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1 rounded-lg transition-colors border-2 
-                    ${
-                        inputType === t.id
-                            ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500"
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700"
-                    }`}
+                                    className={`flex-1 py-2 text-xs font-semibold flex items-center justify-center gap-1.5 rounded-lg transition-colors border ${
+                                        inputType === t.id
+                                            ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-300 border-indigo-500"
+                                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 border-gray-200 dark:border-gray-700"
+                                    }`}
                                 >
                                     <t.icon size={14} /> {t.label}
                                 </button>
                             ))}
-                            <button
-                                onClick={() => setIsPanelOpen(false)}
-                                className="sm:hidden p-2.5 font-semibold text flex items-center justify-center gap-1 rounded-full transition-colors border-2 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 text-xs border-gray-600 dark:border-gray-700"
-                            >
-                                <FiX />
-                            </button>
                         </div>
 
-                        <div className="flex-1 relative mb-4 min-h-[200px]">
+                        {/* Input Area with Mobile-Resilient Monaco Editor */}
+                        <div className="flex-1 w-full min-h-[300px] overflow-hidden flex flex-col">
                             {inputType === "paste" && (
-                                <textarea
-                                    value={rawInput}
-                                    onChange={(e) => setRawInput(e.target.value)}
-                                    placeholder='[{"key": "value"}]'
-                                    className="w-full h-full p-4 font-mono text-xs border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-0 bg-gray-50 dark:bg-gray-800 resize-none outline-none"
-                                />
+                                <div className="w-full h-full">
+                                    <MonacoCodeEditor
+                                        value={rawInput}
+                                        onChange={(val) => setRawInput(val)}
+                                        language="json"
+                                        showFormatButton={true}
+                                    />
+                                </div>
                             )}
+
                             {inputType === "url" && (
-                                <div className="mt-4">
+                                <div className="mt-4 flex flex-col gap-2">
+                                    <label className="text-xs font-semibold text-slate-500">
+                                        JSON Endpoint URL:
+                                    </label>
                                     <input
                                         type="text"
                                         value={urlInput}
                                         onChange={(e) => setUrlInput(e.target.value)}
-                                        placeholder="https://api.example.com/data..."
-                                        className="w-full p-4 rounded-xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 outline-none text-xs"
+                                        placeholder="https://jsonplaceholder.typicode.com/comments"
+                                        className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 outline-none text-xs"
                                     />
                                 </div>
                             )}
+
                             {inputType === "file" && (
-                                <div className="h-full flex items-center justify-center border-2 border-dashed rounded-xl dark:border-gray-700 hover:border-indigo-500 min-h-[150px]">
+                                <div className="h-full flex flex-col items-center justify-center border-2 border-dashed rounded-xl dark:border-gray-700 hover:border-indigo-500 p-6 text-center">
                                     <input
                                         type="file"
                                         id="fileUp"
+                                        accept=".json"
                                         onChange={handleFileUpload}
                                         className="hidden"
                                     />
-                                    <label
-                                        htmlFor="fileUp"
-                                        className="cursor-pointer text-center p-10"
-                                    >
+                                    <label htmlFor="fileUp" className="cursor-pointer">
                                         <FiUploadCloud
-                                            className="mx-auto text-gray-400 dark:text-gray-500 mb-4"
-                                            size={20}
+                                            className="mx-auto text-indigo-500 mb-2"
+                                            size={36}
                                         />
-                                        <span className="text-gray-500">Click to upload JSON</span>
+                                        <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
+                                            Upload JSON File
+                                        </span>
+                                        <span className="text-[11px] text-gray-400">Up to 5MB</span>
                                     </label>
                                 </div>
                             )}
                         </div>
 
                         {error && (
-                            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/30 text-red-500 rounded-lg text-sm ">
+                            <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 rounded-lg text-xs">
                                 {error}
                             </div>
                         )}
 
                         <button
+                            type="button"
                             onClick={handleProcess}
                             disabled={loading}
-                            className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-lg flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                            className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md flex items-center justify-center gap-2 transition-all disabled:opacity-50 text-xs active:scale-[0.98]"
                         >
                             {loading ? "Processing..." : "Visualize Data"} <HiSparkles size={16} />
                         </button>
                     </div>
                 </div>
             </div>
-            <div className="flex-1 min-w-0 transition-all duration-300 md:max-w-7xl mx-auto px-2 sm:px-0">
+
+            {/* Main Visualizer Canvas: Expands to full screen width when drawer is closed */}
+            <div
+                className={`flex-1 w-full min-w-0 transition-all duration-300 px-4 sm:px-8 max-w-full ${
+                    isPanelOpen ? "md:ml-125" : "ml-0"
+                }`}
+            >
+                {/* Floating button to open drawer */}
                 {!isPanelOpen && (
                     <button
+                        type="button"
                         onClick={() => {
                             panelref.current?.focus();
                             setIsPanelOpen(true);
                         }}
-                        className="fixed bottom-6 left-6 z-50 p-4 bg-indigo-600 text-white rounded-full shadow-xl hover:bg-indigo-700 transition-all"
+                        className="fixed bottom-6 left-6 z-40 p-3.5 bg-indigo-600 text-white rounded-full shadow-2xl hover:bg-indigo-700 transition-all active:scale-95"
+                        title="Open Input Editor"
                     >
                         <FiCode size={20} />
                     </button>
                 )}
-                <div className="flex flex-col gap-4 py-4 rounded-xl transition-colors py-10">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="flex items-center gap-3 justify-center">
-                            <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-500/20">
+
+                {/* Top Action Header */}
+                <div className="flex flex-col gap-4 py-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setIsPanelOpen(!isPanelOpen)}
+                                className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 shadow-2xs border border-indigo-200/50 dark:border-indigo-500/20 hover:scale-105 transition-transform"
+                                title="Toggle Input Panel"
+                            >
                                 <FiBarChart2 className="w-6 h-6 stroke-[2.5px]" />
-                            </div>
-                            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">
-                                <span className="bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
+                            </button>
+                            <div>
+                                <h1 className="text-xl md:text-2xl font-black tracking-tight bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
                                     Visualization Canvas
+                                </h1>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {data.length > 0
+                                        ? `${data.length} records parsed`
+                                        : "No dataset loaded"}
                                 </span>
-                            </h1>
+                            </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row p-1.5 sm:p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 gap-2 sm:gap-0 overflow-x-hidden max-w-full">
+                        {/* Control Bar */}
+                        <div className="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 p-1.5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
                             {data.length > 0 && (
-                                <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 px-1">
-                                    <>
-                                        <button
-                                            onClick={togglePublic}
-                                            className={`group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2 w-full sm:w-auto
-                      ${
-                          isPublic
-                              ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500"
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
-                      }`}
-                                        >
-                                            <div className="flex-shrink-0">
-                                                {isPublic ? (
-                                                    <FiEye size={18} />
-                                                ) : (
-                                                    <FiEyeOff size={18} />
-                                                )}
-                                            </div>
-                                            <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                                                <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
-                                                    {isPublic ? "Public" : "Private"}
-                                                </span>
-                                            </div>
-                                        </button>
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={togglePublic}
+                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all border ${
+                                            isPublic
+                                                ? "bg-blue-50 dark:bg-blue-950 text-blue-600 border-blue-300 dark:border-blue-700"
+                                                : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700"
+                                        }`}
+                                    >
+                                        {isPublic ? <FiEye size={14} /> : <FiEyeOff size={14} />}
+                                        <span className="hidden sm:inline">
+                                            {isPublic ? "Public" : "Private"}
+                                        </span>
+                                    </button>
 
-                                        <button
-                                            onClick={handleSave}
-                                            disabled={saveState === "saving"}
-                                            className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg shadow-md transition-all duration-300 w-full sm:w-auto"
-                                        >
-                                            <div className="flex-shrink-0">
-                                                {saveState === "saving" && (
-                                                    <FiLoader className="animate-spin" size={18} />
-                                                )}
-                                                {saveState === "saved" && <FiCheck size={18} />}
-                                                {saveState === "idle" && <FiSave size={18} />}
-                                            </div>
-                                            <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                                                <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
-                                                    {saveState === "saving"
-                                                        ? "Saving..."
-                                                        : saveState === "saved"
-                                                          ? "Saved"
-                                                          : "Save"}
-                                                </span>
-                                            </div>
-                                        </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleSave}
+                                        disabled={saveState === "saving"}
+                                        className="flex items-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-lg text-xs font-semibold shadow-xs transition-all"
+                                    >
+                                        {saveState === "saving" ? (
+                                            <FiLoader className="animate-spin" size={14} />
+                                        ) : saveState === "saved" ? (
+                                            <FiCheck size={14} />
+                                        ) : (
+                                            <FiSave size={14} />
+                                        )}
+                                        <span className="hidden sm:inline">
+                                            {saveState === "saving"
+                                                ? "Saving..."
+                                                : saveState === "saved"
+                                                  ? "Saved"
+                                                  : "Save"}
+                                        </span>
+                                    </button>
 
-                                        <button
-                                            onClick={handleClearVisualizer}
-                                            className="group flex items-center justify-center gap-0 hover:gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow-md transition-all duration-300 w-full sm:w-auto"
-                                        >
-                                            <div className="flex-shrink-0">
-                                                <FiTrash2 size={18} />
-                                            </div>
-                                            <div className="grid grid-cols-[0fr] group-hover:grid-cols-[1fr] transition-all duration-300 ease-in-out">
-                                                <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
-                                                    Clear
-                                                </span>
-                                            </div>
-                                        </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleClearVisualizer}
+                                        className="flex items-center gap-1.5 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all"
+                                    >
+                                        <FiTrash2 size={14} />
+                                        <span className="hidden sm:inline">Clear</span>
+                                    </button>
 
-                                        <button
-                                            onClick={() => setSearchBar(!searchBar)}
-                                            disabled={
-                                                data.length === 0 ||
-                                                viewMode === "graph" ||
-                                                viewMode === "tree"
-                                            }
-                                            className={`group flex items-center justify-center gap-0 sm:hover:gap-2 px-3 py-2 rounded-lg shadow-md transition-all duration-300 border-2 w-full sm:w-auto
-                        ${
-                            searchBar
-                                ? "bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 border-blue-500 gap-2"
-                                : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600"
-                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                        >
-                                            <div className="flex-shrink-0">
-                                                <FiSearch size={18} />
-                                            </div>
-                                            <div
-                                                className={`grid transition-all duration-300 ease-in-out ${searchBar ? "grid-cols-[1fr] gap-2" : "grid-cols-[0fr] group-hover:grid-cols-[1fr] group-hover:gap-2"}`}
-                                            >
-                                                <span className="hidden sm:flex overflow-hidden whitespace-nowrap text-sm font-medium">
-                                                    Search
-                                                </span>
-                                            </div>
-                                        </button>
-                                    </>
-                                </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchBar(!searchBar)}
+                                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                                            searchBar
+                                                ? "bg-indigo-50 dark:bg-indigo-950 text-indigo-600 border-indigo-300 dark:border-indigo-700"
+                                                : "bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700"
+                                        }`}
+                                    >
+                                        <FiSearch size={14} />
+                                        <span className="hidden sm:inline">Filter</span>
+                                    </button>
+                                </>
                             )}
 
-                            {data.length < 0 && (
-                                <div className="h-[1px] w-full bg-gray-100 dark:bg-gray-800 sm:hidden" />
-                            )}
-                            {data.length < 0 && (
-                                <div className="hidden sm:block w-[1px] h-6 bg-gray-200 dark:bg-gray-700 mx-2" />
-                            )}
+                            <div className="h-4 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block mx-1" />
 
-                            <div className="flex items-center justify-around sm:justify-start gap-2 sm:gap-3 px-1 overflow-x-auto no-scrollbar">
+                            {/* View Modes */}
+                            <div className="flex items-center gap-1">
                                 {viewModes.map((v) => {
                                     const isActive = viewMode === v.id;
                                     return (
                                         <button
                                             key={v.id}
+                                            type="button"
                                             onClick={() => setViewMode(v.id)}
-                                            className={`group flex items-center justify-center sm:px-3 py-2 rounded-lg text-sm font-medium transition-all duration-300 whitespace-nowrap flex-1 sm:flex-none
-                        ${
-                            isActive
-                                ? "bg-indigo-600 text-white shadow-md sm:gap-2"
-                                : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400 gap-0 hover:gap-2"
-                        }`}
+                                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                                                isActive
+                                                    ? "bg-indigo-600 text-white shadow-xs"
+                                                    : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                            }`}
                                         >
-                                            <div className="flex-shrink-0">
-                                                <v.icon size={18} />
-                                            </div>
-                                            <div
-                                                className={`grid transition-all duration-300 ease-in-out ${isActive ? "grid-cols-[1fr]" : "grid-cols-[0fr] group-hover:grid-cols-[1fr]"}`}
-                                            >
-                                                <span className="hidden sm:flex overflow-hidden whitespace-nowrap">
-                                                    {v.label}
-                                                </span>
-                                            </div>
+                                            <v.icon size={15} />
+                                            <span className="hidden md:inline">{v.label}</span>
                                         </button>
                                     );
                                 })}
                             </div>
                         </div>
                     </div>
-                    {searchBar && viewMode !== "graph" && viewMode !== "tree" && (
-                        <div className="w-full transition-all duration-500 animate-in fade-in slide-in-from-top-2">
+
+                    {searchBar && (
+                        <div className="w-full pt-2 animate-in fade-in slide-in-from-top-2">
                             <Features
                                 searchTerm={searchTerm}
                                 setSearchTerm={setSearchTerm}
@@ -556,40 +543,32 @@ const Visualizer = () => {
                         </div>
                     )}
                 </div>
-                <div ref={reportRef} className="pb-20">
-                    {data.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[60vh] text-center border-2 border-dashed rounded-2xl border-gray-300 dark:border-gray-700 bg-white/50 dark:bg-gray-900/20 backdrop-blur-sm p-8 transition-all">
-                            <div className="relative p-6 bg-indigo-50 dark:bg-indigo-900/30 rounded-full mb-6 group">
-                                <HiOutlineDatabase className="text-5xl text-indigo-500 dark:text-indigo-400 group-hover:scale-110 transition-transform duration-300" />
-                                <div className="absolute -top-1 -right-1">
-                                    <span className="relative flex h-4 w-4">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-4 w-4 bg-indigo-500"></span>
-                                    </span>
-                                </div>
-                            </div>
-                            <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
-                                Ready to get started?
-                            </h3>
-                            <p className="max-w-xs text-gray-500 dark:text-gray-400 mt-2 mb-8 leading-relaxed">
-                                Your data workspace is empty. Open the side panel to connect your
-                                source.
-                            </p>
 
+                {/* Viewport Content */}
+                <div ref={reportRef} className="pb-24 w-full">
+                    {data.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center h-[55vh] text-center border-2 border-dashed rounded-3xl border-gray-300 dark:border-gray-800 bg-white/60 dark:bg-gray-900/30 backdrop-blur-xs p-8">
+                            <div className="p-5 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl mb-4 text-indigo-600 dark:text-indigo-400">
+                                <HiOutlineDatabase size={44} />
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                                Ready to Visualize Your Data
+                            </h3>
+                            <p className="max-w-md text-xs text-gray-500 dark:text-gray-400 mt-2 mb-6">
+                                Paste JSON, connect an API endpoint, or upload a JSON document to
+                                generate interactive tables, charts, graphs, and inspectors.
+                            </p>
                             <button
+                                type="button"
                                 onClick={() => setIsPanelOpen(true)}
-                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all
-                 bg-green-400 hover:bg-green-700 text-green-900 
-                 dark:bg-green-500 dark:hover:bg-green-600
-                 shadow-lg shadow-green-200 dark:shadow-none
-                 active:scale-95"
+                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg active:scale-95 transition-all"
                             >
-                                <HiPlusCircle className="w-5 h-5" />
-                                Connect Data Source
+                                <HiPlusCircle size={18} />
+                                Load Data Source
                             </button>
                         </div>
                     ) : (
-                        <div className="overflow-x-auto">
+                        <div className="w-full">
                             {viewMode === "table" && (
                                 <TableView
                                     data={filteredData}
@@ -608,56 +587,54 @@ const Visualizer = () => {
                             {viewMode === "chart" && <ChartView data={filteredData} />}
                             {viewMode === "tree" && <TreeView data={data} />}
                             {viewMode === "graph" && <GraphView data={data} />}
+                            {/* {viewMode === "flow" && <FlowChartView data={filteredData} />} */}
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Save Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 p-4 sm:p-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="w-full max-w-md p-6 bg-gray-100 dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-300 dark:border-gray-700 transition-all">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+                <div className="fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/60 backdrop-blur-xs">
+                    <div className="w-full max-w-md p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                             Save Visualization
                         </h3>
-
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            Enter a title for your data OR Continue with the auto-generated name.
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                            Provide a title for this dataset or continue with the generated name.
                         </p>
-
-                        <div className="relative flex items-center">
+                        <div className="relative flex items-center mb-6">
                             <input
                                 type="text"
-                                className="w-full pl-4 pr-12 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none 
-               bg-gray-50 dark:bg-gray-900 
-               text-gray-900 dark:text-white 
-               border-gray-300 dark:border-gray-600 transition-all"
+                                className="w-full pl-3 pr-10 py-2.5 border rounded-xl text-xs outline-none bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500"
                                 placeholder="Enter title..."
                                 value={viztitle}
                                 onChange={(e) => setViztitle(e.target.value)}
                                 autoFocus
-                                onFocus={(e) => e.target.select()}
                             />
                             <button
                                 type="button"
                                 onClick={generateRandomTitle}
-                                className="absolute right-2 p-2 text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
+                                className="absolute right-2 p-1.5 text-gray-400 hover:text-indigo-600 rounded-md"
                                 title="Regenerate Title"
                             >
-                                <FiRefreshCw className="w-4 h-4" />
+                                <FiRefreshCw size={14} />
                             </button>
                         </div>
-
-                        <div className="flex justify-end gap-3 mt-6">
+                        <div className="flex justify-end gap-2">
                             <button
+                                type="button"
                                 onClick={() => setIsModalOpen(false)}
-                                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
+                                className="px-4 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition"
                             >
                                 Cancel
                             </button>
                             <button
+                                type="button"
                                 onClick={confirmSave}
-                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition"
+                                className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-xs transition"
                             >
-                                Save Data
+                                Save Visualization
                             </button>
                         </div>
                     </div>

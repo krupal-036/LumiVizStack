@@ -42,6 +42,9 @@ export default defineConfig(({ mode }) => {
               if (id.includes('react') || id.includes('react-dom') || id.includes('react-router-dom')) {
                 return 'vendor-react';
               }
+              if (id.includes('monaco-editor') || id.includes('@monaco-editor/react')) {
+                return 'vendor-monaco';
+              }
               if (id.includes('recharts') || id.includes('d3')) {
                 return 'vendor-charts';
               }
