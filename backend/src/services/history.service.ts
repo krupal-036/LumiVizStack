@@ -27,7 +27,7 @@ export const createHistory = async (historyData: any) => {
                 return ResponseHandler.send(HttpStatus.FORBIDDEN, {
                     message: "Insufficient credits.",
                 });
-                
+
             userCheck.credits -= 1;
             await userCheck.save();
         }

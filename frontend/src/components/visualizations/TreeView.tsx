@@ -1,10 +1,24 @@
 // frontend/src/components/visualizations/TreeView.tsx
-import { useState } from "react";
-import { FiCopy, FiDownload, FiCheck, FiCode } from "react-icons/fi";
+import MonacoCodeEditor from "@/components/common/MonacoCodeEditor";
+import React, { useState } from "react";
+import { FiCopy, FiDownload, FiCheck, FiCode, FiMinimize2 } from "react-icons/fi";
 
-const TreeView = ({ data, title = "Data Export" }: any) => {
+type TreeViewProps = {
+    data: any;
+    title?: string;
+};
+
+const TreeView: React.FC<TreeViewProps> = ({ data, title = "Data Export" }) => {
     const [copied, setCopied] = useState(false);
-    const jsonString = JSON.stringify(data, null, 2);
+    const [minified, setMinified] = useState(false);
+
+    const jsonString = React.useMemo(() => {
+        try {
+            return minified ? JSON.stringify(data) : JSON.stringify(data, null, 2);
+        } catch {
+            return String(data);
+        }
+    }, [data, minified]);
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(jsonString);
@@ -23,56 +37,67 @@ const TreeView = ({ data, title = "Data Export" }: any) => {
     };
 
     return (
-        <div className="relative group rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50">
+        <div className="relative rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden flex flex-col h-[650px] w-full">
+            {/* Action Bar */}
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg text-indigo-600 dark:text-indigo-400">
                         <FiCode className="w-4 h-4 stroke-[2.5px]" />
                     </div>
-                    <span className="text-sm font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400">
-                        JSON SOURCE
+                    <span className="text-xs font-black tracking-wide bg-clip-text text-transparent bg-linear-to-r from-indigo-600 to-blue-500 dark:from-indigo-400 dark:to-cyan-400 uppercase">
+                        Monaco JSON Explorer
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-400 ml-2">
+                        {Array.isArray(data) ? `[${data.length} items]` : "{Object}"}
                     </span>
                 </div>
 
                 <div className="flex items-center gap-2">
                     <button
-                        onClick={handleCopy}
-                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-slate-200 dark:border-zinc-700 hover:border-indigo-500 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400"
+                        type="button"
+                        onClick={() => setMinified(!minified)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-bold rounded-lg transition-all border ${
+                            minified
+                                ? "bg-indigo-50 dark:bg-indigo-900/50 text-indigo-600 border-indigo-300 dark:border-indigo-700"
+                                : "bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700"
+                        }`}
+                        title="Toggle Minification"
                     >
-                        {copied ? <FiCheck className="text-emerald-500" /> : <FiCopy />}
+                        <FiMinimize2 size={13} />
+                        {minified ? "Beautify" : "Minify"}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleCopy}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border border-slate-200 dark:border-zinc-700 hover:border-indigo-500 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400"
+                    >
+                        {copied ? (
+                            <FiCheck className="text-emerald-500" size={13} />
+                        ) : (
+                            <FiCopy size={13} />
+                        )}
                         {copied ? "Copied!" : "Copy"}
                     </button>
+
                     <button
+                        type="button"
                         onClick={handleDownload}
-                        className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
                     >
-                        <FiDownload /> Export
+                        <FiDownload size={13} /> Export
                     </button>
                 </div>
             </div>
 
-            <div className="p-4 md:p-6 max-h-[500px] overflow-auto bg-slate-900 dark:bg-black/40 font-mono">
-                <pre className="text-[13px] leading-relaxed whitespace-pre text-indigo-300">
-                    {jsonString.split("\n").map((line, i) => {
-                        const highlightedLine = line.replace(
-                            /"([^"]+)":/g,
-                            '<span class="text-cyan-400">"$1"</span>:',
-                        );
-
-                        return (
-                            <div key={i} className="flex gap-4">
-                                <span className="w-8 shrink-0 text-slate-600 dark:text-zinc-600 text-right select-none">
-                                    {i + 1}
-                                </span>
-                                <span
-                                    className="text-indigo-200 dark:text-blue-200"
-                                    dangerouslySetInnerHTML={{ __html: highlightedLine }}
-                                />
-                            </div>
-                        );
-                    })}
-                </pre>
+            {/* Monaco Editor in Read-Only Explorer Mode */}
+            <div className="flex-1 w-full h-full min-h-0">
+                <MonacoCodeEditor
+                    value={jsonString}
+                    readOnly={true}
+                    language="json"
+                    showFormatButton={false}
+                />
             </div>
         </div>
     );
