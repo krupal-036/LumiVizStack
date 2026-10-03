@@ -1,8 +1,9 @@
 // backend/src/middleware/validations/validateProfile.ts
+import mongoose from "mongoose";
 import { Response, NextFunction } from "express";
+import { HttpStatus } from "../../constants/http-status.enum";
 import { countUserByField, getUserByField } from "../../repositories/user.repo";
 import { passwordRegex, usernameRegex } from "../../utils/regex";
-import { HttpStatus } from "../../constants/http-status.enum";
 
 export const validateProfile = async (req: any, res: Response, next: NextFunction) => {
     const { username, password } = req.body;
@@ -15,41 +16,44 @@ export const validateProfile = async (req: any, res: Response, next: NextFunctio
 
         let isChanged = false;
 
-        if (username) {
-            const trimmedName = username.trim().toLowerCase();
+        if (user.role !== "admin") {
+            if (username) {
+                const trimmedName = username.trim().toLowerCase();
 
-            if (!usernameRegex.test(trimmedName)) {
-                return res.status(HttpStatus.BAD_REQUEST).json({
-                    message:
-                        "Username must start with a letter and contain only lowercase letters/numbers.",
-                });
-            }
-            if (trimmedName.length < 3 || trimmedName.length > 20) {
-                return res.status(HttpStatus.BAD_REQUEST).json({
-                    message: "Username must be between 3 and 20 characters",
-                });
-            }
-
-            const reservedWords = ["admin", "root", "support", "help", "official", "moderator"];
-            if (reservedWords.includes(trimmedName)) {
-                return res.status(HttpStatus.BAD_REQUEST).json({
-                    message: "This username is reserved and cannot be used.",
-                });
-            }
-            if (user.username !== trimmedName) {
-                const existingUser = await countUserByField({
-                    username: trimmedName,
-                    _id: { $ne: userId },
-                });
-
-                if (existingUser) {
-                    return res
-                        .status(HttpStatus.BAD_REQUEST)
-                        .json({ message: "Username is already taken" });
+                if (!usernameRegex.test(trimmedName)) {
+                    return res.status(HttpStatus.BAD_REQUEST).json({
+                        message:
+                            "Username must start with a letter and contain only lowercase letters/numbers.",
+                    });
+                }
+                if (trimmedName.length < 3 || trimmedName.length > 20) {
+                    return res.status(HttpStatus.BAD_REQUEST).json({
+                        message: "Username must be between 3 and 20 characters",
+                    });
                 }
 
-                req.body.username = trimmedName;
-                isChanged = true;
+                const reservedWords = ["admin", "root", "support", "help", "official", "moderator"];
+                if (reservedWords.includes(trimmedName)) {
+                    return res.status(HttpStatus.BAD_REQUEST).json({
+                        message: "This username is reserved and cannot be used.",
+                    });
+                }
+
+                if (user.username !== trimmedName) {
+                    const existingUser = await countUserByField({
+                        username: trimmedName,
+                        _id: mongoose.trusted({ $ne: userId }),
+                    });
+
+                    if (existingUser) {
+                        return res
+                            .status(HttpStatus.BAD_REQUEST)
+                            .json({ message: "Username is already taken" });
+                    }
+
+                    req.body.username = trimmedName;
+                    isChanged = true;
+                }
             }
         }
 

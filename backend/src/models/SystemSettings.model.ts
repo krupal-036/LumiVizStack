@@ -1,11 +1,14 @@
 // backend/src/models/SystemSettings.model.ts
 import mongoose, { Model, Schema } from "mongoose";
+
 export interface ISystemsetting {
     configName: string;
     isLoginEnabled: boolean;
     isSignupEnabled: boolean;
+    isHistoryCreationEnabled: boolean;
     createdAt: Date;
 }
+
 const SystemSettingsSchema = new Schema<ISystemsetting>(
     {
         configName: {
@@ -18,6 +21,10 @@ const SystemSettingsSchema = new Schema<ISystemsetting>(
             default: true,
         },
         isSignupEnabled: {
+            type: Boolean,
+            default: true,
+        },
+        isHistoryCreationEnabled: {
             type: Boolean,
             default: true,
         },
