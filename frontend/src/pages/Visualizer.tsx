@@ -21,7 +21,8 @@ import {
     FiSearch,
     FiRefreshCw,
 } from "react-icons/fi";
-import { parseData } from "@/utils/dataParser";
+import { parseDualData } from "@/utils/dataParser";
+import { SafeStorage } from "@/utils/safeStorage";
 import { AuthContext } from "@/context/AuthContext";
 import { useAlert, useTitle } from "@/hooks/customHooks";
 import TableView from "@/components/visualizations/TableView";
@@ -32,7 +33,6 @@ import GraphView from "@/components/visualizations/GraphView";
 import { Features } from "@/components/Features";
 import { HiOutlineDatabase, HiPlusCircle, HiSparkles } from "react-icons/hi";
 import MonacoCodeEditor from "@/components/common/MonacoCodeEditor";
-// import FlowChartView from "@/components/visualizations/FlowChart";
 
 const VISUALIZER_STORAGE_KEY = "visualizerState";
 
@@ -42,10 +42,15 @@ const Visualizer = () => {
     const { showAlert } = useAlert();
     const reportRef = useRef<HTMLDivElement | null>(null);
     const panelref = useRef<HTMLButtonElement | null>(null);
+
     const [inputType, setInputType] = useState<string>("paste");
     const [rawInput, setRawInput] = useState<string>("");
     const [urlInput, setUrlInput] = useState<string>("");
-    const [data, setData] = useState<any[]>([]);
+
+    // Dual Data Stream: Tabular projection for Table/Charts, full tree for Graph/JSON
+    const [tabularData, setTabularData] = useState<any[]>([]);
+    const [hierarchicalData, setHierarchicalData] = useState<any>(null);
+    const [savedShareId, setSavedShareId] = useState<string | null>(null);
     const [viewMode, setViewMode] = useState<string>("table");
     const [error, setError] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -60,7 +65,7 @@ const Visualizer = () => {
 
     useTitle("Visualizer");
 
-    // Lock background scroll when drawer is open on mobile devices
+    // Drawer lock
     useEffect(() => {
         if (isPanelOpen) {
             document.body.style.overflow = "hidden";
@@ -76,35 +81,45 @@ const Visualizer = () => {
         const forceLoad = location.state?.forceLoad === true;
         if (forceLoad && location.state?.config) {
             const config = location.state.config;
-            setData(config.data ?? []);
+            const parsed = parseDualData(config.data ?? []);
+            setTabularData(parsed.tabularData);
+            setHierarchicalData(parsed.hierarchicalData);
             setViewMode(config.type ?? "table");
             setRawInput(config.rawInput ?? "");
             setUrlInput(config.urlInput ?? "");
             setInputType(config.inputType ?? "paste");
-            sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(config));
+            SafeStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(config));
             return;
         }
 
-        const saved = sessionStorage.getItem(VISUALIZER_STORAGE_KEY);
+        const saved = SafeStorage.getItem(VISUALIZER_STORAGE_KEY);
         if (saved) {
             try {
-                const parsed = JSON.parse(saved);
-                setData(parsed.data ?? []);
-                setViewMode(parsed.viewMode ?? "table");
-                setRawInput(parsed.rawInput ?? "");
-                setUrlInput(parsed.urlInput ?? "");
-                setInputType(parsed.inputType ?? "paste");
+                const parsedConfig = JSON.parse(saved);
+                setTabularData(parsedConfig.tabularData ?? parsedConfig.data ?? []);
+                setHierarchicalData(parsedConfig.hierarchicalData ?? parsedConfig.data ?? null);
+                setViewMode(parsedConfig.viewMode ?? "table");
+                setRawInput(parsedConfig.rawInput ?? "");
+                setUrlInput(parsedConfig.urlInput ?? "");
+                setInputType(parsedConfig.inputType ?? "paste");
             } catch {
-                sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
+                SafeStorage.removeItem(VISUALIZER_STORAGE_KEY);
             }
         }
     }, [location.state]);
 
     useEffect(() => {
-        if (data.length === 0) return;
-        const snapshot = { data, viewMode, rawInput, urlInput, inputType };
-        sessionStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(snapshot));
-    }, [data, viewMode, rawInput, urlInput, inputType]);
+        if (tabularData.length === 0 && !hierarchicalData) return;
+        const snapshot = {
+            tabularData,
+            hierarchicalData,
+            viewMode,
+            rawInput: rawInput.length > 500000 ? "" : rawInput,
+            urlInput,
+            inputType,
+        };
+        SafeStorage.setItem(VISUALIZER_STORAGE_KEY, JSON.stringify(snapshot));
+    }, [tabularData, hierarchicalData, viewMode, rawInput, urlInput, inputType]);
 
     const generateRandomTitle = () => {
         const randomID = Math.random().toString(36).substring(2, 10).toLowerCase();
@@ -116,15 +131,18 @@ const Visualizer = () => {
     }, [isModalOpen]);
 
     const handleClearVisualizer = () => {
-        setData([]);
+        setTabularData([]);
+        setHierarchicalData(null);
         setRawInput("");
         setUrlInput("");
         setInputType("paste");
         setViewMode("table");
         setError("");
         setSearchTerm("");
-        sessionStorage.removeItem(VISUALIZER_STORAGE_KEY);
+        SafeStorage.removeItem(VISUALIZER_STORAGE_KEY);
         showAlert("Input Data Cleared successfully", "Message", 3);
+        setSavedShareId(null);
+        setSaveState("idle");
     };
 
     const handleProcess = async () => {
@@ -145,9 +163,13 @@ const Visualizer = () => {
 
             if (!rawData.trim()) throw new Error("Please enter or upload data to visualize");
 
-            const parsed = parseData(rawData);
-            if (!parsed || parsed.length === 0) throw new Error("No valid records found in data");
-            setData(parsed);
+            const { tabularData: tData, hierarchicalData: hData } = parseDualData(rawData);
+            if (!tData || (tData.length === 0 && !hData)) {
+                throw new Error("No valid JSON structure found in data");
+            }
+
+            setTabularData(tData);
+            setHierarchicalData(hData);
             setIsPanelOpen(false);
         } catch (err: any) {
             setError(err?.message || "Failed to parse input data");
@@ -159,13 +181,9 @@ const Visualizer = () => {
     const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-        const maxSize = 5 * 1024 * 1024;
+        const maxSize = 10 * 1024 * 1024; // 10MB
         if (file.size > maxSize) {
-            showAlert(
-                "File is too large! Please upload a file smaller than 5MB.",
-                "Upload Error",
-                2,
-            );
+            showAlert("File is too large! Max file size is 10MB.", "Upload Error", 2);
             e.target.value = "";
             return;
         }
@@ -182,7 +200,7 @@ const Visualizer = () => {
     };
 
     const handleSave = () => {
-        if (!user || data.length === 0) return;
+        if (!user || (tabularData.length === 0 && !hierarchicalData)) return;
         setIsModalOpen(true);
     };
 
@@ -199,8 +217,8 @@ const Visualizer = () => {
         const newHistoryItem = {
             title: viztitle?.trim() || `Visual ${new Date().toLocaleDateString()}`,
             type: viewMode,
-            dataLength: data.length,
-            data: data,
+            dataLength: tabularData.length,
+            data: hierarchicalData || tabularData,
             rawInput: rawInput,
             urlInput: urlInput,
             inputType: inputType,
@@ -220,23 +238,19 @@ const Visualizer = () => {
             const result = await response.json();
 
             if (!response.ok) {
-                showAlert(
-                    result?.message || result?.error || "Failed to save history",
-                    "Save Error",
-                    1,
-                );
+                showAlert(result?.message || "Failed to save history", "Save Error", 1);
                 setSaveState("idle");
                 return;
             }
             if (result?.credits !== undefined) {
                 setCredits(result.credits);
             }
+            if (result?.newHistory?.shareId) {
+                setSavedShareId(result.newHistory.shareId);
+            }
             setSaveState("saved");
             showAlert("History saved successfully", "Success", 2);
             setViztitle("");
-            setTimeout(() => {
-                setSaveState("idle");
-            }, 2000);
         } catch (err: any) {
             setError(err?.message || "Failed to save");
             setSaveState("idle");
@@ -254,12 +268,12 @@ const Visualizer = () => {
     };
 
     const filteredData = useMemo(() => {
-        if (!searchTerm.trim()) return data;
+        if (!searchTerm.trim()) return tabularData;
         const q = searchTerm.toLowerCase();
-        return data.filter((item) =>
+        return tabularData.filter((item) =>
             Object.values(item || {}).some((val) => String(val).toLowerCase().includes(q)),
         );
-    }, [data, searchTerm]);
+    }, [tabularData, searchTerm]);
 
     const viewModes = [
         { id: "table", icon: FiTable, label: "Table" },
@@ -267,18 +281,17 @@ const Visualizer = () => {
         { id: "chart", icon: FiBarChart2, label: "Charts" },
         { id: "tree", icon: FiDatabase, label: "JSON" },
         { id: "graph", icon: FiGitBranch, label: "Graph" },
-        // { id: "flow", icon: FiGitCommit, label: "Flow" },
     ];
+
+    const hasData = tabularData.length > 0 || hierarchicalData !== null;
 
     return (
         <div className="relative flex bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 min-h-screen w-full pt-16">
-            {/* Background Glows */}
             <div className="inset-0 overflow-hidden pointer-events-none z-0 fixed">
                 <div className="absolute top-[-10%] right-[-5%] w-[350px] h-[350px] bg-cyan-500/10 blur-[100px] rounded-full" />
                 <div className="absolute bottom-[-5%] left-0 w-[350px] h-[350px] bg-fuchsia-500/10 blur-[100px] rounded-full" />
             </div>
 
-            {/* Mobile Drawer Backdrop */}
             {isPanelOpen && (
                 <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-2xs z-50 md:hidden"
@@ -286,7 +299,6 @@ const Visualizer = () => {
                 />
             )}
 
-            {/* Side Input Drawer: Full height, isolates touch scroll events */}
             <div
                 className={`fixed inset-y-0 left-0 z-50 w-full sm:w-[420px] md:w-125 transform transition-transform duration-300 ease-in-out overscroll-contain
                     ${isPanelOpen ? "translate-x-0" : "-translate-x-full"}`}
@@ -328,7 +340,6 @@ const Visualizer = () => {
                             ))}
                         </div>
 
-                        {/* Input Area with Mobile-Resilient Monaco Editor */}
                         <div className="flex-1 w-full min-h-[300px] overflow-hidden flex flex-col">
                             {inputType === "paste" && (
                                 <div className="w-full h-full">
@@ -350,7 +361,7 @@ const Visualizer = () => {
                                         type="text"
                                         value={urlInput}
                                         onChange={(e) => setUrlInput(e.target.value)}
-                                        placeholder="https://jsonplaceholder.typicode.com/comments"
+                                        placeholder="https://api.github.com/repos/facebook/react"
                                         className="w-full p-3 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 outline-none text-xs"
                                     />
                                 </div>
@@ -371,9 +382,11 @@ const Visualizer = () => {
                                             size={36}
                                         />
                                         <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 block">
-                                            Upload JSON File
+                                            Upload JSON Document
                                         </span>
-                                        <span className="text-[11px] text-gray-400">Up to 5MB</span>
+                                        <span className="text-[11px] text-gray-400">
+                                            Up to 10MB (package.json, deep trees supported)
+                                        </span>
                                     </label>
                                 </div>
                             )}
@@ -397,13 +410,11 @@ const Visualizer = () => {
                 </div>
             </div>
 
-            {/* Main Visualizer Canvas: Expands to full screen width when drawer is closed */}
             <div
                 className={`flex-1 w-full min-w-0 transition-all duration-300 px-4 sm:px-8 max-w-full ${
                     isPanelOpen ? "md:ml-125" : "ml-0"
                 }`}
             >
-                {/* Floating button to open drawer */}
                 {!isPanelOpen && (
                     <button
                         type="button"
@@ -418,7 +429,6 @@ const Visualizer = () => {
                     </button>
                 )}
 
-                {/* Top Action Header */}
                 <div className="flex flex-col gap-4 py-6">
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div className="flex items-center gap-3">
@@ -435,16 +445,15 @@ const Visualizer = () => {
                                     Visualization Canvas
                                 </h1>
                                 <span className="text-xs text-slate-500 dark:text-slate-400">
-                                    {data.length > 0
-                                        ? `${data.length} records parsed`
+                                    {hasData
+                                        ? `${tabularData.length} records projected`
                                         : "No dataset loaded"}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Control Bar */}
                         <div className="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 p-1.5 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xs">
-                            {data.length > 0 && (
+                            {hasData && (
                                 <>
                                     <button
                                         type="button"
@@ -483,6 +492,35 @@ const Visualizer = () => {
                                         </span>
                                     </button>
 
+                                    {savedShareId && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!savedShareId) {
+                                                    showAlert(
+                                                        "Please save this visualization first to generate an embed code.",
+                                                        "Save Required",
+                                                        3,
+                                                    );
+                                                    setIsModalOpen(true);
+                                                    return;
+                                                }
+                                                const embedSnippet = `<iframe src="${window.location.origin}/embed/${savedShareId}" width="100%" height="100%" frameborder="0" style="border:1px solid #e2e8f0; border-radius:12px;" allowfullscreen></iframe>`;
+                                                navigator.clipboard.writeText(embedSnippet);
+                                                showAlert(
+                                                    "Embed code copied to clipboard! Paste it into Notion, blogs, or HTML.",
+                                                    "Embed Code Ready",
+                                                    2,
+                                                );
+                                            }}
+                                            className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg text-xs font-semibold border border-indigo-200 dark:border-indigo-800 shadow-xs transition-all"
+                                            title="Get embeddable <iframe> snippet"
+                                        >
+                                            <FiCode size={14} />
+                                            <span className="hidden sm:inline">Embed</span>
+                                        </button>
+                                    )}
+
                                     <button
                                         type="button"
                                         onClick={handleClearVisualizer}
@@ -509,7 +547,6 @@ const Visualizer = () => {
 
                             <div className="h-4 w-px bg-gray-200 dark:bg-gray-800 hidden sm:block mx-1" />
 
-                            {/* View Modes */}
                             <div className="flex items-center gap-1">
                                 {viewModes.map((v) => {
                                     const isActive = viewMode === v.id;
@@ -544,9 +581,8 @@ const Visualizer = () => {
                     )}
                 </div>
 
-                {/* Viewport Content */}
                 <div ref={reportRef} className="pb-24 w-full">
-                    {data.length === 0 ? (
+                    {!hasData ? (
                         <div className="flex flex-col items-center justify-center h-[55vh] text-center border-2 border-dashed rounded-3xl border-gray-300 dark:border-gray-800 bg-white/60 dark:bg-gray-900/30 backdrop-blur-xs p-8">
                             <div className="p-5 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl mb-4 text-indigo-600 dark:text-indigo-400">
                                 <HiOutlineDatabase size={44} />
@@ -555,8 +591,8 @@ const Visualizer = () => {
                                 Ready to Visualize Your Data
                             </h3>
                             <p className="max-w-md text-xs text-gray-500 dark:text-gray-400 mt-2 mb-6">
-                                Paste JSON, connect an API endpoint, or upload a JSON document to
-                                generate interactive tables, charts, graphs, and inspectors.
+                                Paste JSON, connect an API endpoint, or upload package.json to
+                                generate interactive tables, charts, network graphs, and inspectors.
                             </p>
                             <button
                                 type="button"
@@ -585,15 +621,17 @@ const Visualizer = () => {
                                 />
                             )}
                             {viewMode === "chart" && <ChartView data={filteredData} />}
-                            {viewMode === "tree" && <TreeView data={data} />}
-                            {viewMode === "graph" && <GraphView data={data} />}
-                            {/* {viewMode === "flow" && <FlowChartView data={filteredData} />} */}
+                            {viewMode === "tree" && (
+                                <TreeView data={hierarchicalData || tabularData} />
+                            )}
+                            {viewMode === "graph" && (
+                                <GraphView data={hierarchicalData || tabularData} />
+                            )}
                         </div>
                     )}
                 </div>
             </div>
 
-            {/* Save Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 p-4 flex items-center justify-center bg-black/60 backdrop-blur-xs">
                     <div className="w-full max-w-md p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800">

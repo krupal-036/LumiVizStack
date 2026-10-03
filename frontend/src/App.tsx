@@ -24,9 +24,11 @@ import AdminRoute from "@/components/common/AdminRoute";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import ProtectedRoute from "@/components/common/ProtectedRoute";
 
-const Visualizer = lazy(() => import("@/pages/Visualizer"));
 const History = lazy(() => import("@/pages/History"));
+const EmbedView = lazy(() => import("@/pages/EmbedView"));
 const PublicView = lazy(() => import("@/pages/PublicView"));
+const Visualizer = lazy(() => import("@/pages/Visualizer"));
+const SharedGallery = lazy(() => import("@/pages/SharedGallery"));
 
 const PageLoader = () => (
     <div className="flex items-center justify-center min-h-[60vh]">
@@ -52,7 +54,9 @@ const App = () => {
                                         <Route path="/about" element={<About />} />
                                         <Route path="/guide" element={<Guide />} />
                                         <Route path="/docs/api" element={<ApiDocs />} />
-
+                                        <Route path="/view/:historyId" element={<PublicView />} />
+                                        <Route path="/embed/:shareId" element={<EmbedView />} />
+                                        <Route path="/shared" element={<SharedGallery />} />
                                         <Route
                                             path="/visualize"
                                             element={
@@ -69,9 +73,6 @@ const App = () => {
                                                 </ProtectedRoute>
                                             }
                                         />
-
-                                        <Route path="/view/:historyId" element={<PublicView />} />
-
                                         <Route
                                             path="/admin"
                                             element={

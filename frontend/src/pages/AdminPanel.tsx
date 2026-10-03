@@ -1,15 +1,27 @@
 // frontend/src/pages/AdminPanel.tsx
-import { useEffect, useState, useContext, type ReactNode } from "react";
+import { useEffect, useState, useContext, useMemo, type ReactNode } from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import axios from "axios";
-import { Earth, Trash, Settings, UserCheck, UserPlus } from "lucide-react";
+import {
+    Earth,
+    Trash,
+    Settings,
+    UserCheck,
+    UserPlus,
+    RefreshCw,
+    Search,
+    Shield,
+    CheckCircle2,
+    XCircle,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react";
 import { AuthContext } from "@/context/AuthContext";
 import {
     FiUsers,
     FiDatabase,
     FiTrash2,
     FiActivity,
-    FiUser,
     FiAlertTriangle,
     FiSettings,
     FiExternalLink,
@@ -24,6 +36,7 @@ import { FaRocket } from "react-icons/fa";
 type AdminSettings = {
     isLoginEnabled: boolean | null;
     isSignupEnabled: boolean | null;
+    isHistoryCreationEnabled: boolean | null;
 };
 
 type AdminStats = {
@@ -52,7 +65,7 @@ type AdminHistoryItem = {
     isPublic?: boolean;
     isDeleted?: boolean;
     shareId?: string;
-    userId?: { email?: string };
+    userId?: { email?: string; username?: string };
     [key: string]: any;
 };
 
@@ -66,72 +79,69 @@ const AdminPanel = () => {
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [history, setHistory] = useState<AdminHistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
     const [settings, setSettings] = useState<AdminSettings>({
         isLoginEnabled: null,
         isSignupEnabled: null,
+        isHistoryCreationEnabled: null,
     });
-    const [activeTab, setActiveTab] = useState("users");
-    const [isDark, setIsDark] = useState(false);
+    const [activeTab, setActiveTab] = useState<"users" | "history" | "stats" | "settings">("users");
+
+    // Search and Filtering State
+    const [userSearch, setUserSearch] = useState("");
+    const [userFilter, setUserFilter] = useState<"all" | "active" | "disabled">("all");
+    const [historySearch, setHistorySearch] = useState("");
+    const [historyFilter, setHistoryFilter] = useState<"all" | "public" | "private" | "deleted">(
+        "all",
+    );
+
+    // Pagination State
+    const [userPage, setUserPage] = useState(1);
+    const [historyPage, setHistoryPage] = useState(1);
+    const pageSize = 15;
+
     const { user: currentUser, token } = useContext(AuthContext);
     const { showAlert } = useAlert();
     const navigate = useNavigate();
     const location = useLocation();
     const { theme } = useTheme();
-    const fetchData = async () => {
-        setLoading(true);
+    const isDark = theme === "dark";
+
+    useTitle("Admin Command Center");
+
+    const fetchData = async (quiet = false) => {
+        if (!quiet) setLoading(true);
+        if (quiet) setIsRefreshing(true);
         if (!token) return;
+
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
-            const [statsRes, usersRes, historyRes] = await Promise.all([
+            const [statsRes, usersRes, historyRes, settingsRes] = await Promise.all([
                 axios.get("/api/admin/stats", config),
                 axios.get("/api/admin/users", config),
                 axios.get("/api/admin/history", config),
+                axios.get("/api/admin/settings", config),
             ]);
+
             setStats(statsRes.data);
             setUsers(usersRes.data);
             setHistory(historyRes.data);
-            setLoading(false);
+            setSettings(settingsRes.data);
         } catch (err: any) {
             showAlert(
                 err.response?.data?.message || "Could not load administrative data.",
-                "Error...",
+                "Access Error",
                 1,
             );
             navigate("/", { state: { from: location }, replace: true });
+        } finally {
             setLoading(false);
+            setIsRefreshing(false);
         }
     };
-    useTitle("Admin Panel");
+
     useEffect(() => {
         fetchData();
-    }, [token]);
-    useEffect(() => {
-        if (theme === "dark") {
-            setIsDark(true);
-        } else {
-            setIsDark(false);
-        }
-    }, [theme]);
-    useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const response = await fetch("/api/admin/settings", {
-                    method: "GET",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-                if (!response.ok) throw new Error("Failed to fetch");
-                const data = await response.json();
-                setSettings(data);
-            } catch (err: any) {
-                showAlert(err?.message || "Could not load administrative data.", "Invalid Role", 1);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchSettings();
     }, [token]);
 
     const handleLoad = (item: AdminHistoryItem | AdminUser) => {
@@ -142,10 +152,12 @@ const AdminPanel = () => {
             },
         });
     };
+
     const handleToggle = async (field: keyof AdminSettings) => {
         const updatedValue = !settings[field];
         const originalValue = settings[field];
         setSettings({ ...settings, [field]: updatedValue });
+
         try {
             const response = await fetch("/api/admin/settings/auth", {
                 method: "PATCH",
@@ -155,58 +167,68 @@ const AdminPanel = () => {
                 },
                 body: JSON.stringify({ ...settings, [field]: updatedValue }),
             });
+
             const data = await response.json();
             if (!response.ok) {
                 showAlert(data?.message || "Update failed", "Error", 1);
+                setSettings({ ...settings, [field]: originalValue });
+                return;
             }
-            const fieldName = field === "isLoginEnabled" ? "Login" : "Sign-up";
+
+            const fieldName =
+                field === "isLoginEnabled"
+                    ? "User Login"
+                    : field === "isHistoryCreationEnabled"
+                      ? "History Generation"
+                      : "New Sign-ups";
             const status = updatedValue ? "Enabled" : "Disabled";
-            const type = updatedValue ? 2 : 3;
-            showAlert(`${fieldName} has been successfully ${status}`, "Success", type);
-        } catch (err) {
+            showAlert(`${fieldName} has been ${status}`, "Setting Updated", updatedValue ? 2 : 3);
+        } catch {
             setSettings({ ...settings, [field]: originalValue });
             showAlert("Failed to update server settings", "Error", 1);
         }
     };
 
     const handleDeleteUser = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this user?")) return;
+        if (
+            !window.confirm(
+                "Are you sure you want to permanently delete this user and all their records?",
+            )
+        )
+            return;
         try {
             await axios.delete(`/api/admin/user/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setUsers(users.filter((u) => u._id !== id));
-            setStats((prev) => ({ ...prev, users: prev.users - 1 }));
-        } catch (err) {
-            console.error(err);
-            showAlert("Failed to delete user.");
+            setUsers((prev) => prev.filter((u) => u._id !== id));
+            setStats((prev) => ({ ...prev, users: Math.max(0, prev.users - 1) }));
+            showAlert("User account removed successfully", "Deleted", 2);
+        } catch {
+            showAlert("Failed to delete user.", "Error", 1);
         }
     };
 
     const handleDeleteAllHistoryOfUser = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete all History of this user?")) return;
+        if (
+            !window.confirm(
+                "Are you sure you want to clear ALL visualization records for this user?",
+            )
+        )
+            return;
         try {
             const res: any = await axios.delete(`/api/admin/users/history/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             if (res.status === 204) {
-                showAlert(
-                    `User had no associated history records to delete.`,
-                    "No Changes made",
-                    3,
-                );
+                showAlert("User has no associated records to delete.", "No Changes", 3);
                 return;
             }
-            showAlert(res.messege, "success", 2);
-        } catch (err) {
-            console.error(err);
-            showAlert("Failed to delete All History.", "Error", 1);
+            showAlert("User records purged successfully", "Success", 2);
+            fetchData(true);
+        } catch {
+            showAlert("Failed to purge user history.", "Error", 1);
         }
-    };
-
-    const getErrorMessage = (err: unknown) => {
-        if (err instanceof Error) return err.message;
-        return typeof err === "string" ? err : "Unknown error";
     };
 
     const handleToggleStatus = async (id: string) => {
@@ -217,16 +239,20 @@ const AdminPanel = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                setHistory((prevHistory) =>
-                    prevHistory.map((item) =>
+                setHistory((prev) =>
+                    prev.map((item) =>
                         item._id === id ? { ...item, isPublic: data.isPublic } : item,
                     ),
                 );
+                setStats((prev) => ({
+                    ...prev,
+                    isPublic: data.isPublic ? prev.isPublic + 1 : Math.max(0, prev.isPublic - 1),
+                }));
             } else {
-                showAlert("Failed to Update Status.", "Error", 1);
+                showAlert("Failed to update visibility.", "Error", 1);
             }
-        } catch (err) {
-            showAlert(getErrorMessage(err) || "Fail to Toggle", "Toggle error");
+        } catch {
+            showAlert("Network error while updating visibility", "Error", 1);
         }
     };
 
@@ -243,11 +269,16 @@ const AdminPanel = () => {
                         item._id === id ? { ...item, isDeleted: data.isDeleted } : item,
                     ),
                 );
+                showAlert(
+                    `User account ${data.isDeleted ? "deactivated" : "reactivated"}`,
+                    "Status Changed",
+                    2,
+                );
             } else {
-                showAlert("Failed to Update Status.", "Error", 1);
+                showAlert("Failed to update user status.", "Error", 1);
             }
-        } catch (err) {
-            showAlert(getErrorMessage(err) || "Fail to Toggle", "Toggle error");
+        } catch {
+            showAlert("Failed to toggle user status.", "Error", 1);
         }
     };
 
@@ -259,30 +290,34 @@ const AdminPanel = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                setHistory((prevHistory) =>
-                    prevHistory.map((item) =>
+                setHistory((prev) =>
+                    prev.map((item) =>
                         item._id === id ? { ...item, isDeleted: data.isDeleted } : item,
                     ),
                 );
-            } else {
-                showAlert("Failed to Update Status.");
+                setStats((prev) => ({
+                    ...prev,
+                    isDeleted: data.isDeleted
+                        ? prev.isDeleted + 1
+                        : Math.max(0, prev.isDeleted - 1),
+                }));
             }
-        } catch (err) {
-            showAlert(getErrorMessage(err) || "Fail to toggle", "Toggle error");
+        } catch {
+            showAlert("Failed to toggle record deletion state.", "Error", 1);
         }
     };
 
     const handleDeleteHistoryItem = async (id: string) => {
-        if (!window.confirm("Delete this visualization record?")) return;
+        if (!window.confirm("Permanently delete this visualization record?")) return;
         try {
             await axios.delete(`/api/history/${id}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            setHistory(history.filter((h) => h._id !== id));
-            setStats((prev) => ({ ...prev, records: prev.records - 1 }));
-        } catch (err) {
-            console.error(err);
-            showAlert("Failed to delete record.", "Error...");
+            setHistory((prev) => prev.filter((h) => h._id !== id));
+            setStats((prev) => ({ ...prev, records: Math.max(0, prev.records - 1) }));
+            showAlert("Visualization record deleted", "Removed", 2);
+        } catch {
+            showAlert("Failed to delete record.", "Error", 1);
         }
     };
 
@@ -300,855 +335,815 @@ const AdminPanel = () => {
             });
             const data = await res.json();
             if (res.ok) {
-                showAlert(data.message, "Success", 2);
+                showAlert(data.message || "All history purged", "Success", 2);
+                setHistory([]);
+                setStats((prev) => ({ ...prev, records: 0, isPublic: 0, isDeleted: 0 }));
             }
-            setHistory([]);
-            setStats((prev) => ({ ...prev, records: 0 }));
-        } catch (err) {
-            console.error(err);
+        } catch {
             showAlert("Failed to delete all history.", "Error", 1);
         }
     };
 
-    type StatCardProps = {
-        icon: ReactNode;
-        label: string;
-        value: number | string;
-        iconBg: string;
+    // Filtered Users Pipeline
+    const filteredUsers = useMemo(() => {
+        return users.filter((u) => {
+            const matchesQuery =
+                u.username?.toLowerCase().includes(userSearch.toLowerCase()) ||
+                u.email?.toLowerCase().includes(userSearch.toLowerCase());
+            if (!matchesQuery) return false;
+            if (userFilter === "active") return !u.isDeleted;
+            if (userFilter === "disabled") return u.isDeleted;
+            return true;
+        });
+    }, [users, userSearch, userFilter]);
+
+    // Filtered History Pipeline
+    const filteredHistory = useMemo(() => {
+        return history.filter((h) => {
+            const matchesQuery =
+                h.title?.toLowerCase().includes(historySearch.toLowerCase()) ||
+                h.userId?.email?.toLowerCase().includes(historySearch.toLowerCase()) ||
+                h.type?.toLowerCase().includes(historySearch.toLowerCase());
+            if (!matchesQuery) return false;
+            if (historyFilter === "public") return h.isPublic && !h.isDeleted;
+            if (historyFilter === "private") return !h.isPublic && !h.isDeleted;
+            if (historyFilter === "deleted") return h.isDeleted;
+            return true;
+        });
+    }, [history, historySearch, historyFilter]);
+
+    // Paginated Slices
+    const paginatedUsers = useMemo(() => {
+        const start = (userPage - 1) * pageSize;
+        return filteredUsers.slice(start, start + pageSize);
+    }, [filteredUsers, userPage]);
+
+    const paginatedHistory = useMemo(() => {
+        const start = (historyPage - 1) * pageSize;
+        return filteredHistory.slice(start, start + pageSize);
+    }, [filteredHistory, historyPage]);
+
+    const totalUserPages = Math.ceil(filteredUsers.length / pageSize) || 1;
+    const totalHistoryPages = Math.ceil(filteredHistory.length / pageSize) || 1;
+
+    const fmtDate = (d: string | undefined) => {
+        if (!d) return "—";
+        return new Date(d).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
     };
 
-    const StatCard = ({ icon, label, value, iconBg }: StatCardProps) => (
-        <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900/60 border border-slate-200/80 dark:border-white/6 p-5 group hover:shadow-xl hover:shadow-black/4 dark:hover:shadow-black/20 transition-all duration-300 hover:-translate-y-0.5">
-            <div className="flex items-center justify-between pl-3">
+    if (loading) {
+        return <Loader data="Loading Admin Command Center..." />;
+    }
+
+    const pieData = [
+        {
+            name: "Active Users",
+            value: Math.max(0, stats.users - stats.isDeleted),
+            color: "#6366f1",
+        },
+        { name: "Public Viz", value: stats.isPublic || 0, color: "#10b981" },
+        {
+            name: "Private Viz",
+            value: Math.max(0, stats.records - stats.isPublic),
+            color: "#f59e0b",
+        },
+        { name: "Deleted Viz", value: stats.isDeleted || 0, color: "#ef4444" },
+    ];
+
+    const StatMetricCard = ({
+        icon,
+        title,
+        value,
+        subtext,
+        colorClass,
+    }: {
+        icon: ReactNode;
+        title: string;
+        value: number | string;
+        subtext: string;
+        colorClass: string;
+    }) => (
+        <div className="relative overflow-hidden rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-xs transition-all hover:shadow-md hover:border-indigo-500/30">
+            <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-1.5">
-                        {label}
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">
+                        {title}
                     </p>
-                    <p
-                        className="text-3xl font-black text-slate-900 dark:text-white tracking-tight"
-                        style={{ fontVariantNumeric: "tabular-nums" }}
-                    >
+                    <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums">
                         {value}
                     </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">
+                        {subtext}
+                    </p>
                 </div>
-                <div
-                    className={`p-3 rounded-xl ${iconBg} transition-transform duration-300 group-hover:scale-110`}
-                >
-                    {icon}
-                </div>
+                <div className={`p-3.5 rounded-2xl ${colorClass}`}>{icon}</div>
             </div>
         </div>
     );
 
-    if (loading) {
-        return <Loader data={"Loading Admin Panel..."} />;
-    }
-
-    const tabs = [
-        { id: "users", label: "Users", icon: <HiOutlineUserGroup className="w-4 h-4" /> },
-        { id: "history", label: "History", icon: <FiActivity className="w-4 h-4" /> },
-        { id: "stats", label: "Stats", icon: <HiOutlineChartBar className="w-4 h-4" /> },
-        { id: "settings", label: "Settings", icon: <FiSettings className="w-4 h-4" /> },
-    ];
-
-    const pieData = [
-        { name: "Users", value: stats.users || 0, color: "#0d9488" },
-        { name: "Records", value: stats.records || 0, color: "#f59e0b" },
-        { name: "Public", value: stats.isPublic || 0, color: "#10b981" },
-        { name: "Deleted", value: stats.isDeleted || 0, color: "#f43f5e" },
-    ];
-
-    const totalItems = pieData.reduce((s, d) => s + d.value, 0);
-
-    const fmtDate = (d: string | undefined) =>
-        new Date(d ?? "").toLocaleString("en-IN", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-        });
-
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-[#0c0e14] relative">
-            <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div className="absolute -top-40 -right-40 w-[550px] h-[550px] bg-indigo-400/8 dark:bg-indigo-500/4 rounded-full blur-[140px]" />
-                <div className="absolute -bottom-40 -left-40 w-[480px] h-[480px] bg-blue-400/6 dark:bg-blue-500/3 rounded-full blur-[120px]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-amber-300/3 dark:bg-amber-500/2 rounded-full blur-[100px]" />
-                <div
-                    className="absolute inset-0 opacity-3 dark:opacity-[0.05]"
-                    style={{
-                        backgroundImage: "radial-linear(#94a3b8 1px, transparent 1px)",
-                        backgroundSize: "28px 28px",
-                    }}
+        <div className="min-h-screen w-full bg-slate-50 dark:bg-[#07090E] pt-20 pb-16 px-4 sm:px-6 lg:px-10 xl:px-12 transition-colors">
+            {/* Global Top Banner */}
+            <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 mb-6 border-b border-slate-200 dark:border-slate-800/80">
+                <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-lg shadow-indigo-600/20 shrink-0">
+                        <Shield className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2.5">
+                            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+                                System Administration
+                            </h1>
+                            <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                                Superadmin
+                            </span>
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+                            Real-time overview of users, database records, telemetry, and platform
+                            permissions.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => fetchData(true)}
+                        disabled={isRefreshing}
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-300 shadow-xs transition-all active:scale-95 disabled:opacity-60"
+                        title="Sync latest database statistics"
+                    >
+                        <RefreshCw
+                            className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-indigo-500" : ""}`}
+                        />
+                        <span>{isRefreshing ? "Syncing..." : "Sync Live Data"}</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* Quick KPI Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <StatMetricCard
+                    icon={<FiUsers className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />}
+                    title="Total Registered Users"
+                    value={stats.users}
+                    subtext="Platform accounts"
+                    colorClass="bg-indigo-50 dark:bg-indigo-950/40"
+                />
+                <StatMetricCard
+                    icon={<FiDatabase className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
+                    title="Total Visualizations"
+                    value={stats.records}
+                    subtext="Stored datasets"
+                    colorClass="bg-amber-50 dark:bg-amber-950/40"
+                />
+                <StatMetricCard
+                    icon={<Earth className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />}
+                    title="Public Share Links"
+                    value={stats.isPublic}
+                    subtext="Accessible globally"
+                    colorClass="bg-emerald-50 dark:bg-emerald-950/40"
+                />
+                <StatMetricCard
+                    icon={<Trash className="w-6 h-6 text-rose-600 dark:text-rose-400" />}
+                    title="Archived / Deleted"
+                    value={stats.isDeleted}
+                    subtext="In trash bin"
+                    colorClass="bg-rose-50 dark:bg-rose-950/40"
                 />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
-                <header className="mb-10">
-                    <div className="flex items-center gap-3.5 mb-2">
-                        <div className="w-11 h-11 rounded-xl bg-linear-to-br from-indigo-500 to-indigo-600 dark:from-indigo-400 dark:to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20 dark:shadow-indigo-500/10">
-                            <FiSettings className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex items-center gap-2.5 flex-wrap">
-                            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-                                Admin Panel
-                            </h1>
-                            <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] bg-indigo-50 dark:bg-indigo-900/25 text-indigo-700 dark:text-indigo-400 rounded-md border border-indigo-200/60 dark:border-indigo-700/30">
-                                Admin
-                            </span>
-                        </div>
-                    </div>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm ml-[58px]">
-                        Monitor activity, manage users, and configure system settings.
-                    </p>
-                </header>
-
-                <section
-                    className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8"
-                    aria-label="Statistics overview"
-                >
-                    <StatCard
-                        icon={<FiUsers className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />}
-                        label="Total Users"
-                        value={stats.users}
-                        iconBg="bg-indigo-50 dark:bg-indigo-900/20"
-                    />
-                    <StatCard
-                        icon={<FiDatabase className="w-5 h-5 text-amber-600 dark:text-amber-400" />}
-                        label="Total Records"
-                        value={stats.records}
-                        iconBg="bg-amber-50 dark:bg-amber-900/20"
-                    />
-                    <StatCard
-                        icon={<Earth className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
-                        label="Public Records"
-                        value={stats.isPublic}
-                        iconBg="bg-blue-50 dark:bg-blue-900/20"
-                    />
-                    <StatCard
-                        icon={<Trash className="w-5 h-5 text-rose-600 dark:text-rose-400" />}
-                        label="Deleted Records"
-                        value={stats.isDeleted}
-                        iconBg="bg-rose-50 dark:bg-rose-900/20"
-                    />
-                </section>
-
-                <nav
-                    className="flex items-center justify-between gap-4 mb-4 flex-wrap"
-                    aria-label="Admin panel tabs"
-                >
-                    <div className="inline-flex items-center gap-1 p-1.5 bg-white dark:bg-slate-900/40 rounded-2xl border border-slate-200/80 dark:border-white/6 shadow-sm">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                                    activeTab === tab.id
-                                        ? "bg-indigo-600 dark:bg-indigo-500 text-white shadow-lg shadow-indigo-600/25 dark:shadow-indigo-500/15"
-                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/4"
-                                }`}
-                            >
-                                {tab.icon}
-                                <span className="hidden sm:inline">{tab.label}</span>
-                            </button>
-                        ))}
-                    </div>
-
-                    {activeTab === "history" && history.length > 0 && (
+            {/* Navigation Tabs Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div className="inline-flex items-center gap-1.5 p-1 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+                    {[
+                        {
+                            id: "users",
+                            label: "Users Registry",
+                            icon: <HiOutlineUserGroup className="w-4 h-4" />,
+                        },
+                        {
+                            id: "history",
+                            label: "Visualizations",
+                            icon: <FiActivity className="w-4 h-4" />,
+                        },
+                        {
+                            id: "stats",
+                            label: "Analytics & Breakdown",
+                            icon: <HiOutlineChartBar className="w-4 h-4" />,
+                        },
+                        {
+                            id: "settings",
+                            label: "Platform Policy",
+                            icon: <FiSettings className="w-4 h-4" />,
+                        },
+                    ].map((tab) => (
                         <button
-                            onClick={handleDeleteAllHistory}
-                            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/40 bg-rose-50 dark:bg-rose-900/10 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/20 active:scale-[0.97] transition-all duration-200"
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                                activeTab === tab.id
+                                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
+                                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50"
+                            }`}
                         >
-                            <FiTrash2 className="w-3.5 h-3.5" />
-                            Delete All History
+                            {tab.icon}
+                            <span>{tab.label}</span>
                         </button>
-                    )}
-                </nav>
+                    ))}
+                </div>
 
-                <main className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border border-slate-200/80 dark:border-white/6 rounded-2xl overflow-hidden shadow-xl shadow-black/3 dark:shadow-black/20">
-                    {activeTab === "users" && (
-                        <div className="p-4 sm:p-6">
-                            <div className="hidden md:block overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800/60">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-200/60 dark:border-slate-700/40">
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                    User
-                                                </th>
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                    Email
-                                                </th>
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                    Role
-                                                </th>
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                    Joined
-                                                </th>
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                    Viz
-                                                </th>
-                                                <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                                            {users.map((u) => (
+                {activeTab === "history" && history.length > 0 && (
+                    <button
+                        onClick={handleDeleteAllHistory}
+                        className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 active:scale-95 transition-all"
+                    >
+                        <FiTrash2 className="w-3.5 h-3.5" />
+                        <span>Purge All Platform History</span>
+                    </button>
+                )}
+            </div>
+
+            {/* Main Full-Width Content Container */}
+            <div className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+                {/* 1. USERS TAB */}
+                {activeTab === "users" && (
+                    <div className="p-4 sm:p-6 flex flex-col gap-4">
+                        {/* Users Search & Filter Controls */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div className="relative w-full sm:w-80">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Filter by username or email..."
+                                    value={userSearch}
+                                    onChange={(e) => {
+                                        setUserSearch(e.target.value);
+                                        setUserPage(1);
+                                    }}
+                                    className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <select
+                                    value={userFilter}
+                                    onChange={(e) => {
+                                        setUserFilter(e.target.value as any);
+                                        setUserPage(1);
+                                    }}
+                                    className="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 outline-none"
+                                >
+                                    <option value="all">All Accounts ({users.length})</option>
+                                    <option value="active">Active Only</option>
+                                    <option value="disabled">Disabled Only</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Full Width Users Table */}
+                        <div className="w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                        <th className="py-3 px-4">User</th>
+                                        <th className="py-3 px-4">Email</th>
+                                        <th className="py-3 px-4">Role</th>
+                                        <th className="py-3 px-4">Status</th>
+                                        <th className="py-3 px-4 text-center">Visualizations</th>
+                                        <th className="py-3 px-4">Joined Date</th>
+                                        <th className="py-3 px-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                                    {paginatedUsers.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan={7}
+                                                className="py-12 text-center text-slate-400"
+                                            >
+                                                No users matching current filters
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        paginatedUsers.map((u) => {
+                                            const isSelf = currentUser?.id === u._id;
+                                            return (
                                                 <tr
                                                     key={u._id}
-                                                    className="hover:bg-slate-50/60 dark:hover:bg-white/2 transition-colors"
+                                                    className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors"
                                                 >
-                                                    <td className="py-4 px-5">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-9 h-9 shrink-0 rounded-full bg-linear-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                                                    <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-black flex items-center justify-center text-xs shrink-0">
                                                                 {u.username
                                                                     ? u.username[0].toUpperCase()
                                                                     : "U"}
                                                             </div>
-                                                            <span className="font-semibold text-slate-800 dark:text-slate-100">
+                                                            <span className="truncate">
                                                                 {u.username}
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td className="py-4 px-5 text-sm text-slate-500 dark:text-slate-400">
+                                                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono">
                                                         {u.email}
                                                     </td>
-                                                    <td className="py-4 px-5">
+                                                    <td className="py-3.5 px-4">
                                                         <span
-                                                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold uppercase tracking-wider ${
+                                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                                                                 u.role === "admin"
-                                                                    ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-700/30"
-                                                                    : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30"
+                                                                    ? "bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800"
+                                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
                                                             }`}
                                                         >
                                                             {u.role}
                                                         </span>
                                                     </td>
-                                                    <td className="py-4 px-5">
-                                                        <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                                            {fmtDate(u.createdAt)}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 px-5 text-center">
-                                                        <span className="inline-flex items-center justify-center min-w-[32px] px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/30">
-                                                            {u.historyCount}
-                                                        </span>
-                                                    </td>
-                                                    <td className="py-4 px-5">
-                                                        <div className="flex items-center justify-center gap-1">
-                                                            {currentUser?.id !== u._id &&
-                                                                u.role !== "admin" && (
-                                                                    <>
-                                                                        <button
-                                                                            onClick={() =>
-                                                                                handleDeleteAllHistoryOfUser(
-                                                                                    u._id,
-                                                                                )
-                                                                            }
-                                                                            className="p-2 rounded-lg text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/10 transition-colors"
-                                                                            title="Delete user's history"
-                                                                        >
-                                                                            <FiTrash2 className="w-4 h-4" />
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() =>
-                                                                                handleDeleteUser(
-                                                                                    u._id,
-                                                                                )
-                                                                            }
-                                                                            className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors"
-                                                                            title="Delete User"
-                                                                        >
-                                                                            <Trash className="w-4 h-4" />
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={() =>
-                                                                                handledisableuser(
-                                                                                    u._id,
-                                                                                )
-                                                                            }
-                                                                            className={`p-2 rounded-lg ${u.isDeleted ? "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/10" : "text-slate-400"} hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors`}
-                                                                            title={
-                                                                                u.isDeleted
-                                                                                    ? `${u.username} is Disabled`
-                                                                                    : `Disable ${u.username}`
-                                                                            }
-                                                                        >
-                                                                            <MdBlock className="w-4 h-4" />
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-3 md:hidden">
-                                {users.map((u) => (
-                                    <div
-                                        key={u._id}
-                                        className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-xl border border-slate-200/60 dark:border-white/4 space-y-3"
-                                    >
-                                        <div className="flex items-center justify-between gap-3">
-                                            <div className="flex items-center gap-3 min-w-0">
-                                                <div className="w-10 h-10 rounded-lg bg-linear-to-br from-indigo-800 to-blue-500 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
-                                                    {u.username ? u.username[0].toUpperCase() : "U"}
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
-                                                            {u.username}
-                                                        </span>
+                                                    <td className="py-3.5 px-4">
                                                         <span
-                                                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider shrink-0 ${
-                                                                u.role === "admin"
-                                                                    ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400"
-                                                                    : "bg-slate-100 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400"
+                                                            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                                                u.isDeleted
+                                                                    ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                                                                    : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
                                                             }`}
                                                         >
-                                                            {u.role}
+                                                            {u.isDeleted ? (
+                                                                <>
+                                                                    <XCircle className="w-3 h-3" />{" "}
+                                                                    Disabled
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <CheckCircle2 className="w-3 h-3" />{" "}
+                                                                    Active
+                                                                </>
+                                                            )}
                                                         </span>
-                                                    </div>
-                                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                                        {u.email}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/60 px-2.5 py-1 rounded-lg shrink-0">
-                                                {u.historyCount} viz
-                                            </span>
-                                        </div>
-                                        {currentUser?.id !== u._id && u.role !== "admin" && (
-                                            <div className="flex flex-wrap sm:flex-row gap-2 pt-2 border-t border-slate-200/60 dark:border-white/4">
-                                                <button
-                                                    onClick={() =>
-                                                        handleDeleteAllHistoryOfUser(u._id)
-                                                    }
-                                                    className="flex-1 min-w-fit flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-xs font-bold active:scale-[0.97] transition-all border border-amber-200/60 dark:border-amber-800/30"
-                                                >
-                                                    <FiTrash2 className="w-3.5 h-3.5" />
-                                                    <span>Clear History</span>
-                                                </button>
-
-                                                <button
-                                                    onClick={() => handleDeleteUser(u._id)}
-                                                    className="flex-1 sm:flex-none flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30"
-                                                >
-                                                    <Trash className="w-3.5 h-3.5" />
-                                                </button>
-
-                                                <button
-                                                    onClick={() => handledisableuser(u._id)}
-                                                    className={`flex-1 sm:flex-none flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl ${u.isDeleted ? "bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400" : "bg-slate-50 dark:bg-slate-900/10 text-slate-600 dark:text-slate-400"} text-xs font-bold active:scale-[0.97] transition-all border border-rose-200/60 dark:border-rose-800/30`}
-                                                >
-                                                    <MdBlock className="w-3.5 h-3.5" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {activeTab === "history" && (
-                        <div className="p-4 sm:p-6">
-                            {history.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
-                                    <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800/40 flex items-center justify-center mb-4">
-                                        <FiDatabase className="w-7 h-7" />
-                                    </div>
-                                    <p className="font-semibold text-slate-500 dark:text-slate-400">
-                                        No history records found
-                                    </p>
-                                    <p className="text-sm mt-1 text-slate-400 dark:text-slate-500">
-                                        Records will appear here as users create visualizations.
-                                    </p>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="hidden md:block overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800/60">
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full text-left">
-                                                <thead>
-                                                    <tr className="bg-slate-50/80 dark:bg-slate-800/30 border-b border-slate-200/60 dark:border-slate-700/40">
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                            Title
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                            User
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500">
-                                                            Type
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                            Created
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                            Action
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                            Visibility
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-center">
-                                                            Link
-                                                        </th>
-                                                        <th className="py-3.5 px-5 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400 dark:text-slate-500 text-right">
-                                                            Delete
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                                                    {history.map((h) => (
-                                                        <tr
-                                                            key={h._id}
-                                                            className="hover:bg-slate-50/60 dark:hover:bg-white/2 transition-colors"
-                                                        >
-                                                            <td className="py-4 px-5">
-                                                                <span className="font-medium text-slate-800 dark:text-slate-100">
-                                                                    {h.title || "Untitled Record"}
-                                                                </span>
-                                                            </td>
-                                                            <td className="py-4 px-5">
-                                                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                                                                    <FiUser className="w-3.5 h-3.5 opacity-40 shrink-0" />
-                                                                    <span className="truncate max-w-[160px]">
-                                                                        {h.userId?.email ||
-                                                                            "Unknown"}
-                                                                    </span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-4 px-5">
-                                                                <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-slate-700/30">
-                                                                    {h.type}
-                                                                </span>
-                                                            </td>
-                                                            <td className="py-4 px-2">
-                                                                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono text-center">
-                                                                    {fmtDate(h.createdAt)}
-                                                                </span>
-                                                            </td>
-                                                            <td className="py-4 px-2 text-center">
-                                                                <span className="flex items-center justify-center">
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            handleLoad(h)
-                                                                        }
-                                                                        className="flex items-center gap-2 p-2 bg-blue-100 text-blue-500 dark:bg-blue-900/30 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 rounded-lg transition-all text-xs font-mono"
-                                                                        title="Load this Visualization"
-                                                                    >
-                                                                        <FaRocket size={16} />
-                                                                        <span>Load</span>
-                                                                    </button>
-                                                                </span>
-                                                            </td>
-
-                                                            <td className="py-4 px-5">
-                                                                <div className="flex items-center justify-center gap-3">
-                                                                    <label className="inline-flex items-center cursor-pointer">
-                                                                        <div className="relative">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="sr-only peer"
-                                                                                checked={h.isPublic}
-                                                                                onChange={() =>
-                                                                                    handleToggleStatus(
-                                                                                        h._id,
-                                                                                    )
-                                                                                }
-                                                                            />
-                                                                            <div className="w-8 h-4 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-500 transition-colors" />
-                                                                            <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                                                                        </div>
-                                                                        <span
-                                                                            className={`ml-1.5 text-[10px] font-bold uppercase ${h.isPublic ? "text-emerald-600 dark:text-green-400" : "text-slate-400 dark:text-slate-500"}`}
-                                                                        >
-                                                                            {h.isPublic
-                                                                                ? "On"
-                                                                                : "Off"}
-                                                                        </span>
-                                                                    </label>
-                                                                    <label className="inline-flex items-center cursor-pointer">
-                                                                        <div className="relative">
-                                                                            <input
-                                                                                type="checkbox"
-                                                                                className="sr-only peer"
-                                                                                checked={
-                                                                                    h.isDeleted
-                                                                                }
-                                                                                onChange={() =>
-                                                                                    handleSoftDelete(
-                                                                                        h._id,
-                                                                                    )
-                                                                                }
-                                                                            />
-                                                                            <div className="w-8 h-4 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-rose-500 transition-colors" />
-                                                                            <div className="absolute left-0.5 top-0.5 bg-white w-3 h-3 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                                                                        </div>
-                                                                        <span
-                                                                            className={`ml-1.5 text-[10px] font-bold uppercase ${h.isDeleted ? "text-rose-600 dark:text-rose-400" : "text-slate-400 dark:text-slate-500"}`}
-                                                                        >
-                                                                            {h.isDeleted
-                                                                                ? "Del"
-                                                                                : "Act"}
-                                                                        </span>
-                                                                    </label>
-                                                                </div>
-                                                            </td>
-                                                            <td className="py-4 px-5 text-center">
-                                                                {h.shareId && h.isPublic ? (
-                                                                    <button
-                                                                        onClick={() =>
-                                                                            window.open(
-                                                                                `/view/${h.shareId}`,
-                                                                                "_blank",
-                                                                                "noopener,noreferrer",
-                                                                            )
-                                                                        }
-                                                                        className="p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-colors inline-flex"
-                                                                        title="Open public link"
-                                                                    >
-                                                                        <FiExternalLink className="w-4 h-4" />
-                                                                    </button>
-                                                                ) : (
-                                                                    <span className="text-slate-300 dark:text-slate-600">
-                                                                        &mdash;
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                            <td className="py-4 px-5 text-right">
+                                                    </td>
+                                                    <td className="py-3.5 px-4 text-center">
+                                                        <span className="font-mono font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                                                            {u.historyCount || 0}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
+                                                        {fmtDate(u.createdAt)}
+                                                    </td>
+                                                    <td className="py-3.5 px-4 text-right">
+                                                        {!isSelf && u.role !== "admin" ? (
+                                                            <div className="flex items-center justify-end gap-1">
                                                                 <button
                                                                     onClick={() =>
-                                                                        handleDeleteHistoryItem(
-                                                                            h._id,
+                                                                        handleDeleteAllHistoryOfUser(
+                                                                            u._id,
                                                                         )
                                                                     }
-                                                                    className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors inline-flex"
+                                                                    className="p-1.5 rounded-lg text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
+                                                                    title="Purge user's history records"
                                                                 >
                                                                     <FiTrash2 className="w-4 h-4" />
                                                                 </button>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handledisableuser(u._id)
+                                                                    }
+                                                                    className={`p-1.5 rounded-lg transition-colors ${
+                                                                        u.isDeleted
+                                                                            ? "text-rose-600 bg-rose-50 dark:bg-rose-950/30"
+                                                                            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                                    }`}
+                                                                    title={
+                                                                        u.isDeleted
+                                                                            ? "Reactivate account"
+                                                                            : "Deactivate account"
+                                                                    }
+                                                                >
+                                                                    <MdBlock className="w-4 h-4" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleDeleteUser(u._id)
+                                                                    }
+                                                                    className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                                                    title="Permanently delete user"
+                                                                >
+                                                                    <Trash className="w-4 h-4" />
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-[11px] text-slate-400 italic">
+                                                                Protected
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
 
-                                    <div className="grid grid-cols-1 gap-3 md:hidden">
-                                        {history.map((h) => (
-                                            <div
-                                                key={h._id}
-                                                className="bg-slate-50/80 dark:bg-white/2 p-4 rounded-xl border border-slate-200/60 dark:border-white/4 space-y-3"
+                        {/* Pagination Bar */}
+                        {totalUserPages > 1 && (
+                            <div className="flex items-center justify-between pt-2">
+                                <span className="text-xs text-slate-500">
+                                    Page {userPage} of {totalUserPages} ({filteredUsers.length}{" "}
+                                    total)
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setUserPage((p) => Math.max(1, p - 1))}
+                                        disabled={userPage === 1}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setUserPage((p) => Math.min(totalUserPages, p + 1))
+                                        }
+                                        disabled={userPage === totalUserPages}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 2. HISTORY / VISUALIZATIONS TAB */}
+                {activeTab === "history" && (
+                    <div className="p-4 sm:p-6 flex flex-col gap-4">
+                        {/* History Search & Filters */}
+                        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                            <div className="relative w-full sm:w-80">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Search by title, owner email, or type..."
+                                    value={historySearch}
+                                    onChange={(e) => {
+                                        setHistorySearch(e.target.value);
+                                        setHistoryPage(1);
+                                    }}
+                                    className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white"
+                                />
+                            </div>
+
+                            <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <select
+                                    value={historyFilter}
+                                    onChange={(e) => {
+                                        setHistoryFilter(e.target.value as any);
+                                        setHistoryPage(1);
+                                    }}
+                                    className="px-3 py-2 text-xs font-semibold rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 outline-none"
+                                >
+                                    <option value="all">All Records ({history.length})</option>
+                                    <option value="public">Public Links Only</option>
+                                    <option value="private">Private Records</option>
+                                    <option value="deleted">Archived / Deleted</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {/* Full Width History Table */}
+                        <div className="w-full overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                                        <th className="py-3 px-4">Title</th>
+                                        <th className="py-3 px-4">Owner</th>
+                                        <th className="py-3 px-4">Visual Mode</th>
+                                        <th className="py-3 px-4 text-center">Visibility</th>
+                                        <th className="py-3 px-4 text-center">Archive Status</th>
+                                        <th className="py-3 px-4">Created Date</th>
+                                        <th className="py-3 px-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                                    {paginatedHistory.length === 0 ? (
+                                        <tr>
+                                            <td
+                                                colSpan={7}
+                                                className="py-12 text-center text-slate-400"
                                             >
-                                                <div className="flex items-start justify-between gap-3">
-                                                    <div className="min-w-0">
-                                                        <h3 className="font-bold text-slate-800 dark:text-slate-100 truncate">
-                                                            {h.title || "Untitled Record"}
-                                                        </h3>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 text-[10px] font-mono font-medium text-slate-500 dark:text-slate-400">
-                                                                {h.type}
-                                                            </span>
-                                                            <span className="text-xs text-slate-400 truncate">
-                                                                {h.userId?.email}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                                No visualization records found matching current
+                                                query
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        paginatedHistory.map((h) => (
+                                            <tr
+                                                key={h._id}
+                                                className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors"
+                                            >
+                                                <td className="py-3.5 px-4 font-bold text-slate-900 dark:text-white max-w-xs truncate">
+                                                    {h.title || "Untitled Visualization"}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono">
+                                                    {h.userId?.email || "Unknown"}
+                                                </td>
+                                                <td className="py-3.5 px-4">
+                                                    <span className="px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-200 dark:border-indigo-800">
+                                                        {h.type}
+                                                    </span>
+                                                </td>
+                                                <td className="py-3.5 px-4 text-center">
                                                     <button
-                                                        onClick={() =>
-                                                            handleDeleteHistoryItem(h._id)
-                                                        }
-                                                        className="p-2 rounded-lg bg-rose-50 dark:bg-rose-900/10 text-rose-500 shrink-0 active:scale-90 transition-transform"
+                                                        onClick={() => handleToggleStatus(h._id)}
+                                                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                                            h.isPublic
+                                                                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                                                                : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                                        }`}
+                                                        title="Toggle Public / Private"
                                                     >
-                                                        <FiTrash2 className="w-4 h-4" />
+                                                        {h.isPublic ? "Public" : "Private"}
                                                     </button>
-                                                </div>
-                                                <div className="flex items-center gap-4 pt-2 border-t border-slate-200/60 dark:border-white/4">
-                                                    <label className="inline-flex items-center cursor-pointer">
-                                                        <div className="relative">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="sr-only peer"
-                                                                checked={h.isPublic}
-                                                                onChange={() =>
-                                                                    handleToggleStatus(h._id)
-                                                                }
-                                                            />
-                                                            <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-blue-500 transition-colors" />
-                                                            <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                                                        </div>
-                                                        <span
-                                                            className={`ml-2 text-[10px] font-bold uppercase tracking-wide ${h.isPublic ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}`}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-center">
+                                                    <button
+                                                        onClick={() => handleSoftDelete(h._id)}
+                                                        className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all ${
+                                                            h.isDeleted
+                                                                ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                                                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                                                        }`}
+                                                    >
+                                                        {h.isDeleted ? "In Trash" : "Active"}
+                                                    </button>
+                                                </td>
+                                                <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
+                                                    {fmtDate(h.createdAt)}
+                                                </td>
+                                                <td className="py-3.5 px-4 text-right">
+                                                    <div className="flex items-center justify-end gap-1.5">
+                                                        <button
+                                                            onClick={() => handleLoad(h)}
+                                                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[11px] font-bold hover:bg-blue-100 transition-colors"
+                                                            title="Mount visualization in editor"
                                                         >
-                                                            Public
-                                                        </span>
-                                                    </label>
-                                                    <label className="inline-flex items-center cursor-pointer">
-                                                        <div className="relative">
-                                                            <input
-                                                                type="checkbox"
-                                                                className="sr-only peer"
-                                                                checked={h.isDeleted}
-                                                                onChange={() =>
-                                                                    handleSoftDelete(h._id)
-                                                                }
-                                                            />
-                                                            <div className="w-9 h-5 bg-slate-200 dark:bg-slate-700 rounded-full peer peer-checked:bg-rose-500 transition-colors" />
-                                                            <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                                                        </div>
-                                                        <span
-                                                            className={`ml-2 text-[10px] font-bold uppercase tracking-wide ${h.isDeleted ? "text-rose-600 dark:text-rose-400" : "text-slate-400"}`}
-                                                        >
-                                                            Deleted
-                                                        </span>
-                                                    </label>
-                                                    {h.shareId && h.isPublic && (
-                                                        <>
+                                                            <FaRocket size={12} />
+                                                            <span>Launch</span>
+                                                        </button>
+
+                                                        {h.shareId && h.isPublic && (
                                                             <button
                                                                 onClick={() =>
                                                                     window.open(
                                                                         `/view/${h.shareId}`,
                                                                         "_blank",
-                                                                        "noopener,noreferrer",
                                                                     )
                                                                 }
-                                                                className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                                                                className="p-1.5 rounded-lg text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors"
+                                                                title="Open shareable public URL"
                                                             >
                                                                 <FiExternalLink className="w-4 h-4" />
                                                             </button>
-                                                            <button
-                                                                onClick={() => handleLoad(h)}
-                                                                className="ml-auto p-2 rounded-lg text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                                                            >
-                                                                <FaRocket className="w-4 h-4" />
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
+                                                        )}
 
-                    {activeTab === "stats" && (
-                        <div className="p-6 sm:p-10">
-                            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 text-center mb-2">
-                                Platform Distribution
+                                                        <button
+                                                            onClick={() =>
+                                                                handleDeleteHistoryItem(h._id)
+                                                            }
+                                                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                                                            title="Permanently delete record"
+                                                        >
+                                                            <FiTrash2 className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination Bar */}
+                        {totalHistoryPages > 1 && (
+                            <div className="flex items-center justify-between pt-2">
+                                <span className="text-xs text-slate-500">
+                                    Page {historyPage} of {totalHistoryPages} (
+                                    {filteredHistory.length} total records)
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}
+                                        disabled={historyPage === 1}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40"
+                                    >
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() =>
+                                            setHistoryPage((p) =>
+                                                Math.min(totalHistoryPages, p + 1),
+                                            )
+                                        }
+                                        disabled={historyPage === totalHistoryPages}
+                                        className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 3. STATS & ANALYTICS TAB */}
+                {activeTab === "stats" && (
+                    <div className="p-6 sm:p-10 flex flex-col items-center">
+                        <div className="text-center max-w-md mb-8">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+                                Platform Entity Distribution
                             </h3>
-                            <p className="text-sm text-slate-400 dark:text-slate-500 text-center mb-8">
-                                Breakdown of all platform entities by category
+                            <p className="text-xs text-slate-500 mt-1">
+                                Breakdown of records, active configurations, and user distribution
                             </p>
-                            <div style={{ width: "100%", height: 400 }}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={pieData}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={90}
-                                            outerRadius={125}
-                                            paddingAngle={4}
-                                            dataKey="value"
-                                            animationBegin={0}
-                                            animationDuration={1200}
-                                            animationEasing="ease-out"
-                                        >
-                                            {pieData.map((entry, index) => (
-                                                <Cell
-                                                    key={`cell-${index}`}
-                                                    fill={entry.color}
-                                                    stroke="none"
-                                                />
-                                            ))}
-                                            <text
-                                                x="50%"
-                                                y="46%"
-                                                textAnchor="middle"
-                                                dominantBaseline="middle"
-                                                style={{
-                                                    fontSize: "28px",
-                                                    fontWeight: 900,
-                                                    fill: isDark ? "#f1f5f9" : "#0f172a",
-                                                }}
-                                            >
-                                                {totalItems}
-                                            </text>
-                                            <text
-                                                x="50%"
-                                                y="55%"
-                                                textAnchor="middle"
-                                                dominantBaseline="middle"
-                                                style={{
-                                                    fontSize: "10px",
-                                                    fontWeight: 700,
-                                                    fill: isDark ? "#64748b" : "#94a3b8",
-                                                    letterSpacing: "0.15em",
-                                                }}
-                                            >
-                                                TOTAL
-                                            </text>
-                                        </Pie>
-                                        <Tooltip
-                                            contentStyle={{
-                                                backgroundColor: isDark
-                                                    ? "rgba(15, 23, 42, 0.92)"
-                                                    : "rgba(255, 255, 255, 0.96)",
-                                                borderRadius: "12px",
-                                                border: isDark
-                                                    ? "1px solid rgba(255,255,255,0.08)"
-                                                    : "1px solid rgba(0,0,0,0.06)",
-                                                boxShadow: isDark
-                                                    ? "0 20px 40px rgba(0,0,0,0.5)"
-                                                    : "0 20px 40px rgba(0,0,0,0.08)",
-                                                backdropFilter: "blur(12px)",
-                                                color: isDark ? "#e2e8f0" : "#1e293b",
-                                                fontSize: "13px",
-                                                fontWeight: 600,
-                                            }}
-                                            itemStyle={{ color: isDark ? "#e2e8f0" : "#1e293b" }}
-                                            cursor={{
-                                                fill: isDark
-                                                    ? "rgba(255,255,255,0.03)"
-                                                    : "rgba(0,0,0,0.02)",
-                                            }}
-                                        />
-                                        <Legend
-                                            verticalAlign="bottom"
-                                            height={40}
-                                            iconType="circle"
-                                            iconSize={10}
-                                            formatter={(value) => (
-                                                <span
-                                                    style={{
-                                                        color: isDark ? "#94a3b8" : "#64748b",
-                                                        fontSize: "13px",
-                                                        fontWeight: 600,
-                                                        marginLeft: "4px",
-                                                    }}
-                                                >
-                                                    {value}
-                                                </span>
-                                            )}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                        </div>
+
+                        <div className="w-full max-w-2xl h-80">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={pieData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={80}
+                                        outerRadius={120}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {pieData.map((entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={entry.color}
+                                                stroke="none"
+                                            />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip
+                                        contentStyle={{
+                                            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                                            borderRadius: "12px",
+                                            border: "1px solid rgba(148, 163, 184, 0.2)",
+                                            fontSize: "12px",
+                                            fontWeight: "bold",
+                                        }}
+                                    />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        formatter={(val) => (
+                                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                {val}
+                                            </span>
+                                        )}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+                )}
+
+                {/* 4. SETTINGS TAB */}
+                {activeTab === "settings" && (
+                    <div className="p-6 sm:p-8 max-w-4xl">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+                                <Settings className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                                    Global Authentication & Access Guard
+                                </h3>
+                                <p className="text-xs text-slate-500">
+                                    Emergency switches to control new account creation and platform
+                                    ingress.
+                                </p>
                             </div>
                         </div>
-                    )}
 
-                    {activeTab === "settings" && (
-                        <div className="p-4 sm:p-6">
-                            <div className="flex items-center gap-3 mb-6">
-                                <div className="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800/60 flex items-center justify-center">
-                                    <Settings className="w-[18px] h-[18px] text-slate-600 dark:text-slate-400" />
-                                </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">
-                                        Site Control
-                                    </h2>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">
-                                        Manage authentication and access settings
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-slate-50/80 dark:bg-white/2 border border-slate-200/60 dark:border-white/4 rounded-xl hover:border-indigo-200/60 dark:hover:border-indigo-800/30 transition-colors gap-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-2.5 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl h-fit shrink-0">
-                                            <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-slate-800 dark:text-slate-100">
-                                                User Login
-                                            </p>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                                                Allow existing users to authenticate. Admins are
-                                                always permitted.
-                                            </p>
-                                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mt-0.5">
+                                        <UserCheck className="w-5 h-5" />
                                     </div>
-                                    <button
-                                        onClick={() => handleToggle("isLoginEnabled")}
-                                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 shrink-0 ${
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-900 dark:text-white">
+                                            User Login Ingress
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            When disabled, existing non-admin users cannot
+                                            authenticate. Admins bypass this guard.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleToggle("isLoginEnabled")}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                                        settings.isLoginEnabled
+                                            ? "bg-indigo-600"
+                                            : "bg-slate-300 dark:bg-slate-700"
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
                                             settings.isLoginEnabled
-                                                ? "bg-indigo-500"
-                                                : "bg-slate-300 dark:bg-slate-600"
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
                                         }`}
-                                        role="switch"
-                                        aria-checked={!!settings.isLoginEnabled}
-                                    >
-                                        <span
-                                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                                                settings.isLoginEnabled
-                                                    ? "translate-x-6"
-                                                    : "translate-x-1"
-                                            }`}
-                                        />
-                                    </button>
-                                </div>
-
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 bg-slate-50/80 dark:bg-white/2 border border-slate-200/60 dark:border-white/4 rounded-xl hover:border-amber-200/60 dark:hover:border-amber-800/30 transition-colors gap-4">
-                                    <div className="flex items-start gap-4">
-                                        <div className="p-2.5 bg-amber-50 dark:bg-amber-900/20 rounded-xl h-fit shrink-0">
-                                            <UserPlus className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-slate-800 dark:text-slate-100">
-                                                New Signups
-                                            </p>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                                                Allow new users to create accounts on the platform.
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <button
-                                        onClick={() => handleToggle("isSignupEnabled")}
-                                        className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 shrink-0 ${
-                                            settings.isSignupEnabled
-                                                ? "bg-amber-500"
-                                                : "bg-slate-300 dark:bg-slate-600"
-                                        }`}
-                                        role="switch"
-                                        aria-checked={!!settings.isSignupEnabled}
-                                    >
-                                        <span
-                                            className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                                                settings.isSignupEnabled
-                                                    ? "translate-x-6"
-                                                    : "translate-x-1"
-                                            }`}
-                                        />
-                                    </button>
-                                </div>
+                                    />
+                                </button>
                             </div>
 
-                            <div className="mt-6 p-4 rounded-xl bg-slate-50 dark:bg-white/2 border border-slate-200/60 dark:border-white/4">
-                                <div className="flex items-start gap-3">
-                                    <div className="p-1.5 bg-slate-200/60 dark:bg-slate-700/40 rounded-lg h-fit shrink-0 mt-0.5">
-                                        <FiAlertTriangle className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                            <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 rounded-xl bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 mt-0.5">
+                                        <UserPlus className="w-5 h-5" />
                                     </div>
-                                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                                        Disabling login will prevent all non-admin users from
-                                        accessing the platform. Disabling signup closes registration
-                                        while keeping existing accounts active.
-                                    </p>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-900 dark:text-white">
+                                            Public User Registration
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            When disabled, the registration endpoint will reject new
+                                            user sign-ups.
+                                        </p>
+                                    </div>
                                 </div>
+                                <button
+                                    onClick={() => handleToggle("isSignupEnabled")}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                                        settings.isSignupEnabled
+                                            ? "bg-amber-500"
+                                            : "bg-slate-300 dark:bg-slate-700"
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                                            settings.isSignupEnabled
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
+                            <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-800">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 rounded-xl bg-violet-100 dark:bg-violet-900/40 text-violet-600 dark:text-violet-400 mt-0.5">
+                                        <FiDatabase className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-sm text-slate-900 dark:text-white">
+                                            Visualization Generation & Saving
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                            When disabled, non-admin users cannot save new
+                                            visualizations to the database.
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleToggle("isHistoryCreationEnabled")}
+                                    className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${
+                                        settings.isHistoryCreationEnabled !== false
+                                            ? "bg-indigo-600"
+                                            : "bg-slate-300 dark:bg-slate-700"
+                                    }`}
+                                >
+                                    <span
+                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${
+                                            settings.isHistoryCreationEnabled !== false
+                                                ? "translate-x-6"
+                                                : "translate-x-1"
+                                        }`}
+                                    />
+                                </button>
                             </div>
                         </div>
-                    )}
-                </main>
+
+                        <div className="mt-6 p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 flex items-center gap-3 text-xs text-indigo-700 dark:text-indigo-300">
+                            <FiAlertTriangle className="w-4 h-4 shrink-0" />
+                            <span>
+                                Toggles update in MongoDB immediately. All live sessions will
+                                respect these changes on their next request.
+                            </span>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

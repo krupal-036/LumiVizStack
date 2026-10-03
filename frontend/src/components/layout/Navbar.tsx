@@ -19,6 +19,7 @@ import {
     FiServer,
     FiZap,
     FiChevronRight,
+    FiGlobe,
 } from "react-icons/fi";
 
 type NavLink = {
@@ -30,6 +31,7 @@ type NavLink = {
 
 const baseNavLinks: NavLink[] = [
     { path: "/", label: "Home", icon: FiHome },
+    { path: "/shared", label: "Explore", icon: FiGlobe },
     { path: "/visualize", label: "Visualize", icon: FiBarChart2, protected: true },
     { path: "/history", label: "History", icon: FiClock, protected: true },
     { path: "/about", label: "About", icon: FiInfo },
@@ -44,6 +46,7 @@ export default function Navbar() {
     const { theme, toggleTheme } = useTheme();
     const location = useLocation();
     const navigate = useNavigate();
+
     const navLinks =
         user?.role === "admin"
             ? [...baseNavLinks, { path: "/admin", label: "Admin", icon: FiUser }]
@@ -55,6 +58,9 @@ export default function Navbar() {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
+    if (location.pathname.startsWith("/embed/") || location.pathname.startsWith("/view/")) {
+        return null;
+    }
     const isActive = (path: string) => location.pathname === path;
 
     const handleLogout = () => {

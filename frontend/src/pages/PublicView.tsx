@@ -7,6 +7,7 @@ import ChartView from "@/components/visualizations/ChartView";
 import TreeView from "@/components/visualizations/TreeView";
 import GraphView from "@/components/visualizations/GraphView";
 import Loader from "@/components/common/Loader";
+import { parseDualData } from "@/utils/dataParser";
 import {
     FiAlertCircle,
     FiArrowLeft,
@@ -23,7 +24,7 @@ import {
 import { useAlert, useTitle } from "../hooks/customHooks";
 
 interface PublicViewData {
-    data: Array<Record<string, any>>;
+    data: any;
     type?: string;
     title?: string;
     createdAt?: string;
@@ -41,7 +42,9 @@ const PublicView = () => {
     );
     const [searchTerm, setSearchTerm] = useState("");
     const [forceImages, setForceImages] = useState<boolean>(false);
+
     useTitle("Share & View");
+
     useEffect(() => {
         const fetchPublicData = async () => {
             try {
@@ -54,7 +57,7 @@ const PublicView = () => {
                     );
                 } else {
                     showAlert(data?.message || "Failed to load visualization");
-                    setError(data.message || "Visualization not available");
+                    setError(data?.message || "Visualization not available");
                 }
             } catch (err) {
                 showAlert("Visualization not available", "Server Error");
@@ -65,18 +68,25 @@ const PublicView = () => {
         };
         fetchPublicData();
     }, [historyId]);
+
+    const { tabularData, hierarchicalData } = useMemo(() => {
+        if (!historyData?.data) return { tabularData: [], hierarchicalData: null };
+        return parseDualData(historyData.data);
+    }, [historyData]);
+
     const filteredData = useMemo(() => {
-        if (!historyData?.data || !searchTerm) return historyData?.data || [];
-        return historyData.data.filter((item) =>
-            Object.values(item).some((val) =>
+        if (!tabularData || !searchTerm) return tabularData || [];
+        return tabularData.filter((item) =>
+            Object.values(item || {}).some((val) =>
                 String(val).toLowerCase().includes(searchTerm.toLowerCase()),
             ),
         );
-    }, [historyData, searchTerm]);
+    }, [tabularData, searchTerm]);
 
     if (loading) {
         return <Loader data={"Loading Visualization..."} />;
     }
+
     if (error) {
         return (
             <div className="min-h-screen bg-gray-100 dark:bg-black flex items-center justify-center p-4">
@@ -96,6 +106,7 @@ const PublicView = () => {
             </div>
         );
     }
+
     const { type, title, createdAt } = historyData ?? {};
     type ViewMode = "table" | "card" | "chart" | "tree" | "graph";
     const viewModes: Array<{
@@ -109,9 +120,10 @@ const PublicView = () => {
         { id: "tree", icon: FiCode, label: "JSON" },
         { id: "graph", icon: FiShare2, label: "Graph" },
     ];
+
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100  p-4 pt-20 md:pt-24">
-            <div className="max-w-screen-2xl mx-auto">
+        <div className="max-w-screen-auto min-h-screen bg-gray-50 dark:bg-black text-gray-900 dark:text-gray-100 p-4">
+            <div className="max-w-screen-auto mx-auto">
                 <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
                     <div className="flex items-center gap-3">
                         <div className="p-2.5 bg-linear-to-br from-indigo-100 to-blue-50 dark:from-indigo-900/40 dark:to-blue-900/40 rounded-xl text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/20 shadow-sm">
@@ -140,22 +152,40 @@ const PublicView = () => {
                             </div>
                         </div>
                     </div>
+
                     <div className="flex p-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-x-auto max-w-full">
                         {viewModes.map((v) => (
                             <button
                                 key={v.id}
                                 onClick={() => setViewMode(v.id)}
                                 className={`flex items-center gap-2 px-3 sm:px-4 py-2 mr-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap
-            ${
-                viewMode === v.id
-                    ? "bg-indigo-600 text-white shadow-md"
-                    : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
-            }`}
+                                    ${
+                                        viewMode === v.id
+                                            ? "bg-indigo-600 text-white shadow-md"
+                                            : "text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400"
+                                    }`}
                             >
                                 <v.icon size={16} />
                                 <span className="hidden sm:inline">{v.label}</span>
                             </button>
                         ))}
+                        <button
+                            onClick={() => {
+                                const embedUrl = `${window.location.origin}/embed/${historyId}`;
+                                const iframeSnippet = `<iframe src="${embedUrl}" width="100%" height="100%" frameborder="0" style="border:1px solid #e2e8f0; border-radius:12px;" allowfullscreen></iframe>`;
+                                navigator.clipboard.writeText(iframeSnippet);
+                                showAlert(
+                                    "Embed code copied to clipboard! Paste it into Notion, blogs, or HTML.",
+                                    "Embed Code Copied",
+                                    2,
+                                );
+                            }}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 rounded-lg text-xs sm:text-sm font-semibold border border-indigo-200 dark:border-indigo-800 transition-colors"
+                            title="Copy embeddable <iframe> snippet"
+                        >
+                            <FiCode size={16} />
+                            <span>Embed</span>
+                        </button>
                         <button
                             onClick={() => navigate("/")}
                             className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-sm"
@@ -165,6 +195,7 @@ const PublicView = () => {
                         </button>
                     </div>
                 </div>
+
                 <div className="mb-4 relative">
                     {viewMode !== "tree" && viewMode !== "graph" && (
                         <>
@@ -179,6 +210,7 @@ const PublicView = () => {
                         </>
                     )}
                 </div>
+
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden p-4">
                     {viewMode === "table" && (
                         <TableView
@@ -196,8 +228,8 @@ const PublicView = () => {
                         />
                     )}
                     {viewMode === "chart" && <ChartView data={filteredData} />}
-                    {viewMode === "tree" && <TreeView data={historyData?.data ?? []} />}
-                    {viewMode === "graph" && <GraphView data={historyData?.data ?? []} />}
+                    {viewMode === "tree" && <TreeView data={hierarchicalData || tabularData} />}
+                    {viewMode === "graph" && <GraphView data={hierarchicalData || tabularData} />}
                 </div>
             </div>
         </div>

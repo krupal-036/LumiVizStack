@@ -38,7 +38,6 @@ const TreeView: React.FC<TreeViewProps> = ({ data, title = "Data Export" }) => {
 
     return (
         <div className="relative rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden flex flex-col h-[650px] w-full">
-            {/* Action Bar */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60">
                 <div className="flex items-center gap-2">
                     <div className="p-1.5 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg text-indigo-600 dark:text-indigo-400">
@@ -90,7 +89,6 @@ const TreeView: React.FC<TreeViewProps> = ({ data, title = "Data Export" }) => {
                 </div>
             </div>
 
-            {/* Monaco Editor in Read-Only Explorer Mode */}
             <div className="flex-1 w-full h-full min-h-0">
                 <MonacoCodeEditor
                     value={jsonString}
