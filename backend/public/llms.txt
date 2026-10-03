@@ -1,0 +1,11 @@
+# LumiVizStack
+
+> LumiVizStack turns complex JSON into clear, interactive visualizations. Paste, connect an API, or upload a file.
+
+## Pages
+
+- [Home](https://lumivizstack.vercel.app/): Overview and quick start
+- [Explore](https://lumivizstack.vercel.app/explore): Visualize your JSON data
+- [About](https://lumivizstack.vercel.app/about): About the project
+- [Guide](https://lumivizstack.vercel.app/guide): How to use LumiVizStack
+- [API](https://lumivizstack.vercel.app/api-docs): API documentation

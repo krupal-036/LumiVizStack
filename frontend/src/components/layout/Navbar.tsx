@@ -31,7 +31,7 @@ type NavLink = {
 
 const baseNavLinks: NavLink[] = [
     { path: "/", label: "Home", icon: FiHome },
-    { path: "/shared", label: "Explore", icon: FiGlobe },
+    { path: "/explore", label: "Explore", icon: FiGlobe },
     { path: "/visualize", label: "Visualize", icon: FiBarChart2, protected: true },
     { path: "/history", label: "History", icon: FiClock, protected: true },
     { path: "/about", label: "About", icon: FiInfo },

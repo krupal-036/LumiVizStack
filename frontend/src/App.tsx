@@ -56,7 +56,7 @@ const App = () => {
                                         <Route path="/docs/api" element={<ApiDocs />} />
                                         <Route path="/view/:historyId" element={<PublicView />} />
                                         <Route path="/embed/:shareId" element={<EmbedView />} />
-                                        <Route path="/shared" element={<SharedGallery />} />
+                                        <Route path="/explore" element={<SharedGallery />} />
                                         <Route
                                             path="/visualize"
                                             element={
