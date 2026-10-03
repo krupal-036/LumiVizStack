@@ -1,18 +1,48 @@
 // backend/src/middleware/validations/validateHistory.ts
 import { NextFunction, Response } from "express";
 import { getHistoriesByField, getHistoryByField } from "../../repositories/history.repo";
+import * as ssRepo from "../../repositories/systemSettings.repo";
+import * as userRepo from "../../repositories/user.repo";
 import { HttpStatus } from "../../constants/http-status.enum";
-
 export const validateHistory = async (req: any, res: Response, next: NextFunction) => {
     try {
         const { title, data, rawInput } = req.body;
         const userId = req.user.id;
+        const systemConfig = await ssRepo.getSystemConfig();
+
+        const userCheck = await userRepo.getUserByField({
+            _id: userId,
+        });
+
+        if (req.user.role !== "admin") {
+            if (systemConfig && systemConfig.isHistoryCreationEnabled === false) {
+                return res.status(HttpStatus.FORBIDDEN).json({
+                    message:
+                        "Saving new visualizations is temporarily disabled by the administrator.",
+                });
+            }
+            if (!userCheck)
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    message: "User not found",
+                });
+            if (userCheck.isDeleted)
+                return res.status(HttpStatus.NOT_FOUND).json({
+                    message: "Account was Disabled",
+                });
+            if (userCheck.credits <= 0)
+                return res.status(HttpStatus.FORBIDDEN).json({
+                    message: "Insufficient credits.",
+                });
+
+            userCheck.credits -= 1;
+            await userCheck.save();
+        }
 
         if (rawInput) {
             const rawLines = rawInput.trim().split("\n").length;
-            if (rawLines > 500) {
+            if (rawLines > 1000) {
                 return res.status(HttpStatus.BAD_REQUEST).json({
-                    message: `Input text is too long (${rawLines} lines). Max 500.`,
+                    message: `Input text is too long (${rawLines} lines). Max 1000.`,
                 });
             }
         }
@@ -96,7 +126,7 @@ export const validateHistory = async (req: any, res: Response, next: NextFunctio
         }
 
         req.trimmedInput = trimmedInput;
-
+        req.user.credits = userCheck?.credits;
         next();
     } catch (err) {
         return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

@@ -1,6 +1,7 @@
 // backend/src/routes/history.routes.ts
 import { Router } from "express";
 import * as c from "../controllers/history.controller";
+import * as historyRepo from "../repositories/history.repo";
 import { validateHistory } from "../middleware/validations/validateHistory";
 import { authenticate, authorizeRoles } from "../middleware/auth.middleware";
 import { validateUser } from "../middleware/validations/validateUser";
@@ -8,8 +9,12 @@ import { validateUser } from "../middleware/validations/validateUser";
 const r = Router();
 
 // @route   GET api/history/public/:shareId
-// @desc    Get public history by Share ID (accessible by anyone)
+// @desc    Get public visualization by Share ID (accessible by anyone)
 r.get("/public/:shareId", c.getPublicHistory);
+
+// @route   GET api/history/gallery
+// @desc    Get all public visualizations for the discovery page
+r.get("/gallery", historyRepo.populateAllPublicViz);
 
 r.use(authenticate, authorizeRoles("admin", "user"), validateUser);
 

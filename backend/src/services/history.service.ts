@@ -4,33 +4,11 @@ import * as historyRepo from "../repositories/history.repo";
 import { ResponseHandler } from "../utils/handlers/responseHandler";
 import { HttpStatus } from "../constants/http-status.enum";
 
-export const createHistory = async (historyData: any) => {
+export const createHistory = async (req: any) => {
     try {
-        const { title, type, data, urlInput, inputType, isPublic, isDeleted } = historyData.body;
-        const userId = historyData.user.id;
-        const trimmedInput = historyData.trimmedInput;
-        let userCheck: any;
-
-        if (historyData.user.role !== "admin") {
-            userCheck = await userRepo.getUserByField({
-                _id: userId,
-            });
-            if (!userCheck)
-                return ResponseHandler.send(HttpStatus.NOT_FOUND, {
-                    message: "User not found",
-                });
-            if (userCheck.isDeleted)
-                return ResponseHandler.send(HttpStatus.NOT_FOUND, {
-                    message: "Account was Disabled",
-                });
-            if (userCheck.credits <= 0)
-                return ResponseHandler.send(HttpStatus.FORBIDDEN, {
-                    message: "Insufficient credits.",
-                });
-
-            userCheck.credits -= 1;
-            await userCheck.save();
-        }
+        const { title, type, data, urlInput, inputType, isPublic, isDeleted } = req.body;
+        const userId = req.user.id;
+        const trimmedInput = req.trimmedInput;
 
         const newHistory = await historyRepo.createHistory({
             userId,
@@ -56,7 +34,7 @@ export const createHistory = async (historyData: any) => {
 
         return ResponseHandler.send(HttpStatus.CREATED, {
             newHistory,
-            credits: userCheck?.credits,
+            credits: req.user.credits,
         });
     } catch (err) {
         return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
@@ -143,23 +121,21 @@ export const getPublicHistory = async (shareId: any) => {
 
 export const toggleDeleteAllHistory = async (userId: any) => {
     try {
-        const results = await historyRepo.getHistoriesByField({
-            userId,
-            isDeleted: { $ne: true },
-        });
+        const result = await historyRepo.updateManyByField(
+            {
+                userId,
+                isDeleted: false,
+            },
+            {
+                $set: { isDeleted: true },
+            },
+        );
 
-        const savePromises = results.map(async (doc) => {
-            doc.isDeleted = true;
-            return await doc.save();
+        return ResponseHandler.send(HttpStatus.OK, {
+            message: `Total ${result.modifiedCount} history records cleared successfully`,
+            modifiedCount: result.modifiedCount,
         });
-
-        await Promise.all(savePromises);
-
-        return ResponseHandler.send(HttpStatus.CREATED, {
-            message: `Total ${results.length} History cleared successfully`,
-            modifiedCount: results.length,
-        });
-    } catch (err) {
+    } catch (err: any) {
         return ResponseHandler.send(HttpStatus.INTERNAL_SERVER_ERROR, {
             message: "Failed to clear history",
         });

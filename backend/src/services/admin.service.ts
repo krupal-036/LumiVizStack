@@ -23,6 +23,8 @@ export const updateSettings = async (data: any) => {
 
         settings.isLoginEnabled = data?.isLoginEnabled ?? settings.isLoginEnabled;
         settings.isSignupEnabled = data?.isSignupEnabled ?? settings.isSignupEnabled;
+        settings.isHistoryCreationEnabled =
+            data?.isHistoryCreationEnabled ?? settings.isHistoryCreationEnabled;
 
         await settings.save();
         return ResponseHandler.send(HttpStatus.OK, settings);
