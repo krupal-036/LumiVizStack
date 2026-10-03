@@ -64,6 +64,9 @@ export default function UserProfile() {
     }, []);
 
     const validateUsername = (name: string) => {
+        if (user!.role === "admin") {
+            return null;
+        }
         const reservedWords = ["admin", "root", "support", "help", "official", "moderator"];
         if (reservedWords.includes(name.toLowerCase())) {
             return "This username is reserved and cannot be used.";

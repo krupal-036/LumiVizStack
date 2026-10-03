@@ -1,10 +1,14 @@
 // frontend/src/components/layout/Footer.tsx
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FiBarChart2, FiGithub, FiMail, FiExternalLink, FiArrowRight } from "react-icons/fi";
 
 const Footer = () => {
+    const location = useLocation();
     const currentYear = new Date().getFullYear();
 
+    if (location.pathname.startsWith("/embed/")) {
+        return null;
+    }
     const footerLinks = {
         product: [
             { name: "Home", path: "/" },

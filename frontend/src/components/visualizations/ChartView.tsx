@@ -217,7 +217,7 @@ const ChartView = ({ data }: ChartViewProps) => {
                             <select
                                 value={dataLimit}
                                 onChange={(e) => setDataLimit(Number(e.target.value))}
-                                className="bg-transparent font-bold text-gray-800 dark:text-gray-200 outline-none cursor-pointer"
+                                className="px-1 py-1 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs text-slate-700 dark:text-slate-300 outline-none"
                             >
                                 <option value={25}>First 25</option>
                                 <option value={50}>First 50</option>

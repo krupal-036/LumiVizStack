@@ -165,7 +165,9 @@ const TableView: React.FC<TableViewProps> = ({ data, forceImages, setForceImages
 
             {/* Main Table Container */}
             <div className="w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs">
-                <div className="overflow-x-auto max-h-[70vh] custom-scrollbar">
+                <div
+                    className={`overflow-x-auto max-h-[${location.pathname.startsWith("/embed/") || location.pathname.startsWith("/view/") ? 100 : 75}vh] custom-scrollbar`}
+                >
                     <table className="w-full text-left border-separate border-spacing-0">
                         <thead className="sticky top-0 z-20">
                             <tr className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
@@ -219,7 +221,6 @@ const TableView: React.FC<TableViewProps> = ({ data, forceImages, setForceImages
                                             {absoluteIdx}
                                         </td>
                                         {displayedHeaders.map((key) => {
-                                            // Safe access even if the key does not exist on this specific record
                                             const cellValue =
                                                 row !== null &&
                                                 typeof row === "object" &&

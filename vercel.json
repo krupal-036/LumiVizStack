@@ -1,34 +1,21 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "backend/src/index.ts",
-      "use": "@vercel/node",
-      "config": {
-        "excludeFiles": "**/public/**"
-      }
-    },
-    {
-      "src": "backend/public/**",
-      "use": "@vercel/static"
+  "installCommand": "npm install --include=dev",
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": "backend/public",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "backend/dist/**",
+      "maxDuration": 30
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "backend/src/index.ts"
+      "source": "/api/(.*)",
+      "destination": "/api"
     },
     {
-      "src": "/(.*\\.[a-zA-Z0-9]+)$",
-      "dest": "/backend/public/$1",
-      "check": true
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/backend/public/index.html"
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

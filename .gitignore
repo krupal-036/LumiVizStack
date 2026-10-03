@@ -27,6 +27,8 @@ dist-ssr
 *.sln
 *.sw?
 .vite/*
+
+*.py
 frontend/.vite/
 backend/vercel.json
 /scripts
